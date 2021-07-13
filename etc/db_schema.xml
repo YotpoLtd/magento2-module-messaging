@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="yotpo_customers_sync" resource="default" engine="innodb" comment="Customers sync with Yotpo">
+        <column xsi:type="int" name="entity_id" unsigned="true" nullable="false" identity="true"
+                comment="Entity ID"/>
+        <column xsi:type="int" name="customer_id" unsigned="true" nullable="false" identity="false"
+                comment="Customer ID"/>
+        <column xsi:type="int" name="store_id" unsigned="true" nullable="false" identity="false" default="0"
+                comment="Store ID"/>
+        <column xsi:type="datetime" name="synced_to_yotpo" nullable="true" comment="Synced to Yotpo"/>
+        <column xsi:type="varchar" name="response_code" nullable="true" length="5" comment="Response Code"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="YOTPO_CUSTOMERS_SYNC_CUSTOMER_ID_CUSTOMER_ENTITY_ENTITY_ID"
+                    table="yotpo_customers_sync" column="customer_id" referenceTable="customer_entity"
+                    referenceColumn="entity_id" onDelete="CASCADE"/>
+        <constraint xsi:type="unique" referenceId="YOTPO_CUSTOMERS_SYNC_UNIQUE_KEY_CUSTOMER_ID_STORE_ID">
+            <column name="customer_id"/>
+            <column name="store_id"/>
+        </constraint>
+        <index referenceId="YOTPO_CUSTOMERS_SYNC_ENTITY_ID" indexType="btree">
+            <column name="entity_id"/>
+        </index>
+    </table>
+    <table name="sales_order" resource="sales" engine="innodb" comment="Sales Flat Order">
+        <column xsi:type="int" name="yotpo_accepts_sms_marketing" nullable="true" comment="Accepts SMS Marketing" default="0"/>
+    </table>
+</schema>

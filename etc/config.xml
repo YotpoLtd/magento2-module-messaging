@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <yotpo_core>
+            <sync_settings>
+                <customers_sync>
+                    <sync_limit_customers>100</sync_limit_customers>
+                </customers_sync>
+            </sync_settings>
+            <marketing_settings>
+                <attr_customer>yotpo_accepts_sms_marketing</attr_customer>
+            </marketing_settings>
+        </yotpo_core>
+    </default>
+</config>

@@ -1,0 +1,19 @@
+<!-- ko if: isEnabled() -->
+<div>
+    <br/>
+    <label>
+        <input type="checkbox"
+               id="yotpo_accepts_sms_marketing"
+               name="yotpo_accepts_sms_marketing"
+               data-bind="click: updateCustomerAttribute, checked: getCustomAttrVal"
+        />
+        <span data-bind="text: getHeading()"></span>
+        <br/>
+        <span class="note" data-bind="text: getDescription()"></span>
+        <br/>
+        <span class="note" data-bind="text: getConsentMessage()"></span>
+        <a target="_blank" data-bind="text: getPrivacyPolicyText(),attr: { href: getPrivacyPolicyUrl() }">
+        </a>
+    </label>
+</div>
+<!-- /ko -->

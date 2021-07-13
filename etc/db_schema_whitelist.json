@@ -1,0 +1,24 @@
+{
+    "yotpo_customers_sync": {
+        "column": {
+            "entity_id": true,
+            "customer_id": true,
+            "store_id": true,
+            "synced_to_yotpo": true,
+            "response_code": true
+        },
+        "index": {
+            "YOTPO_CUSTOMERS_SYNC_ENTITY_ID": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "YOTPO_CUSTOMERS_SYNC_CUSTOMER_ID_CUSTOMER_ENTITY_ENTITY_ID": true,
+            "YOTPO_CUSTOMERS_SYNC_CUSTOMER_ID_STORE_ID": true
+        }
+    },
+    "sales_order": {
+        "column": {
+            "yotpo_accepts_sms_marketing": true
+        }
+    }
+}

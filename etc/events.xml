@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="customer_address_save_after">
+        <observer name="yotpo_smsbump_customer_address_save_after" instance="Yotpo\SmsBump\Observer\CustomerAddressUpdate" />
+    </event>
+    <event name="customer_save_after">
+        <observer name="yotpo_smsbump_customer_save_after" instance="Yotpo\SmsBump\Observer\CustomerSaveAfter"/>
+    </event>
+</config>

@@ -1,0 +1,48 @@
+<?php
+/**
+ * Create account form template
+ */
+use Yotpo\SmsBump\Block\Form\Renderer\Checkbox;
+use Magento\Framework\Escaper;
+
+/* @var $block Checkbox */
+/* @var $escaper Escaper */
+
+$isYotpoSignUpEnabled = $block->isSignUpEnabled();
+if ($isYotpoSignUpEnabled) {
+    $data = $block->getConfigData();
+}
+?>
+<?php
+$fieldCssClass = 'field field-' . $block->getHtmlId();
+$fieldCssClass .= $block->isRequired() ? ' required' : '';
+?>
+<?php if ($isYotpoSignUpEnabled && $data['customAttribute'] == 'yotpo_accepts_sms_marketing'): ?>
+    <div class="<?= /* @noEscape */ $fieldCssClass ?>">
+        <div class="control">
+            <input
+                type="checkbox"
+                id="<?= /* @noEscape */ $block->getHtmlId() ?>"
+                name="<?= $escaper->escapeHtmlAttr($block->getFieldName()) ?>"
+                title="<?= $escaper->escapeHtmlAttr($block->getLabel()) ?>"
+                value="1"
+                <?php if ($block->getValue()): ?> checked="checked"<?php endif; ?>
+                <?php if ($block->getHtmlClass()): ?>
+                    class="select <?= /* @noEscape */ $block->getHtmlClass() ?>"
+                <?php endif;?>
+            />
+            <label class="label" for="<?= /* @noEscape */ $block->getHtmlId() ?>">
+                <span><?= $escaper->escapeHtml($data['boxHeading']) ?></span></label>
+            <?php if ($_message = $data['description']): ?>
+                <div class="message"><?= /* @noEscape */ $_message ?></div>
+            <?php endif; ?>
+            <?php if ($_message = $data['message']): ?>
+                <div class="message"><?= /* @noEscape */ $_message ?>
+                    <a target="_blank" href="<?= $escaper->escapeUrl($block->getUrl($data['privacyPolicyUrl'])) ?>">
+                        <?= $escaper->escapeHtml($data['privacyPolicyText']) ?>
+                    </a>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+<?php endif; ?>

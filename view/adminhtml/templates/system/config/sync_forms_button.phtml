@@ -1,0 +1,55 @@
+<?php
+/* @var $block SyncFormsButton */
+
+use Magento\Framework\Escaper;
+use Yotpo\SmsBump\Block\Adminhtml\System\Config\SyncFormsButton;
+
+/* @var Escaper $escaper*/
+?>
+
+<script>
+    require([
+        'jquery',
+        'prototype',
+        'mage/translate'
+    ], function($){
+        $successDiv = $('#sync_forms_message_success');
+        $errorDiv = $('#sync_forms_message_error');
+        var currentStore = <?= $escaper->escapeHtml($block->getStoreScope()) ?>;
+        var currentWebsite = <?= $escaper->escapeHtml($block->getWebsiteScope()) ?>;
+        $('#yotpo_sync_forms_btn').click(function () {
+            new Ajax.Request('<?= $escaper->escapeHtml($block->getAjaxUrl()) ?>', {
+                asynchronous:   true,
+                showLoader: true,
+                parameters:{
+                    store: currentStore,
+                    website: currentWebsite
+                },
+                onSuccess: function(response) {
+                    $errorDiv.hide();
+                    $successDiv.show();
+                    if (currentStore === 0 && currentWebsite === 0) {
+                        $successDiv.text($.mage.__('Subscription forms are synced successfully for all stores.'));
+                    } else if (currentStore !== 0) {
+                        $successDiv.text($.mage.__('Subscription forms are synced successfully for the store '
+                            + currentStore));
+                    } else if (currentWebsite !== 0) {
+                        $successDiv.
+                        text($.mage.__('Subscription forms are synced successfully for all stores under website '
+                            + currentWebsite));
+                    }
+                },
+                onError: function() {
+                    $successDiv.hide();
+                    $errorDiv.show();
+                    $errorDiv.text($.mage.__('Something went wrong while processing the sync job.'));
+                },
+            });
+        });
+
+    });
+</script>
+
+<?= $block->getButtonHtml() ?>
+<div id="sync_forms_message_success" class="message message-success" style="display: none;"></div>
+<div id="sync_forms_message_error" class="message message-error" style="display: none;"></div>
