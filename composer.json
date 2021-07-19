@@ -1,7 +1,7 @@
 {
     "name": "yotpo/module-yotpo-messaging",
     "description": "Yotpo Sms extension for Magento2",
-    "version": "4.0.0",
+    "version": "4.0.1",
     "license": [
         "OSL-3.0",
         "AFL-3.0"
@@ -19,7 +19,7 @@
         "magento/module-sales": "102.1.*||^103.0",
         "magento/module-store": "101.1.*",
         "magento/module-analytics": "*",
-        "yotpo/module-yotpo-core": "4.0.0"
+        "yotpo/module-yotpo-core": "4.0.1"
     },
     "type": "magento2-module",
     "autoload": {

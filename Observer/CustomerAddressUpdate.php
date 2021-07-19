@@ -10,6 +10,7 @@ use Safe\Exceptions\DatetimeException;
 use Yotpo\SmsBump\Model\Sync\Customers\Processor as CustomersProcessor;
 use Yotpo\SmsBump\Model\Config;
 use Magento\Framework\App\RequestInterface;
+use Magento\Checkout\Model\Session;
 
 /**
  * Class CustomerAddressUpdate
@@ -33,19 +34,27 @@ class CustomerAddressUpdate implements ObserverInterface
     protected $request;
 
     /**
+     * @var Session
+     */
+    protected $session;
+
+    /**
      * CustomerAddressUpdate constructor.
      * @param CustomersProcessor $customersProcessor
      * @param Config $yotpoSmsConfig
      * @param RequestInterface $request
+     * @param Session $session
      */
     public function __construct(
         CustomersProcessor $customersProcessor,
         Config $yotpoSmsConfig,
-        RequestInterface $request
+        RequestInterface $request,
+        Session $session
     ) {
         $this->customersProcessor = $customersProcessor;
         $this->yotpoSmsConfig = $yotpoSmsConfig;
         $this->request = $request;
+        $this->session = $session;
     }
 
     /**
@@ -56,11 +65,16 @@ class CustomerAddressUpdate implements ObserverInterface
      */
     public function execute(Observer $observer)
     {
+        $address = $observer->getCustomerAddress();
+        if ($this->session->getDelegateGuestCustomer() && !$address->getDefaultBilling()) {
+            return;
+        } else {
+            $this->session->unsDelegateGuestCustomer();
+        }
         if ($this->yotpoSmsConfig->isCustomerSyncActive() &&
                 !$this->request->getParam('custSync')) {
             /** @phpstan-ignore-next-line */
             $this->request->setParam('custSync', true);//to avoid multiple calls for a single save.
-            $address = $observer->getCustomerAddress();
             $customer = $address->getCustomer();
             $customerAddress = $address->getDefaultBilling() ? $address : null;
             $this->customersProcessor->processCustomer($customer, $customerAddress);

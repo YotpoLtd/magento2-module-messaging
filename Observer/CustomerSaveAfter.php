@@ -11,6 +11,7 @@ use Safe\Exceptions\DatetimeException;
 use Yotpo\SmsBump\Model\Sync\Customers\Processor as CustomersProcessor;
 use Yotpo\SmsBump\Model\Config;
 use Magento\Framework\App\RequestInterface;
+use Magento\Checkout\Model\Session;
 
 /**
  * Class CustomerSaveAfter
@@ -34,19 +35,27 @@ class CustomerSaveAfter implements ObserverInterface
     protected $request;
 
     /**
+     * @var Session
+     */
+    protected $session;
+
+    /**
      * CustomerSaveAfter constructor.
      * @param CustomersProcessor $customersProcessor
      * @param Config $yotpoSmsConfig
      * @param RequestInterface $request
+     * @param Session $session
      */
     public function __construct(
         CustomersProcessor $customersProcessor,
         Config $yotpoSmsConfig,
-        RequestInterface $request
+        RequestInterface $request,
+        Session $session
     ) {
         $this->customersProcessor = $customersProcessor;
         $this->yotpoSmsConfig = $yotpoSmsConfig;
         $this->request = $request;
+        $this->session = $session;
     }
 
     /**
@@ -57,6 +66,9 @@ class CustomerSaveAfter implements ObserverInterface
      */
     public function execute(Observer $observer)
     {
+        if ($this->session->getDelegateGuestCustomer()) {
+            return;
+        }
         if ($this->yotpoSmsConfig->isCustomerSyncActive() &&
                 !$this->request->getParam('custSync')) {
             /** @phpstan-ignore-next-line */
