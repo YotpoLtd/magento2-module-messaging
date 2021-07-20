@@ -78,33 +78,33 @@
             </group>
             <group id="sync_settings" translate="label" type="text" sortOrder="490" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Sync Settings</label>
-                <group id="customers_sync" translate="label" type="text" sortOrder="620" showInDefault="0" showInWebsite="1" showInStore="1">
+                <group id="customers_sync" translate="label" type="text" sortOrder="620" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Customers</label>
                     <attribute type="expanded">1</attribute>
                     <field id="last_sync_time" translate="label comment" sortOrder="630" type="label" showInDefault="0" showInWebsite="1" showInStore="1">
                         <label>Last sync:</label>
                         <backend_model>Yotpo\Core\Model\Config\Backend\FormatDate</backend_model>
                     </field>
-                    <field id="enable" translate="label comment" type="select" sortOrder="640" showInDefault="0" showInWebsite="1" showInStore="1">
+                    <field id="enable" translate="label comment" type="select" sortOrder="640" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Enable sync:</label>
                         <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     </field>
-                    <field id="download_logs" translate="label" type="label" sortOrder="650" showInDefault="0" showInWebsite="1" showInStore="1">
+                    <field id="download_logs" translate="label" type="label" sortOrder="650" showInDefault="1" showInWebsite="1" showInStore="1">
                         <frontend_model>Yotpo\SmsBump\Block\Adminhtml\System\Config\Form\Field\Link\DownloadCustomersLogs</frontend_model>
                     </field>
                 </group>
-                <group id="checkout_sync" translate="label" type="text" sortOrder="660" showInDefault="0" showInWebsite="1" showInStore="1">
+                <group id="checkout_sync" translate="label" type="text" sortOrder="660" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Checkouts</label>
                     <attribute type="expanded">1</attribute>
                     <field id="last_sync_time" translate="label comment" sortOrder="670" type="label" showInDefault="0" showInWebsite="1" showInStore="1">
                         <label>Last sync:</label>
                         <backend_model>Yotpo\Core\Model\Config\Backend\FormatDate</backend_model>
                     </field>
-                    <field id="enable" translate="label comment" type="select" sortOrder="680" showInDefault="0" showInWebsite="1" showInStore="1">
+                    <field id="enable" translate="label comment" type="select" sortOrder="680" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Enable sync:</label>
                         <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     </field>
-                    <field id="download_logs" translate="label" type="label" sortOrder="690" showInDefault="0" showInWebsite="1" showInStore="1">
+                    <field id="download_logs" translate="label" type="label" sortOrder="690" showInDefault="1" showInWebsite="1" showInStore="1">
                         <frontend_model>Yotpo\SmsBump\Block\Adminhtml\System\Config\Form\Field\Link\DownloadCheckoutLogs</frontend_model>
                     </field>
                 </group>

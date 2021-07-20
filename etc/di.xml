@@ -64,7 +64,12 @@
         </arguments>
     </type>
     <type name="Magento\Quote\Model\Cart\CartTotalRepository">
-        <plugin name="yotpo_smsbump_quote_model_cart_carttotalrepository_plugin" type="Yotpo\SmsBump\Plugin\Quote\Model\Cart\CartTotalRepository" />
+        <plugin name="yotpo_smsbump_quote_model_cart_carttotalrepository_plugin"
+                type="Yotpo\SmsBump\Plugin\Quote\Model\Cart\CartTotalRepository" />
+    </type>
+    <type name="Magento\Checkout\Controller\Account\DelegateCreate">
+        <plugin name="yotpo_smsbump_account_delegate_create"
+                type="Yotpo\SmsBump\Plugin\Checkout\Account\DelegateCreatePlugin"/>
     </type>
     <preference for="Magento\Customer\Model\Metadata\Form\Checkbox"
                 type="Yotpo\SmsBump\Model\Metadata\Form\Checkbox" />
