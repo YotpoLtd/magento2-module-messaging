@@ -47,10 +47,12 @@ class SyncForms implements ArgumentInterface
     {
         $responseData = [];
         $data = $this->yotpoSmsConfig->getConfig('sync_forms_data');
-        $unserializedData = $this->serializer->unserialize($data);
-        /** @phpstan-ignore-next-line */
-        if (isset($unserializedData['forms'])) {
-            $responseData = $unserializedData['forms'];
+        if ($data) {
+            $unserializedData = $this->serializer->unserialize($data);
+            /** @phpstan-ignore-next-line */
+            if (isset($unserializedData['forms'])) {
+                $responseData = $unserializedData['forms'];
+            }
         }
         return $responseData;
     }
