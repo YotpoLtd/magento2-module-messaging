@@ -13,9 +13,6 @@
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="entity_id"/>
         </constraint>
-        <constraint xsi:type="foreign" referenceId="YOTPO_CUSTOMERS_SYNC_CUSTOMER_ID_CUSTOMER_ENTITY_ENTITY_ID"
-                    table="yotpo_customers_sync" column="customer_id" referenceTable="customer_entity"
-                    referenceColumn="entity_id" onDelete="CASCADE"/>
         <constraint xsi:type="unique" referenceId="YOTPO_CUSTOMERS_SYNC_UNIQUE_KEY_CUSTOMER_ID_STORE_ID">
             <column name="customer_id"/>
             <column name="store_id"/>

@@ -7,7 +7,7 @@ use Magento\Framework\Escaper;
 
 /* @var $block Checkbox */
 /* @var $escaper Escaper */
-
+$escaper = $escaper ?? $block;
 $isYotpoSignUpEnabled = $block->isSignUpEnabled();
 if ($isYotpoSignUpEnabled) {
     $data = $block->getConfigData();

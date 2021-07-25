@@ -12,6 +12,7 @@ use Yotpo\SmsBump\ViewModel\SyncForms;
 
 $syncFormsViewModel = $block->getSyncFormsResponse();
 $responseData = $syncFormsViewModel->getSubscriptionData();
+$escaper = $escaper ?? $block;
 ?>
 <?php if ($responseData): ?>
     <?php foreach ($responseData as $data):?>

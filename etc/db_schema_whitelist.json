@@ -12,7 +12,6 @@
         },
         "constraint": {
             "PRIMARY": true,
-            "YOTPO_CUSTOMERS_SYNC_CUSTOMER_ID_CUSTOMER_ENTITY_ENTITY_ID": true,
             "YOTPO_CUSTOMERS_SYNC_CUSTOMER_ID_STORE_ID": true
         }
     },

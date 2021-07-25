@@ -5,6 +5,7 @@ namespace Yotpo\SmsBump\Model;
 use Magento\Config\Model\ResourceModel\Config as ConfigResource;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\Config\Storage\WriterInterface;
+use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
@@ -76,6 +77,7 @@ class Config extends CoreConfig
      * @param EncryptorInterface $encryptor
      * @param WriterInterface $configWriter
      * @param ConfigResource $configResource
+     * @param ProductMetadataInterface $productMetadata
      */
     public function __construct(
         StoreManagerInterface $storeManager,
@@ -83,7 +85,8 @@ class Config extends CoreConfig
         ModuleListInterface $moduleList,
         EncryptorInterface $encryptor,
         WriterInterface $configWriter,
-        ConfigResource $configResource
+        ConfigResource $configResource,
+        ProductMetadataInterface $productMetadata
     ) {
         parent::__construct(
             $storeManager,
@@ -91,7 +94,8 @@ class Config extends CoreConfig
             $moduleList,
             $encryptor,
             $configWriter,
-            $configResource
+            $configResource,
+            $productMetadata
         );
         $this->config = array_merge($this->config, $this->smsBumpConfig);
     }
