@@ -3,12 +3,14 @@
 namespace Yotpo\SmsBump\Model;
 
 use Magento\Config\Model\ResourceModel\Config as ConfigResource;
+use Magento\Eav\Model\Entity;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\Config\Storage\WriterInterface;
 use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\Module\Manager;
 use Magento\Framework\Module\ModuleListInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Yotpo\Core\Model\Config as CoreConfig;
@@ -48,26 +50,38 @@ class Config extends CoreConfig
         ],
         'customers_sync_limit' =>
             ['path' => 'yotpo_core/sync_settings/customers_sync/sync_limit_customers'],
-        'sync_forms_data' => ['path' =>
-            'yotpo_core/sms_subscription/sync_forms_data'
-        ],
-        'sms_subscription_last_sync_time' => ['path' =>
-            'yotpo_core/sms_subscription/last_sync_time'
-        ],
-        'sms_marketing_signup_active' => ['path' => 'yotpo_core/marketing_settings/signup_enable'],
-        'sms_marketing_signup_box_heading' => ['path' => 'yotpo_core/marketing_settings/signup_box_heading'],
-        'sms_marketing_signup_description' => ['path' => 'yotpo_core/marketing_settings/signup_box_description'],
-        'sms_marketing_signup_message' => ['path' => 'yotpo_core/marketing_settings/signup_consent_message'],
-        'sms_marketing_privacy_policy_text' => ['path' => 'yotpo_core/marketing_settings/privacy_policy_text'],
-        'sms_marketing_privacy_policy_link' => ['path' => 'yotpo_core/marketing_settings/privacy_policy_link'],
-        'sms_marketing_checkout_enable' => ['path' => 'yotpo_core/marketing_settings/checkout_enable'],
-        'sms_marketing_checkout_box_heading' => ['path' => 'yotpo_core/marketing_settings/checkout_box_heading'],
+        'sync_forms_data' =>
+            ['path' => 'yotpo_core/widget_settings/sms_subscription/sync_forms_data'],
+        'sms_subscription_last_sync_time' =>
+            ['path' => 'yotpo_core/widget_settings/sms_subscription/last_sync_time'],
+        'sms_marketing_signup_active' =>
+            ['path' => 'yotpo_core/widget_settings/marketing_settings/signup_enable'],
+        'sms_marketing_signup_box_heading' =>
+            ['path' => 'yotpo_core/widget_settings/marketing_settings/signup_box_heading'],
+        'sms_marketing_signup_description' =>
+            ['path' => 'yotpo_core/widget_settings/marketing_settings/signup_box_description'],
+        'sms_marketing_signup_message' =>
+            ['path' => 'yotpo_core/widget_settings/marketing_settings/signup_consent_message'],
+        'sms_marketing_privacy_policy_text' =>
+            ['path' => 'yotpo_core/widget_settings/marketing_settings/privacy_policy_text'],
+        'sms_marketing_privacy_policy_link' =>
+            ['path' => 'yotpo_core/widget_settings/marketing_settings/privacy_policy_link'],
+        'sms_marketing_checkout_enable' =>
+            ['path' => 'yotpo_core/widget_settings/marketing_settings/checkout_enable'],
+        'sms_marketing_checkout_box_heading' =>
+            ['path' => 'yotpo_core/widget_settings/marketing_settings/checkout_box_heading'],
         'sms_marketing_checkout_box_description' =>
-            ['path' => 'yotpo_core/marketing_settings/checkout_box_description'],
+            ['path' => 'yotpo_core/widget_settings/marketing_settings/checkout_box_description'],
         'sms_marketing_checkout_consent_message' =>
-            ['path' => 'yotpo_core/marketing_settings/checkout_consent_message'],
-        'sms_marketing_custom_attribute' => ['path' => 'yotpo_core/marketing_settings/attr_customer']
+            ['path' => 'yotpo_core/widget_settings/marketing_settings/checkout_consent_message'],
+        'sms_marketing_custom_attribute' =>
+            ['path' => 'yotpo_core/widget_settings/marketing_settings/attr_customer']
     ];
+
+    /**
+     * @var Manager
+     */
+    protected $moduleManager;
 
     /**
      * Config constructor.
@@ -86,7 +100,9 @@ class Config extends CoreConfig
         EncryptorInterface $encryptor,
         WriterInterface $configWriter,
         ConfigResource $configResource,
-        ProductMetadataInterface $productMetadata
+        ProductMetadataInterface $productMetadata,
+        Entity $entity,
+        Manager $moduleManager
     ) {
         parent::__construct(
             $storeManager,
@@ -95,9 +111,11 @@ class Config extends CoreConfig
             $encryptor,
             $configWriter,
             $configResource,
-            $productMetadata
+            $productMetadata,
+            $entity
         );
         $this->config = array_merge($this->config, $this->smsBumpConfig);
+        $this->moduleManager = $moduleManager;
     }
 
     /**
@@ -133,5 +151,13 @@ class Config extends CoreConfig
     public function isCheckoutSyncActive()
     {
         return $this->isEnabled() && $this->getConfig('checkout_sync_active');
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCustomAttributeModuleExists(): bool
+    {
+        return $this->moduleManager->isEnabled('Magento_CustomerCustomAttributes');
     }
 }

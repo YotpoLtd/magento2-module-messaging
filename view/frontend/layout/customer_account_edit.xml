@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <referenceBlock name="customer_edit">
+        <block class="Yotpo\SmsBump\Block\Form\Renderer\Checkbox"
+               name="yotposms_customer_attribute_customer_edit" as="yotposms_customer_attribute_customer_edit"  template="Yotpo_SmsBump::form/renderer/checkbox.phtml"/>
+    </referenceBlock>
+</page>
