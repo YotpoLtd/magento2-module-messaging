@@ -4,12 +4,24 @@
         <yotpo_core>
             <sync_settings>
                 <customers_sync>
+                    <frequency>*/2 * * * *</frequency>
                     <sync_limit_customers>100</sync_limit_customers>
                 </customers_sync>
             </sync_settings>
-            <marketing_settings>
-                <attr_customer>yotpo_accepts_sms_marketing</attr_customer>
-            </marketing_settings>
+            <widget_settings>
+                <marketing_settings>
+                    <checkout_enable>0</checkout_enable>
+                    <checkout_box_heading>Get a discount on your next order</checkout_box_heading>
+                    <checkout_box_description>Sign up for our text club and we will text you a discount code</checkout_box_description>
+                    <checkout_consent_message>By checking this box I consent to receive recurring automated marketing by text message through an automatic telephone dialing system. Consent is not a condition to purchase. Message and Data rate apply. Opt-Out by texting STOP.</checkout_consent_message>
+                    <signup_enable>0</signup_enable>
+                    <signup_box_heading>Get a discount on your next order</signup_box_heading>
+                    <signup_box_description>Sign up for our text club and we will text you a discount code</signup_box_description>
+                    <signup_consent_message>By checking this box I consent to receive recurring automated marketing by text message through an automatic telephone dialing system. Consent is not a condition to purchase. Message and Data rate apply. Opt-Out by texting STOP.</signup_consent_message>
+                    <attr_customer>yotpo_accepts_sms_marketing</attr_customer>
+                    <privacy_policy_text>View Privacy Policy</privacy_policy_text>
+                </marketing_settings>
+            </widget_settings>
         </yotpo_core>
     </default>
 </config>

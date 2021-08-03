@@ -7,4 +7,12 @@
             </argument>
         </arguments>
     </type>
+    <type name="Magento\Customer\Block\Form\Register">
+        <plugin name="yotpo_smsbump_customer_form_register"
+                type="Yotpo\SmsBump\Plugin\Customer\Form\Register"/>
+    </type>
+    <type name="Magento\Customer\Block\Form\Edit">
+        <plugin name="yotpo_smsbump_customer_form_edit"
+                type="Yotpo\SmsBump\Plugin\Customer\Form\Edit"/>
+    </type>
 </config>

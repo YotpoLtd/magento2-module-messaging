@@ -5,109 +5,130 @@
             <label>Yotpo</label>
         </tab>
         <section id="yotpo_core" translate="label" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
-            <group id="marketing_settings" translate="label" type="text" sortOrder="300" showInDefault="1" showInWebsite="1" showInStore="1">
-                <label>SMS Marketing Subscriber Collection Widgets</label>
-                <attribute type="expanded">1</attribute>
-                <field id="checkout_heading" translate="label" sortOrder="310" showInStore="1" showInWebsite="1" showInDefault="1">
-                    <label>Checkout checkbox settings</label>
-                    <frontend_model>Yotpo\SmsBump\Block\Adminhtml\System\Config\Form\Field\Heading</frontend_model>
-                </field>
-                <field id="checkout_enable" translate="label comment" type="select" sortOrder="320" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Enable on checkout</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                </field>
-                <field id="checkout_box_heading" translate="label" type="text" sortOrder="330" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Box heading</label>
-                </field>
-                <field id="checkout_box_description" translate="label" type="text" sortOrder="340" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Box description</label>
-                </field>
-                <field id="checkout_consent_message" translate="label" type="textarea" sortOrder="350" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Consent message</label>
-                </field>
-                <field id="signup_heading" translate="label" sortOrder="360" showInStore="1" showInWebsite="1" showInDefault="1">
-                    <label>Sign-up checkbox settings</label>
-                    <frontend_model>Yotpo\SmsBump\Block\Adminhtml\System\Config\Form\Field\Heading</frontend_model>
-                </field>
-                <field id="signup_enable" translate="label comment" type="select" sortOrder="370" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Enable on sign-up</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                </field>
-                <field id="signup_box_heading" translate="label" type="text" sortOrder="380" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Box heading</label>
-                </field>
-                <field id="signup_box_description" translate="label" type="text" sortOrder="390" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Box description</label>
-                </field>
-                <field id="signup_consent_message" translate="label" type="textarea" sortOrder="400" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Consent message</label>
-                </field>
-                <field id="general_heading" translate="label" sortOrder="410" showInStore="1" showInWebsite="1" showInDefault="1">
-                    <label>General settings</label>
-                    <frontend_model>Yotpo\SmsBump\Block\Adminhtml\System\Config\Form\Field\Heading</frontend_model>
-                </field>
-                <field id="attr_customer" translate="label comment" type="select" sortOrder="420" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Accepts SMS marketing field</label>
-                    <comment>The custom field for customer's SMS marketing subscription</comment>
-                    <source_model>Yotpo\SmsBump\Model\Config\Source\CustomerCustomAttributes</source_model>
-                </field>
-                <field id="privacy_policy_text" translate="label" type="text" sortOrder="430" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Privacy policy text</label>
-                </field>
-                <field id="privacy_policy_link" translate="label" type="text" sortOrder="440" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Privacy policy link</label>
-                    <comment>The link to the privacy policy will appear right after the consent message</comment>
-                </field>
-            </group>
-            <group id="sms_subscription" translate="label" type="text" sortOrder="450" showInDefault="1" showInWebsite="1" showInStore="1">
-            <label>SMS Subscription forms</label>
-            <attribute type="expanded">1</attribute>
-                <field id="last_sync_time" translate="label comment" sortOrder="460" type="label" showInDefault="0" showInWebsite="1" showInStore="1">
-                    <label>Last sync:</label>
-                    <backend_model>Yotpo\Core\Model\Config\Backend\FormatDate</backend_model>
-                </field>
-                <field id="sync_forms" translate="label comment" sortOrder="470" type="label" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <comment>
-                        Click to sync published subscription forms defined on the Yotpo SMS application.
-                        Use this button to sync new or updated forms.
-                    </comment>
-                    <frontend_model>Yotpo\SmsBump\Block\Adminhtml\System\Config\SyncFormsButton</frontend_model>
-                </field>
-                <field id="sync_forms_data" translate="label comment" type="textarea" sortOrder="480" showInDefault="0" showInWebsite="0" showInStore="0">
-                </field>
-            </group>
-            <group id="sync_settings" translate="label" type="text" sortOrder="490" showInDefault="1" showInWebsite="1" showInStore="1">
-                <label>Sync Settings</label>
-                <group id="customers_sync" translate="label" type="text" sortOrder="620" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Customers</label>
-                    <attribute type="expanded">1</attribute>
-                    <field id="last_sync_time" translate="label comment" sortOrder="630" type="label" showInDefault="0" showInWebsite="1" showInStore="1">
-                        <label>Last sync:</label>
-                        <backend_model>Yotpo\Core\Model\Config\Backend\FormatDate</backend_model>
+            <group id="widget_settings" translate="label" type="text" sortOrder="80" showInDefault="1"
+                   showInWebsite="1" showInStore="1">
+                <group id="marketing_settings" translate="label" type="text" sortOrder="150" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>SMS Marketing Subscriber Collection Widgets</label>
+                    <attribute type="expanded">0</attribute>
+                    <field id="checkout_heading" translate="label" sortOrder="160" showInStore="1" showInWebsite="1" showInDefault="1">
+                        <label>Checkout checkbox settings</label>
+                        <frontend_model>Yotpo\SmsBump\Block\Adminhtml\System\Config\Form\Field\Heading</frontend_model>
                     </field>
-                    <field id="enable" translate="label comment" type="select" sortOrder="640" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <field id="checkout_enable" translate="label comment" type="select" sortOrder="170" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Enable on checkout</label>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    </field>
+                    <field id="checkout_box_heading" translate="label" type="text" sortOrder="180" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Box heading</label>
+                    </field>
+                    <field id="checkout_box_description" translate="label" type="text" sortOrder="190" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Box description</label>
+                    </field>
+                    <field id="checkout_consent_message" translate="label" type="textarea" sortOrder="200" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Consent message</label>
+                    </field>
+                    <field id="signup_heading" translate="label" sortOrder="210" showInStore="1" showInWebsite="1" showInDefault="1">
+                        <label>Sign-up checkbox settings</label>
+                        <frontend_model>Yotpo\SmsBump\Block\Adminhtml\System\Config\Form\Field\Heading</frontend_model>
+                    </field>
+                    <field id="signup_enable" translate="label comment" type="select" sortOrder="220" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Enable on sign-up</label>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    </field>
+                    <field id="signup_box_heading" translate="label" type="text" sortOrder="230" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Box heading</label>
+                    </field>
+                    <field id="signup_box_description" translate="label" type="text" sortOrder="240" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Box description</label>
+                    </field>
+                    <field id="signup_consent_message" translate="label" type="textarea" sortOrder="250" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Consent message</label>
+                    </field>
+                    <field id="general_heading" translate="label" sortOrder="260" showInStore="1" showInWebsite="1" showInDefault="1">
+                        <label>General settings</label>
+                        <frontend_model>Yotpo\SmsBump\Block\Adminhtml\System\Config\Form\Field\Heading</frontend_model>
+                    </field>
+                    <field id="attr_customer" translate="label comment" type="select" sortOrder="270" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Accepts SMS marketing field</label>
+                        <comment>The custom field for customer's SMS marketing subscription</comment>
+                        <source_model>Yotpo\SmsBump\Model\Config\Source\CustomerCustomAttributes</source_model>
+                    </field>
+                    <field id="privacy_policy_text" translate="label" type="text" sortOrder="280" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Privacy policy text</label>
+                    </field>
+                    <field id="privacy_policy_link" translate="label" type="text" sortOrder="290" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Privacy policy link</label>
+                        <comment>The link to the privacy policy will appear right after the consent message</comment>
+                    </field>
+                </group>
+                <group id="sms_subscription" translate="label" type="text" sortOrder="300" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>SMS Subscription forms</label>
+                    <attribute type="expanded">0</attribute>
+                    <field id="last_sync_time" translate="label comment" sortOrder="310" type="label" showInDefault="0" showInWebsite="1" showInStore="1">
+                        <label>Last sync:</label>
+                        <backend_model>Yotpo\SmsBump\Model\Config\Backend\FormatDate</backend_model>
+                        <frontend_model>Yotpo\SmsBump\Block\Adminhtml\System\Config\Form\Field\RemoveScopes</frontend_model>
+                    </field>
+                    <field id="sync_forms" translate="label comment" sortOrder="320" type="label" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <comment>
+                            Click to sync published subscription forms defined on the Yotpo SMS application.
+                            Use this button to sync new or updated forms.
+                        </comment>
+                        <frontend_model>Yotpo\SmsBump\Block\Adminhtml\System\Config\SyncFormsButton</frontend_model>
+                    </field>
+                    <field id="sync_forms_data" translate="label comment" type="textarea" sortOrder="330" showInDefault="0" showInWebsite="0" showInStore="0">
+                    </field>
+                </group>
+            </group>
+            <group id="sync_settings" translate="label" type="text" sortOrder="340" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Sync Settings</label>
+                <attribute type="expanded">0</attribute>
+                <group id="customers_sync" translate="label" type="text" sortOrder="630" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Customers</label>
+                    <attribute type="expanded">0</attribute>
+                    <field id="last_sync_time" translate="label comment" sortOrder="640" type="label" showInDefault="0" showInWebsite="1" showInStore="1">
+                        <label>Last sync:</label>
+                        <backend_model>Yotpo\SmsBump\Model\Config\Backend\FormatDate</backend_model>
+                        <frontend_model>Yotpo\SmsBump\Block\Adminhtml\System\Config\Form\Field\RemoveScopes</frontend_model>
+                    </field>
+                    <field id="frequency" translate="label comment" sortOrder="643" type="text" showInDefault="1" showInWebsite="0" showInStore="0">
+                        <label>Frequency:</label>
+                        <comment><![CDATA[e.g, */5 * * * *  - Every 5 minutes]]></comment>
+                        <backend_model>Yotpo\SmsBump\Model\Config\Backend\Sync\CustomersScheduler</backend_model>
+                    </field>
+                    <field id="sync_limit_customers" translate="label comment" sortOrder="647" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Limit:</label>
+                    </field>
+                    <field id="enable" translate="label comment" type="select" sortOrder="650" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Enable sync:</label>
                         <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     </field>
-                    <field id="download_logs" translate="label" type="label" sortOrder="650" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <field id="download_logs" translate="label" type="label" sortOrder="660" showInDefault="1" showInWebsite="1" showInStore="1">
                         <frontend_model>Yotpo\SmsBump\Block\Adminhtml\System\Config\Form\Field\Link\DownloadCustomersLogs</frontend_model>
                     </field>
                 </group>
-                <group id="checkout_sync" translate="label" type="text" sortOrder="660" showInDefault="1" showInWebsite="1" showInStore="1">
+                <group id="checkout_sync" translate="label" type="text" sortOrder="670" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Checkouts</label>
-                    <attribute type="expanded">1</attribute>
-                    <field id="last_sync_time" translate="label comment" sortOrder="670" type="label" showInDefault="0" showInWebsite="1" showInStore="1">
+                    <attribute type="expanded">0</attribute>
+                    <field id="last_sync_time" translate="label comment" sortOrder="680" type="label" showInDefault="0" showInWebsite="1" showInStore="1">
                         <label>Last sync:</label>
                         <backend_model>Yotpo\Core\Model\Config\Backend\FormatDate</backend_model>
+                        <frontend_model>Yotpo\SmsBump\Block\Adminhtml\System\Config\Form\Field\RemoveScopes</frontend_model>
                     </field>
-                    <field id="enable" translate="label comment" type="select" sortOrder="680" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <field id="enable" translate="label comment" type="select" sortOrder="690" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Enable sync:</label>
                         <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     </field>
-                    <field id="download_logs" translate="label" type="label" sortOrder="690" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <field id="download_logs" translate="label" type="label" sortOrder="700" showInDefault="1" showInWebsite="1" showInStore="1">
                         <frontend_model>Yotpo\SmsBump\Block\Adminhtml\System\Config\Form\Field\Link\DownloadCheckoutLogs</frontend_model>
                     </field>
                 </group>
+                <field id="debug_mode_active" translate="label comment" type="select" sortOrder="710" showInDefault="1"
+                       showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Enable Debug Mode</label>
+                    <config_path>yotpo_core/settings/debug_mode_active</config_path>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
             </group>
         </section>
     </system>

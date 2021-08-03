@@ -12,26 +12,27 @@ $isYotpoSignUpEnabled = $block->isSignUpEnabled();
 if ($isYotpoSignUpEnabled) {
     $data = $block->getConfigData();
 }
+$parent = $block->getParentBlock();
 ?>
 <?php
-$fieldCssClass = 'field field-' . $block->getHtmlId();
-$fieldCssClass .= $block->isRequired() ? ' required' : '';
+$fieldCssClass = 'field field-yotpo_accepts_sms_marketing';
+$checked = $block->getIsChecked();
 ?>
 <?php if ($isYotpoSignUpEnabled && $data['customAttribute'] == 'yotpo_accepts_sms_marketing'): ?>
     <div class="<?= /* @noEscape */ $fieldCssClass ?>">
         <div class="control">
             <input
-                type="checkbox"
-                id="<?= /* @noEscape */ $block->getHtmlId() ?>"
-                name="<?= $escaper->escapeHtmlAttr($block->getFieldName()) ?>"
-                title="<?= $escaper->escapeHtmlAttr($block->getLabel()) ?>"
+                type="checkbox" <?php if ($checked): ?> checked="checked"<?php endif; ?>
+                id="yotpo_accepts_sms_marketing"
+                name="yotpo_accepts_sms_marketing"
+                title="<?= $escaper->escapeHtmlAttr($data['boxHeading']) ?>"
                 value="1"
                 <?php if ($block->getValue()): ?> checked="checked"<?php endif; ?>
                 <?php if ($block->getHtmlClass()): ?>
                     class="select <?= /* @noEscape */ $block->getHtmlClass() ?>"
                 <?php endif;?>
             />
-            <label class="label" for="<?= /* @noEscape */ $block->getHtmlId() ?>">
+            <label class="label" for="yotpo_accepts_sms_marketing">
                 <span><?= $escaper->escapeHtml($data['boxHeading']) ?></span></label>
             <?php if ($_message = $data['description']): ?>
                 <div class="message"><?= /* @noEscape */ $_message ?></div>
