@@ -16,8 +16,10 @@ $escaper = $escaper ?? $block;
 ?>
 <?php if ($responseData): ?>
     <?php foreach ($responseData as $data):?>
-        <script type="text/javascript" charset="utf-8" async data-requirecontext="_"
-                data-requiremodule="text" src="<?= $escaper->escapeHtml($data['script_source']) ?>">
+        <script>
+            require(['<?= $escaper->escapeHtml($data['script_source'])?>'],
+                function(<?= 'smsbumb'.$escaper->escapeHtml($data['form_id']) ?>) {
+            });
         </script>
     <?php endforeach; ?>
 <?php endif; ?>
