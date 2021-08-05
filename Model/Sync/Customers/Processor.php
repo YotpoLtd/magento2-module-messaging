@@ -157,7 +157,9 @@ class Processor extends Main
                 }
                 if ($yotpoTableFinalData) {
                     $this->insertOrUpdateYotpoTableData($yotpoTableFinalData);
-                    $this->customersToUpdate[] = $customerToUpdate;
+                    if ($this->config->canUpdateCustomAttribute($yotpoTableData['response_code'])) {
+                        $this->customersToUpdate[] = $customerToUpdate;
+                    }
                 }
             }
         } catch (NoSuchEntityException | LocalizedException $e) {
@@ -200,6 +202,7 @@ class Processor extends Main
                     if (array_key_exists($magentoCustomerId, $yotpoSyncedCustomers)) {
                         $responseCode = $yotpoSyncedCustomers[$magentoCustomerId]['response_code'];
                         if (!$this->config->canResync($responseCode)) {
+                            $customersToUpdate[] = $magentoCustomerId;
                             $this->yotpoSmsBumpLogger->info('Customer sync cannot be done for customerId: '
                                 . $magentoCustomerId . ', due to response code: ' . $responseCode, []);
                             continue;
@@ -216,7 +219,9 @@ class Processor extends Main
                     $yotpoTableData['store_id'] = $this->config->getStoreId();
                     $yotpoTableData['synced_to_yotpo'] = $currentTime;
                     $yotpoTableFinalData[] = $yotpoTableData;
-                    $customersToUpdate[] = $magentoCustomerId;
+                    if ($this->config->canUpdateCustomAttribute($yotpoTableData['response_code'])) {
+                        $customersToUpdate[] = $magentoCustomerId;
+                    }
                 }
             }
         }
