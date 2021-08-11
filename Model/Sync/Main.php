@@ -4,7 +4,6 @@ namespace Yotpo\SmsBump\Model\Sync;
 use Magento\Framework\DataObject;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Yotpo\Core\Model\Api\Request as YotpoCoreApiRequest;
-use function Safe\json_encode;
 
 /**
  * Class Main as a common point of SmsBump checkout sync

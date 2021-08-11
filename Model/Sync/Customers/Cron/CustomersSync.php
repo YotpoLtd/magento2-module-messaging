@@ -4,7 +4,6 @@ namespace Yotpo\SmsBump\Model\Sync\Customers\Cron;
 
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Safe\Exceptions\DatetimeException;
 use Yotpo\SmsBump\Model\Sync\Customers\Processor as CustomersProcessor;
 
 /**
@@ -31,7 +30,7 @@ class CustomersSync
      * Process customers sync
      *
      * @return void
-     * @throws NoSuchEntityException|DatetimeException
+     * @throws NoSuchEntityException
      * @throws LocalizedException
      */
     public function processCustomers()

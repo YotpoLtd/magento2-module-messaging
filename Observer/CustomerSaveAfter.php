@@ -7,7 +7,6 @@ use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Safe\Exceptions\DatetimeException;
 use Yotpo\SmsBump\Model\Sync\Customers\Processor as CustomersProcessor;
 use Yotpo\SmsBump\Model\Config;
 use Magento\Framework\App\RequestInterface;
@@ -62,7 +61,6 @@ class CustomerSaveAfter implements ObserverInterface
      * @param Observer $observer
      * @throws LocalizedException
      * @throws NoSuchEntityException
-     * @throws DatetimeException
      */
     public function execute(Observer $observer)
     {

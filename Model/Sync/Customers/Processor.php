@@ -5,7 +5,6 @@ namespace Yotpo\SmsBump\Model\Sync\Customers;
 use Magento\Framework\DataObject;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Safe\Exceptions\DatetimeException;
 use Yotpo\SmsBump\Model\Config;
 use Yotpo\SmsBump\Model\Sync\Customers\Data as CustomersData;
 use Magento\Customer\Model\ResourceModel\Customer\CollectionFactory as CustomerFactory;
@@ -14,7 +13,6 @@ use Magento\Store\Model\App\Emulation as AppEmulation;
 use Magento\Framework\App\ResourceConnection;
 use Yotpo\SmsBump\Model\Sync\Customers\Logger as YotpoSmsBumpLogger;
 use Magento\Customer\Model\Customer;
-use function Safe\date;
 
 /**
  * Class Processor - Process customers sync
@@ -76,7 +74,7 @@ class Processor extends Main
      *
      * @return void
      * @throws LocalizedException
-     * @throws NoSuchEntityException|DatetimeException
+     * @throws NoSuchEntityException
      */
     public function process()
     {
@@ -102,7 +100,6 @@ class Processor extends Main
      *
      * @param Customer $customer
      * @param null|mixed $customerAddress
-     * @throws DatetimeException
      * @throws LocalizedException
      * @throws NoSuchEntityException
      * @return void
@@ -131,7 +128,6 @@ class Processor extends Main
      * @param Customer $magentoCustomer
      * @param null|mixed $customerAddress
      * @return void
-     * @throws DatetimeException
      */
     public function processSingleEntity($magentoCustomer, $customerAddress = null)
     {
@@ -173,7 +169,6 @@ class Processor extends Main
      * @return void
      * @throws LocalizedException
      * @throws NoSuchEntityException
-     * @throws DatetimeException
      */
     public function processEntities()
     {
