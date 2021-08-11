@@ -6,7 +6,6 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Quote\Api\Data\TotalsInterface as QuoteTotalsInterface;
 use Magento\Quote\Model\Quote;
-use Safe\Exceptions\DatetimeException;
 use Yotpo\SmsBump\Model\Sync\Checkout\Processor as CheckoutProcessor;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Quote\Model\Cart\CartTotalRepository as CartRepository;
@@ -65,7 +64,6 @@ class CartTotalRepository
      * @return QuoteTotalsInterface
      * @throws NoSuchEntityException
      * @throws LocalizedException
-     * @throws DatetimeException
      */
     public function afterGet(
         CartRepository $cartTotalRepository,

@@ -5,13 +5,11 @@ namespace Yotpo\SmsBump\Model\Sync\Checkout;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Quote\Model\Quote;
-use Safe\Exceptions\DatetimeException;
 use Yotpo\SmsBump\Model\Sync\Main;
 use Yotpo\SmsBump\Model\Config;
 use Yotpo\SmsBump\Model\Sync\Checkout\Data as CheckoutData;
 use Yotpo\SmsBump\Model\Sync\Checkout\Logger as YotpoSmsBumpLogger;
 use Yotpo\SmsBump\Helper\Data as SMShelper;
-use function Safe\date;
 
 /**
  * Class Processor - Process checkout sync
@@ -70,7 +68,6 @@ class Processor
      * Process checkout sync
      *
      * @param Quote $quote
-     * @throws DatetimeException
      * @throws LocalizedException
      * @throws NoSuchEntityException
      * @return void
@@ -101,7 +98,6 @@ class Processor
      * Updates the last sync date to the database
      *
      * @throws NoSuchEntityException
-     * @throws DatetimeException
      * @return void
      */
     public function updateLastSyncDate()

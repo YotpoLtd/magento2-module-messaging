@@ -9,7 +9,6 @@ use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Message\ManagerInterface;
-use Safe\Exceptions\DatetimeException;
 use Yotpo\SmsBump\Model\Sync\Subscription\Processor;
 use Magento\Store\Api\StoreWebsiteRelationInterface;
 
@@ -55,7 +54,6 @@ class Index extends Action
      * Process subscription forms sync
      *
      * @return ResponseInterface|ResultInterface|void
-     * @throws DatetimeException
      */
     public function execute()
     {

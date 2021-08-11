@@ -12,7 +12,6 @@ use Yotpo\SmsBump\Model\Sync\Main as SmsBumpSyncMain;
 use Magento\Store\Model\App\Emulation as AppEmulation;
 use Yotpo\SmsBump\Model\Sync\Subscription\Logger as YotpoSmsBumpLogger;
 use Magento\Framework\Serialize\SerializerInterface;
-use function Safe\date;
 
 /**
  * Class Processor - Process subscription sync
@@ -69,7 +68,6 @@ class Processor extends AbstractJobs
      * @return void
      * @throws LocalizedException
      * @throws NoSuchEntityException
-     * @throws \Safe\Exceptions\DatetimeException
      */
     public function process()
     {
