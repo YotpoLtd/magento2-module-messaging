@@ -10,6 +10,8 @@
                 comment="Store ID"/>
         <column xsi:type="datetime" name="synced_to_yotpo" nullable="true" comment="Synced to Yotpo"/>
         <column xsi:type="varchar" name="response_code" nullable="true" length="5" comment="Response Code"/>
+        <column xsi:type="smallint" name="sync_status" unsigned="true" nullable="false" identity="false" default="0"
+                comment="Sync Status"/>
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="entity_id"/>
         </constraint>
@@ -19,6 +21,9 @@
         </constraint>
         <index referenceId="YOTPO_CUSTOMERS_SYNC_ENTITY_ID" indexType="btree">
             <column name="entity_id"/>
+        </index>
+        <index referenceId="YOTPO_CUSTOMERS_SYNC_SYNC_STATUS" indexType="btree">
+            <column name="sync_status"/>
         </index>
     </table>
     <table name="sales_order" resource="sales" engine="innodb" comment="Sales Flat Order">

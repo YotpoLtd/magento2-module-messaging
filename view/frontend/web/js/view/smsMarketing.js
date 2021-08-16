@@ -3,9 +3,10 @@ define(
         'jquery',
         'ko',
         'uiComponent',
-        'mage/url'
+        'mage/url',
+        'Magento_Checkout/js/model/full-screen-loader'
     ],
-    function ($, ko, Component, url) {
+    function ($, ko, Component, url, fullScreenLoader) {
         'use strict';
         return Component.extend({
             defaults: {
@@ -46,6 +47,7 @@ define(
                     isCheckboxSelected = customDiv.is(':checked');
                 }
                 isCheckboxSelected = isCheckboxSelected ? 1 : 0;
+                fullScreenLoader.startLoader();
                 $.ajax({
                     url: linkUrl,
                     type: 'POST',
@@ -54,9 +56,10 @@ define(
                         acceptsSmsMarketing: isCheckboxSelected
                     },
                     success: function (response) {
+                        fullScreenLoader.stopLoader();
                     },
                     error: function (response) {
-                        console.log('Error::', response)
+                        fullScreenLoader.stopLoader();
                     }
                 });
 

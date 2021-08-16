@@ -67,13 +67,21 @@ class CustomerSaveAfter implements ObserverInterface
         if ($this->session->getDelegateGuestCustomer()) {
             return;
         }
-        if ($this->yotpoSmsConfig->isCustomerSyncActive() &&
-                !$this->request->getParam('custSync')) {
-            /** @phpstan-ignore-next-line */
-            $this->request->setParam('custSync', true);//to avoid multiple calls for a single save.
-            /** @var Customer $customer */
-            $customer = $observer->getEvent()->getCustomer();
-            $this->customersProcessor->processCustomer($customer);
+        $customer = $observer->getEvent()->getCustomer();
+        $syncActive = $this->yotpoSmsConfig->isCustomerSyncActive();
+        if (!$this->request->getParam('custSync')) {
+            $this->customersProcessor->forceUpdateCustomerSyncStatus(
+                [$customer->getId()],
+                $customer->getStoreId(),
+                0,
+                true
+            );
+            if ($syncActive) {
+                /** @phpstan-ignore-next-line */
+                $this->request->setParam('custSync', true);//to avoid multiple calls for a single save.
+                /** @var Customer $customer */
+                $this->customersProcessor->processCustomer($customer);
+            }
         }
     }
 }

@@ -1,0 +1,43 @@
+define([
+    'Magento_Ui/js/form/form',
+    'Magento_Checkout/js/model/quote',
+    'mage/url',
+    'mage/storage',
+    'jquery',
+    'Magento_Checkout/js/model/full-screen-loader'
+], function (
+    Component,
+    quote,
+    url,
+    storage,
+    $,
+    fullScreenLoader
+) {
+    'use strict';
+
+    return function (Component) {
+        return Component.extend({
+            updateAddress: function () {
+                this._super();
+                this.triggerCheckoutSync();
+            },
+            triggerCheckoutSync: function () {
+                var linkUrl = url.build('yotposmsbump/checkoutsync/billingaddressupdate');
+                fullScreenLoader.startLoader();
+                $.ajax({
+                    url: linkUrl,
+                    data: {
+                        newAddress: JSON.stringify(quote.billingAddress())
+                    },
+                    type: 'post',
+                    dataType: 'json',
+                    context: this
+                }).done(function (response) {
+                    fullScreenLoader.stopLoader();
+                }).fail(function (error) {
+                    fullScreenLoader.stopLoader();
+                });
+            }
+        });
+    };
+});

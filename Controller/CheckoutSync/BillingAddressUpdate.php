@@ -1,25 +1,22 @@
 <?php
 
-namespace Yotpo\SmsBump\Controller\SmsMarketing;
+namespace Yotpo\SmsBump\Controller\CheckoutSync;
 
 use Magento\Framework\App\ActionInterface;
 use Magento\Framework\App\ResponseInterface;
 use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\App\RequestInterface;
-use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Framework\Controller\ResultInterface;
-use Magento\Framework\Exception\InputException;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Framework\Exception\State\InputMismatchException;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Yotpo\SmsBump\Model\Sync\Checkout\Processor as CheckoutProcessor;
 
 /**
- * Class SaveCustomerAttribute - Save customer attribute 'yotpo_accepts_sms_marketing'
+ * Class BillingAddressUpdate - Calls checkout sync when billing address is updated
  */
-class SaveCustomerAttribute implements ActionInterface
+class BillingAddressUpdate implements ActionInterface
 {
     /**
      * Json Factory
@@ -34,11 +31,6 @@ class SaveCustomerAttribute implements ActionInterface
     protected $request;
 
     /**
-     * @var CustomerRepositoryInterface
-     */
-    protected $customerRepositoryInterface;
-
-    /**
      * @var CheckoutSession
      */
     protected $checkoutSession;
@@ -47,53 +39,59 @@ class SaveCustomerAttribute implements ActionInterface
      * @var CheckoutProcessor
      */
     protected $checkoutProcessor;
-    
+
     /**
-     * SaveCustomerAttribute constructor.
+     * BillingAddressUpdate constructor.
      * @param JsonFactory $jsonResultFactory
      * @param RequestInterface $request
-     * @param CustomerRepositoryInterface $customerRepositoryInterface
      * @param CheckoutSession $checkoutSession
      * @param CheckoutProcessor $checkoutProcessor
      */
     public function __construct(
         JsonFactory $jsonResultFactory,
         RequestInterface $request,
-        CustomerRepositoryInterface $customerRepositoryInterface,
         CheckoutSession $checkoutSession,
         CheckoutProcessor $checkoutProcessor
     ) {
         $this->jsonResultFactory = $jsonResultFactory;
         $this->request = $request;
-        $this->customerRepositoryInterface = $customerRepositoryInterface;
         $this->checkoutSession = $checkoutSession;
         $this->checkoutProcessor = $checkoutProcessor;
     }
 
     /**
-     * Updates customer attribute
+     * Calls checkout sync
      *
      * @return ResponseInterface|Json|ResultInterface
-     * @throws InputException
      * @throws LocalizedException
      * @throws NoSuchEntityException
-     * @throws InputMismatchException
      */
     public function execute()
     {
-        $acceptsSmsMarketing = $this->request->getParam('acceptsSmsMarketing');
-        $customerId = $this->checkoutSession->getQuote()->getCustomerId();
-        if ($customerId) {
-            $customer = $this->customerRepositoryInterface->getById($customerId);
-            $customer->setCustomAttribute(
-                \Yotpo\SmsBump\Model\Config::YOTPO_CUSTOM_ATTRIBUTE_SMS_MARKETING,
-                $acceptsSmsMarketing
-            );
-            $this->customerRepositoryInterface->save($customer);
-        } else {
-            $this->checkoutSession->setYotpoSmsMarketing($acceptsSmsMarketing);
+        $fieldsMapping = [
+            'country_id' => 'countryId',
+            'region_id' => 'regionId',
+            'region_code' => 'regionCode',
+            'region' => 'region',
+            'street' => 'street',
+            'company' => 'company',
+            'telephone' => 'telephone',
+            'postcode' => 'postcode',
+            'city' => 'city',
+            'firstname' => 'firstname',
+            'lastname' => 'lastname'
+        ];
+        $newBillingAddress = $this->request->getParam('newAddress', null);
+        if ($newBillingAddress) {
+            $address = json_decode($newBillingAddress, true);
+            $newBillingAddressObject = new \Magento\Framework\DataObject();
+            foreach ($fieldsMapping as $key => $value) {
+                $newBillingAddressObject->setData($key, $address[$value] ?? '');
+            }
+            $quote = $this->checkoutSession->getQuote();
+            $quote->setData('newBillingAddress', $newBillingAddressObject);
+            $this->checkoutProcessor->process($quote);
         }
-        $this->checkoutProcessor->process($this->checkoutSession->getQuote());
         return $this->jsonResultFactory->create();
     }
 }

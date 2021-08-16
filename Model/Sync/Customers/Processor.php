@@ -5,6 +5,7 @@ namespace Yotpo\SmsBump\Model\Sync\Customers;
 use Magento\Framework\DataObject;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Store\Model\StoreManagerInterface;
 use Yotpo\SmsBump\Model\Config;
 use Yotpo\SmsBump\Model\Sync\Customers\Data as CustomersData;
 use Magento\Customer\Model\ResourceModel\Customer\CollectionFactory as CustomerFactory;
@@ -40,9 +41,14 @@ class Processor extends Main
     protected $yotpoSmsBumpLogger;
 
     /**
-     * @var array<mixed>
+     * @var array <mixed>
      */
-    protected $customersToUpdate = [];
+    protected $customerDataPrepared;
+
+    /**
+     * @var StoreManagerInterface
+     */
+    protected $storeManager;
 
     /**
      * Processor constructor.
@@ -61,11 +67,13 @@ class Processor extends Main
         SmsBumpSyncMain $yotpoSyncMain,
         CustomerFactory $customerFactory,
         CustomersData $data,
-        YotpoSmsBumpLogger $yotpoSmsBumpLogger
+        YotpoSmsBumpLogger $yotpoSmsBumpLogger,
+        StoreManagerInterface $storeManager
     ) {
         $this->yotpoSyncMain = $yotpoSyncMain;
         $this->customerFactory = $customerFactory;
         $this->yotpoSmsBumpLogger = $yotpoSmsBumpLogger;
+        $this->storeManager= $storeManager;
         parent::__construct($appEmulation, $resourceConnection, $yotpoSmsConfig, $data);
     }
 
@@ -83,16 +91,14 @@ class Processor extends Main
             $this->emulateFrontendArea($storeId);
             if (!$this->config->isCustomerSyncActive()) {
                 $this->yotpoSmsBumpLogger->info('Customer sync is disabled for store : ' . $storeId, []);
+                $this->stopEnvironmentEmulation();
                 continue;
             }
             $this->yotpoSmsBumpLogger->info('Process customers for store : ' . $storeId, []);
             $this->processEntities();
             $this->stopEnvironmentEmulation();
         }
-        if ($this->customersToUpdate) {
-            $customersArray = array_merge(...$this->customersToUpdate);
-            $this->updateCustomerAttribute(array_unique($customersArray), 1);
-        }
+        $this->stopEnvironmentEmulation();
     }
 
     /**
@@ -106,20 +112,23 @@ class Processor extends Main
      */
     public function processCustomer($customer, $customerAddress = null)
     {
+        $customerAccountshared = $this->config->isCustomerAccountShared();
         /** @phpstan-ignore-next-line */
         foreach ($this->config->getAllStoreIds(false) as $storeId) {
             $this->emulateFrontendArea($storeId);
-            if (!$this->config->isCustomerSyncActive()) {
+            if (!$this->config->isCustomerSyncActive() || (
+                    !$customerAccountshared &&
+                    $this->storeManager->getStore($storeId)->getWebsiteId() != $customer->getWebsiteId()
+                )
+            ) {
+                $this->stopEnvironmentEmulation();
                 continue;
             }
             $this->yotpoSmsBumpLogger->info('Process customer for the store : ' . $storeId, []);
             $this->processSingleEntity($customer, $customerAddress);
             $this->stopEnvironmentEmulation();
         }
-        if ($this->customersToUpdate) {
-            $customersArray = array_merge(...$this->customersToUpdate);
-            $this->updateCustomerAttribute(array_unique($customersArray), 1);
-        }
+        $this->stopEnvironmentEmulation();
     }
 
     /**
@@ -135,10 +144,9 @@ class Processor extends Main
         $currentTime = date('Y-m-d H:i:s');
         $yotpoTableFinalData = [];
         $customerToUpdate[] = $magentoCustomerId;
+        $storeId = $this->config->getStoreId();
         try {
-            //Set the customer attribute value to 0 before sync
-            $this->updateCustomerAttribute($customerToUpdate, 0);
-            $this->yotpoSmsBumpLogger->info('Customer attribute updated to 0 for customer : ' . $magentoCustomerId, []);
+            $this->forceUpdateCustomerSyncStatus($customerToUpdate, $storeId, 0);
 
             $response = $this->syncCustomer($magentoCustomer, true, $customerAddress);
             if ($response) {
@@ -149,17 +157,18 @@ class Processor extends Main
                 if ($yotpoTableData) {
                     $yotpoTableData['store_id'] = $this->config->getStoreId();
                     $yotpoTableData['synced_to_yotpo'] = $currentTime;
+                    $yotpoTableData['sync_status'] = 0;
+                    if ($this->config->canUpdateCustomAttribute($yotpoTableData['response_code'])) {
+                        $yotpoTableData['sync_status'] = 1;
+                    }
                     $yotpoTableFinalData[] = $yotpoTableData;
                 }
                 if ($yotpoTableFinalData) {
                     $this->insertOrUpdateYotpoTableData($yotpoTableFinalData);
-                    if ($this->config->canUpdateCustomAttribute($yotpoTableData['response_code'])) {
-                        $this->customersToUpdate[] = $customerToUpdate;
-                    }
                 }
             }
         } catch (NoSuchEntityException | LocalizedException $e) {
-            $this->yotpoSmsBumpLogger->addError($e->getMessage());
+            $this->yotpoSmsBumpLogger->info($e->getMessage(), []);
         }
     }
 
@@ -172,37 +181,49 @@ class Processor extends Main
      */
     public function processEntities()
     {
+        $storeId = $this->config->getStoreId();
+        $websiteId = $this->storeManager->getStore($storeId)->getWebsiteId();
         $currentTime = date('Y-m-d H:i:s');
         $batchSize = $this->config->getConfig('customers_sync_limit');
+        $customerAccountshared = $this->config->isCustomerAccountShared();
+
         $customerCollection = $this->customerFactory->create();
-        $customersToUpdate = [];
-        $customerCollection->addAttributeToFilter(
+        $customerCollection->getSelect()->joinLeft(
+            ['yotpo_customers_sync' => $customerCollection->getTable('yotpo_customers_sync')],
+            'e.entity_id = yotpo_customers_sync.customer_id
+            AND (yotpo_customers_sync.store_id is null OR yotpo_customers_sync.store_id = \''.$storeId.'\')',
             [
-                ['attribute' => 'synced_to_yotpo_customer', 'null' => true],
-                ['attribute' => 'synced_to_yotpo_customer', 'eq' => '0'],
+                'store_id',
+                'sync_status',
+                'response_code'
             ]
         );
+        $customerCollection->getSelect()
+            ->where('yotpo_customers_sync.sync_status is null OR  yotpo_customers_sync.sync_status = ?', 0);
+        if (!$customerAccountshared) {
+            $customerCollection->getSelect()
+                ->where('e.website_id = ? ', $websiteId);
+        }
         $customerCollection->getSelect()->limit($batchSize);
         $magentoCustomers = [];
         $yotpoTableFinalData = [];
+        $customersToUpdate = [];
         foreach ($customerCollection->getItems() as $customer) {
+            $id = $customer->getId();
+            $id = explode('-', $id);
+            $customer->setId($id[0]);
             $magentoCustomers[$customer->getId()] = $customer;
         }
         if ($magentoCustomers) {
-            $yotpoSyncedCustomers = $this->getYotpoSyncedCustomers($magentoCustomers);
             foreach ($magentoCustomers as $magentoCustomer) {
                 $magentoCustomerId = $magentoCustomer->getId();
                 $yotpoTableData = [];
-                if ($yotpoSyncedCustomers) {
-                    if (array_key_exists($magentoCustomerId, $yotpoSyncedCustomers)) {
-                        $responseCode = $yotpoSyncedCustomers[$magentoCustomerId]['response_code'];
-                        if (!$this->config->canResync($responseCode)) {
-                            $customersToUpdate[] = $magentoCustomerId;
-                            $this->yotpoSmsBumpLogger->info('Customer sync cannot be done for customerId: '
-                                . $magentoCustomerId . ', due to response code: ' . $responseCode, []);
-                            continue;
-                        }
-                    }
+                $responseCode = $magentoCustomer['response_code'];
+                if (!$this->config->canResync($responseCode)) {
+                    $customersToUpdate[] = $magentoCustomerId;
+                    $this->yotpoSmsBumpLogger->info('Customer sync cannot be done for customerId: '
+                        . $magentoCustomerId . ', due to response code: ' . $responseCode, []);
+                    continue;
                 }
                 /** @var Customer $magentoCustomer */
                 $response = $this->syncCustomer($magentoCustomer);
@@ -213,16 +234,18 @@ class Processor extends Main
                 if ($yotpoTableData) {
                     $yotpoTableData['store_id'] = $this->config->getStoreId();
                     $yotpoTableData['synced_to_yotpo'] = $currentTime;
-                    $yotpoTableFinalData[] = $yotpoTableData;
+                    $yotpoTableData['sync_status'] = 0;
                     if ($this->config->canUpdateCustomAttribute($yotpoTableData['response_code'])) {
-                        $customersToUpdate[] = $magentoCustomerId;
+                        $yotpoTableData['sync_status'] = 1;
                     }
+                    $yotpoTableFinalData[] = $yotpoTableData;
                 }
             }
+        } else {
+            $this->yotpoSmsBumpLogger->info('Empty data - Store ID - ' . $storeId, []);
         }
         if ($yotpoTableFinalData) {
             $this->insertOrUpdateYotpoTableData($yotpoTableFinalData);
-            $this->customersToUpdate[] = $customersToUpdate;
         }
         $this->updateLastSyncDate($currentTime);
     }
@@ -239,7 +262,13 @@ class Processor extends Main
      */
     public function syncCustomer($customer, $realTImeSync = false, $customerAddress = null)
     {
-        $customerData = $this->data->prepareData($customer, $realTImeSync, $customerAddress);
+        if (isset($this->customerDataPrepared[$customer->getId()])) {
+            $customerData = $this->customerDataPrepared[$customer->getId()];
+        } else {
+            $customerData = $this->data->prepareData($customer, $realTImeSync, $customerAddress);
+            $this->customerDataPrepared[$customer->getId()] = $customerData;
+        }
+
         $this->yotpoSmsBumpLogger->info('Customers sync - data prepared', []);
         if (!$customerData) {
             $this->yotpoSmsBumpLogger->info('Customers sync - no new data to sync', []);
@@ -286,5 +315,44 @@ class Processor extends Main
     public function updateLastSyncDate($currentTime)
     {
         $this->config->saveConfig('customers_last_sync_time', $currentTime);
+    }
+
+    /**
+     * @param array <mixed> $customerIds
+     * @param int $customerStoreId
+     * @param int $value
+     * @param boolean $updateAllStores
+     * @return void
+     * @throws NoSuchEntityException
+     */
+    public function forceUpdateCustomerSyncStatus($customerIds, $customerStoreId, $value, $updateAllStores = false)
+    {
+        $dataToInsertOrUpdate = [];
+        $storeIds = [];
+        if ($updateAllStores) {
+            if ($this->config->isCustomerAccountShared()) {
+                /** @phpstan-ignore-next-line */
+                foreach ($this->config->getAllStoreIds(false) as $storeId) {
+                    $storeIds[] = $storeId;
+                }
+            } else {
+                $storeIds[] = $customerStoreId;
+            }
+        } else {
+            $storeIds[] = $customerStoreId;
+        }
+
+        foreach ($customerIds as $customerId) {
+            foreach ($storeIds as $storeId) {
+                $data = [
+                    'customer_id' => $customerId,
+                    'store_id' => $storeId,
+                    'sync_status' => $value,
+                    'response_code' => '200'
+                ];
+                $dataToInsertOrUpdate[] = $data;
+            }
+        }
+        $this->insertOnDuplicate('yotpo_customers_sync', $dataToInsertOrUpdate);
     }
 }
