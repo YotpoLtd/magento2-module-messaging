@@ -6,6 +6,7 @@ use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Store\Model\ScopeInterface;
 use Yotpo\SmsBump\Model\Sync\Customers\Processor as CustomersProcessor;
 use Yotpo\SmsBump\Model\Config;
 use Magento\Framework\App\RequestInterface;
@@ -69,13 +70,26 @@ class CustomerAddressUpdate implements ObserverInterface
         } else {
             $this->session->unsDelegateGuestCustomer();
         }
-        if ($this->yotpoSmsConfig->isCustomerSyncActive() &&
-                !$this->request->getParam('custSync')) {
-            /** @phpstan-ignore-next-line */
-            $this->request->setParam('custSync', true);//to avoid multiple calls for a single save.
-            $customer = $address->getCustomer();
-            $customerAddress = $address->getDefaultBilling() ? $address : null;
-            $this->customersProcessor->processCustomer($customer, $customerAddress);
+        $customer = $address->getCustomer();
+        $syncActive = $this->yotpoSmsConfig->isCustomerSyncActive(
+            $address->getCustomer()->getStoreId(),
+            ScopeInterface::SCOPE_STORE
+        );
+        if (!$this->request->getParam('custSync')) {
+            $this->customersProcessor->forceUpdateCustomerSyncStatus(
+                [$customer->getId()],
+                $customer->getStoreId(),
+                0,
+                true
+            );
+            if ($syncActive) {
+                $customerAddress = $address->getDefaultBilling() ? $address : null;
+                if ($customerAddress) {
+                    /** @phpstan-ignore-next-line */
+                    $this->request->setParam('custSync', true);//to avoid multiple calls for a single save.
+                    $this->customersProcessor->processCustomer($customer, $customerAddress);
+                }
+            }
         }
     }
 }

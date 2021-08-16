@@ -143,7 +143,6 @@ class Data extends Main
                 'accepts_sms_marketing' => $this->getCustomAttributeValue($customer->getId())
             ]
         ];
-
         if ($isRealTimeSync) {
             $dataBeforeChange = $this->getDataBeforeChange();
             $newData = json_encode($data);

@@ -12,6 +12,7 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Module\Manager;
 use Magento\Framework\Module\ModuleListInterface;
+use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Yotpo\Core\Model\Config as CoreConfig;
 
@@ -75,7 +76,9 @@ class Config extends CoreConfig
         'sms_marketing_checkout_consent_message' =>
             ['path' => 'yotpo_core/widget_settings/marketing_settings/checkout_consent_message'],
         'sms_marketing_custom_attribute' =>
-            ['path' => 'yotpo_core/widget_settings/marketing_settings/attr_customer']
+            ['path' => 'yotpo_core/widget_settings/marketing_settings/attr_customer'],
+        'customer_account_shared' =>
+            ['path' => 'customer/account_share/scope']
     ];
 
     /**
@@ -132,13 +135,15 @@ class Config extends CoreConfig
     /**
      * Check if Yotpo is enabled and if customer sync is active.
      *
+     * @param int|null $scopeId
+     * @param string $scope
      * @return bool
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
-    public function isCustomerSyncActive()
+    public function isCustomerSyncActive(int $scopeId = null, $scope = ScopeInterface::SCOPE_STORE)
     {
-        return $this->isEnabled() && $this->getConfig('customers_sync_active');
+        return $this->isEnabled($scopeId, $scope) && $this->getConfig('customers_sync_active', $scopeId, $scope);
     }
 
     /**
@@ -159,5 +164,16 @@ class Config extends CoreConfig
     public function isCustomAttributeModuleExists(): bool
     {
         return $this->moduleManager->isEnabled('Magento_CustomerCustomAttributes');
+    }
+
+    /**
+     * @return bool
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
+     */
+    public function isCustomerAccountShared()
+    {
+        $config = $this->getConfig('customer_account_shared');
+        return !$config || $config == \Magento\Customer\Model\Config\Share::SHARE_GLOBAL;
     }
 }

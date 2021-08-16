@@ -83,7 +83,7 @@ class Main extends AbstractJobs
         $data = [
             /** @phpstan-ignore-next-line */
             'response_code' =>  $response->getData('status'),
-            'customer_id'   =>  $magentoCustomerId,
+            'customer_id'   =>  $magentoCustomerId
         ];
         return $data;
     }
@@ -102,7 +102,8 @@ class Main extends AbstractJobs
                 'customer_id'        =>  $data['customer_id'],
                 'synced_to_yotpo'    =>  $data['synced_to_yotpo'],
                 'response_code'      =>  $data['response_code'],
-                'store_id'           =>  $data['store_id']
+                'store_id'           =>  $data['store_id'],
+                'sync_status'        =>  $data['sync_status']
             ];
         }
         $this->insertOnDuplicate('yotpo_customers_sync', $finalData);

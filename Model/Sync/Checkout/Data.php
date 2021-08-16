@@ -88,13 +88,14 @@ class Data
      */
     public function prepareData(Quote $quote)
     {
+        $billingAddress = $quote->getData('newBillingAddress') ?: $quote->getBillingAddress();
         $customAttributeValue = false;
         /** @phpstan-ignore-next-line */
         if ($quote->getCustomer()->getId()) {
             $customerData = $quote->getCustomer();
             $customerId = $customerData->getId();/** @phpstan-ignore-line */
         } else {
-            $customerData = $quote->getBillingAddress();
+            $customerData = $billingAddress;
             $customerId = $customerData->getEmail();
         }
         if (!$customerId) {
@@ -102,7 +103,7 @@ class Data
         }
         $baseUrl = $this->storeManager->getStore()->getBaseUrl();
         $checkoutDate = $quote->getUpdatedAt() ?: $quote->getCreatedAt();
-        if ($customerId && !$quote->getCustomerIsGuest()) {
+        if (!$quote->getCustomerIsGuest()) {
             $customAttributeValue = $this->abstractData->getSmsMarketingCustomAttributeValue($customerId);
         }
         $data = [
@@ -111,13 +112,13 @@ class Data
             'landing_site_url' => $baseUrl,
             'customer' => [
                 'external_id' => $customerId,
-                'email_address' => $customerData->getEmail() ?: null, /** @phpstan-ignore-line */
-                'phone_number' => $quote->getBillingAddress()->getTelephone() ? $this->smsHelper->formatPhoneNumber(
-                    $quote->getBillingAddress()->getTelephone(),
-                    $quote->getBillingAddress()->getCountryId()
+                'email' => $customerData->getEmail() ?: null,
+                'phone_number' => $billingAddress->getTelephone() ? $this->smsHelper->formatPhoneNumber(
+                    $billingAddress->getTelephone(),
+                    $billingAddress->getCountryId()
                 ) : null,
-                'first_name' => $customerData->getFirstname(), /** @phpstan-ignore-line */
-                'last_name' => $customerData->getLastname(), /** @phpstan-ignore-line */
+                'first_name' => $customerData->getFirstname(),
+                'last_name' => $customerData->getLastname(),
                 'accepts_sms_marketing' => $customAttributeValue,
                 'accepts_email_marketing' => $quote->getCustomer()->getEmail() && /** @phpstan-ignore-line */
                     $this->getAcceptsEmailMarketing(
@@ -132,6 +133,7 @@ class Data
         ];
         $dataBeforeChange = $this->getDataBeforeChange();
         $newData = json_encode($data);
+
         if ($dataBeforeChange == $newData) {
             return [];//no change in quote data
         }
@@ -157,7 +159,7 @@ class Data
     public function prepareAddress(Quote $quote, string $type)
     {
         if ($type == 'billing') {
-            $address = $quote->getBillingAddress();
+            $address = $quote->getData('newBillingAddress') ?: $quote->getBillingAddress();
         } else {
             $address = $quote->getShippingAddress();
         }
