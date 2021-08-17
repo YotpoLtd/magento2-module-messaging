@@ -2,15 +2,23 @@
 
 namespace Yotpo\SmsBump\Model\Sync\Checkout;
 
+use Magento\Bundle\Model\Product\Type as ProductTypeBundle;
+use Magento\Catalog\Api\Data\ProductInterface;
+use Magento\Catalog\Model\Product;
+use Magento\Catalog\Model\ProductRepository;
+use Magento\ConfigurableProduct\Model\Product\Type\Configurable as ProductTypeConfigurable;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\GroupedProduct\Model\Product\Type\Grouped as ProductTypeGrouped;
 use Magento\Quote\Model\Quote;
+use Magento\Quote\Model\Quote\Item;
 use Magento\SalesRule\Model\ResourceModel\Coupon\CollectionFactory as CouponCollectionFactory;
 use Yotpo\SmsBump\Helper\Data as SMSHelper;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Newsletter\Model\SubscriberFactory;
 use Yotpo\SmsBump\Model\Sync\Data\AbstractData;
+use Yotpo\Core\Model\Sync\Data\Main;
 
 /**
  * Class Data - Prepare data for checkout sync
@@ -48,9 +56,34 @@ class Data
     protected $abstractData;
 
     /**
+     * @var Main
+     */
+    protected $coreMain;
+
+    /**
      * @var Logger
      */
     protected $checkoutLogger;
+
+    /**
+     * @var array<mixed>
+     */
+    protected $lineItemsProductIds = [];
+
+    /**
+     * @var array<mixed>
+     */
+    protected $productOptions;
+
+    /**
+     * @var array <mixed>
+     */
+    protected $groupProductsParents = [];
+
+    /**
+     * @var ProductRepository
+     */
+    protected $productRepository;
 
     /**
      * Data constructor.
@@ -60,7 +93,9 @@ class Data
      * @param SubscriberFactory $subscriberFactory
      * @param CouponCollectionFactory $couponCollectionFactory
      * @param AbstractData $abstractData
+     * @param Main $coreMain
      * @param Logger $checkoutLogger
+     * @param ProductRepository $productRepository
      */
     public function __construct(
         SMSHelper $smsHelper,
@@ -69,7 +104,9 @@ class Data
         SubscriberFactory $subscriberFactory,
         CouponCollectionFactory $couponCollectionFactory,
         AbstractData $abstractData,
-        Logger $checkoutLogger
+        Main $coreMain,
+        Logger $checkoutLogger,
+        ProductRepository $productRepository
     ) {
         $this->smsHelper = $smsHelper;
         $this->checkoutSession = $checkoutSession;
@@ -77,7 +114,9 @@ class Data
         $this->subscriberFactory = $subscriberFactory;
         $this->couponCollectionFactory = $couponCollectionFactory;
         $this->abstractData = $abstractData;
+        $this->coreMain = $coreMain;
         $this->checkoutLogger = $checkoutLogger;
+        $this->productRepository = $productRepository;
     }
 
     /**
@@ -193,13 +232,26 @@ class Data
                     if ($ruleId != null || !in_array($ruleId, $itemRuleIds)) {
                         $couponCode = null;
                     }
-                    $lineItems[$item->getProduct()->getId()] = [
-                        'external_product_id' => $item->getProduct()->getId(),
-                        'quantity' => $item->getQty(),
-                        'total_price' => $item->getRowTotal(),
-                        'subtotal_price' => $item->getRowTotalWithDiscount(),
-                        'coupon_code' => $couponCode
-                    ];
+                    $product = $this->prepareProductObject($item);
+                    if (($item->getProductType() === ProductTypeGrouped::TYPE_CODE
+                            || $item->getProductType() === ProductTypeConfigurable::TYPE_CODE
+                            || $item->getProductType() === ProductTypeBundle::TYPE_CODE
+                            || $item->getProductType() === 'giftcard')
+                        && (isset($lineItems[$product->getId()]))) {
+                        $lineItems[$product->getId()]['total_price'] +=
+                            $item->getData('row_total_incl_tax');
+                        $lineItems[$product->getId()]['subtotal_price'] += $item->getRowTotal();
+                        $lineItems[$product->getId()]['quantity'] += $item->getQty() * 1;
+                    } else {
+                        $this->lineItemsProductIds[] = $product->getId();
+                        $lineItems[$product->getId()] = [
+                            'external_product_id' => $product->getId(),
+                            'quantity' => $item->getQty() * 1,
+                            'total_price' => $item->getData('row_total_incl_tax'),
+                            'subtotal_price' => $item->getRowTotal(),
+                            'coupon_code' => $couponCode
+                        ];
+                    }
                 } catch (\Exception $e) {
                     $this->checkoutLogger->info('Checkout sync::prepareLineItems() - exception: ' .
                         $e->getMessage(), []);
@@ -214,6 +266,16 @@ class Data
     }
 
     /**
+     * Get the product ids
+     *
+     * @return array<mixed>
+     */
+    public function getLineItemsIds()
+    {
+        return $this->lineItemsProductIds;
+    }
+
+    /**
      * @param string $email
      * @return bool
      * @throws LocalizedException
@@ -223,5 +285,46 @@ class Data
         $subscriber = $this->subscriberFactory->create();
         $subscriber = $subscriber->loadBySubscriberEmail($email, $this->storeManager->getWebsite(null)->getId());
         return ($subscriber->getId() && $subscriber->isSubscribed());
+    }
+
+    /**
+     * Get the productIds of the products that are not synced
+     *
+     * @param array <mixed> $productIds
+     * @param  Quote $quote
+     * @return mixed
+     */
+    public function getUnSyncedProductIds($productIds, $quote)
+    {
+        $quoteItems = [];
+        foreach ($quote->getAllVisibleItems() as $quoteItem) {
+            $quoteItems[$quoteItem->getProduct()->getId()] = $quoteItem->getProduct();
+        }
+        return $this->coreMain->getProductIds($productIds, $quote->getStoreId(), $quoteItems);
+    }
+
+    /**
+     * @param Item $quoteItem
+     * @return ProductInterface|Product|mixed|null
+     * @throws NoSuchEntityException
+     */
+    public function prepareProductObject(Item $quoteItem)
+    {
+        $product = null;
+        if ($quoteItem->getProductType() === ProductTypeGrouped::TYPE_CODE) {
+            $this->productOptions = $quoteItem->getOptions();
+            $productId = (isset($this->productOptions['super_product_config']) &&
+                isset($this->productOptions['super_product_config']['product_id'])) ?
+                $this->productOptions['super_product_config']['product_id'] : null;
+            if ($productId && isset($this->groupProductsParents[$productId])) {
+                $product = $this->groupProductsParents[$productId];
+            } elseif ($productId && !isset($this->groupProductsParents[$productId])) {
+                $product = $this->groupProductsParents[$productId] =
+                    $this->productRepository->getById($productId);
+            }
+        } else {
+            $product = $quoteItem->getProduct();
+        }
+        return $product;
     }
 }

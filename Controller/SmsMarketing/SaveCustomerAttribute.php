@@ -47,7 +47,7 @@ class SaveCustomerAttribute implements ActionInterface
      * @var CheckoutProcessor
      */
     protected $checkoutProcessor;
-    
+
     /**
      * SaveCustomerAttribute constructor.
      * @param JsonFactory $jsonResultFactory
@@ -89,6 +89,8 @@ class SaveCustomerAttribute implements ActionInterface
                 \Yotpo\SmsBump\Model\Config::YOTPO_CUSTOM_ATTRIBUTE_SMS_MARKETING,
                 $acceptsSmsMarketing
             );
+            /** @phpstan-ignore-next-line */
+            $this->request->setParam('_checkout_in_progress', 1);
             $this->customerRepositoryInterface->save($customer);
         } else {
             $this->checkoutSession->setYotpoSmsMarketing($acceptsSmsMarketing);
