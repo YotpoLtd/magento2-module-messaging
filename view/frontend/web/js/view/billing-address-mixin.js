@@ -17,10 +17,25 @@ define([
 
     return function (Component) {
         return Component.extend({
+            useShippingAddress: function () {
+                this._super();
+                if (this.isAddressSameAsShipping()) {
+                    this.triggerCheckoutSync();
+                }
+                return true;
+            },
+
+            /**
+             * Update address action
+             */
             updateAddress: function () {
                 this._super();
                 this.triggerCheckoutSync();
             },
+
+            /**
+             * Trigger checkout sync
+             */
             triggerCheckoutSync: function () {
                 var linkUrl = url.build('yotposmsbump/checkoutsync/billingaddressupdate');
                 fullScreenLoader.startLoader();

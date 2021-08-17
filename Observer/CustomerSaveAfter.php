@@ -79,8 +79,11 @@ class CustomerSaveAfter implements ObserverInterface
             if ($syncActive) {
                 /** @phpstan-ignore-next-line */
                 $this->request->setParam('custSync', true);//to avoid multiple calls for a single save.
-                /** @var Customer $customer */
-                $this->customersProcessor->processCustomer($customer);
+                $checkoutInProgress = $this->request->getParam('_checkout_in_progress', null);
+                if ($checkoutInProgress === null) {
+                    /** @var Customer $customer */
+                    $this->customersProcessor->processCustomer($customer);
+                }
             }
         }
     }
