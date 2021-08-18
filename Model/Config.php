@@ -78,7 +78,9 @@ class Config extends CoreConfig
         'sms_marketing_custom_attribute' =>
             ['path' => 'yotpo_core/widget_settings/marketing_settings/attr_customer'],
         'customer_account_shared' =>
-            ['path' => 'customer/account_share/scope']
+            ['path' => 'customer/account_share/scope'],
+        'customers_sync_frequency' =>
+            ['path' => 'yotpo_core/sync_settings/customers_sync/frequency']
     ];
 
     /**

@@ -11,6 +11,7 @@ use Yotpo\SmsBump\Model\Sync\Customers\Processor as CustomersProcessor;
 use Yotpo\SmsBump\Model\Config;
 use Magento\Framework\App\RequestInterface;
 use Magento\Checkout\Model\Session;
+use Magento\Framework\App\State as AppState;
 
 /**
  * Class CustomerSaveAfter
@@ -39,22 +40,30 @@ class CustomerSaveAfter implements ObserverInterface
     protected $session;
 
     /**
+     * @var AppState
+     */
+    protected $appState;
+
+    /**
      * CustomerSaveAfter constructor.
      * @param CustomersProcessor $customersProcessor
      * @param Config $yotpoSmsConfig
      * @param RequestInterface $request
      * @param Session $session
+     * @param AppState $appState
      */
     public function __construct(
         CustomersProcessor $customersProcessor,
         Config $yotpoSmsConfig,
         RequestInterface $request,
-        Session $session
+        Session $session,
+        AppState $appState
     ) {
         $this->customersProcessor = $customersProcessor;
         $this->yotpoSmsConfig = $yotpoSmsConfig;
         $this->request = $request;
         $this->session = $session;
+        $this->appState = $appState;
     }
 
     /**
@@ -81,7 +90,15 @@ class CustomerSaveAfter implements ObserverInterface
                 $this->request->setParam('custSync', true);//to avoid multiple calls for a single save.
                 $checkoutInProgress = $this->request->getParam('_checkout_in_progress', null);
                 if ($checkoutInProgress === null) {
-                    /** @var Customer $customer */
+                    if ($this->appState->getAreaCode() == 'frontend') {
+                        /** @var Customer $customer */
+                        $customer->setData('is_active', 1);
+                    } else {
+                        /** @phpstan-ignore-next-line */
+                        $postValue = $this->request->getPost();
+                        /** @var Customer $customer */
+                        $customer->setData('is_active', $postValue['customer']['is_active']);
+                    }
                     $this->customersProcessor->processCustomer($customer);
                 }
             }

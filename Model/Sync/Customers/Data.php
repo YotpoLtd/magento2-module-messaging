@@ -124,6 +124,24 @@ class Data extends Main
         }
         $groupId = $customer->getGroupId();
         $groupName = $this->getGroupName($groupId);
+        $gender = null;
+        $genderId = $customer->getGender();
+        if (is_numeric($genderId)) {
+            /** @phpstan-ignore-next-line */
+            $gender = $customer->getAttribute('gender')
+                ->getSource()->getOptionText($genderId);
+        }
+        switch ($gender) {
+            case 'Female':
+                $gender = 'F';
+                break;
+            case 'Male':
+                $gender = 'M';
+                break;
+            default:
+                $gender = null;
+                break;
+        }
         $data = [
             'customer' => [
                 'external_id' => $customer->getId(),
@@ -135,6 +153,9 @@ class Data extends Main
                     ) : null,
                 'first_name' => $customer->getFirstname(),
                 'last_name' => $customer->getLastname(),
+                'account_created_at' => $this->smsHelper->formatDate($customer->getCreatedAt()),
+                'account_status' => $customer->getData('is_active') ? 'enabled' : 'disabled',
+                'gender' => $gender,
                 'default_language' => $locale[0],
                 /** @phpstan-ignore-next-line */
                 'default_currency' => $this->storeManager->getStore()->getBaseCurrencyCode(),
