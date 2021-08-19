@@ -93,7 +93,7 @@
                     </field>
                     <field id="frequency" translate="label comment" sortOrder="643" type="text" showInDefault="1" showInWebsite="0" showInStore="0">
                         <label>Frequency:</label>
-                        <comment><![CDATA[e.g, */5 * * * *  - Every 5 minutes]]></comment>
+                        <comment><![CDATA[e.g, */2 * * * * - every 2 minutes]]></comment>
                         <backend_model>Yotpo\SmsBump\Model\Config\Backend\Sync\CustomersScheduler</backend_model>
                     </field>
                     <field id="sync_limit_customers" translate="label comment" sortOrder="647" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -123,12 +123,6 @@
                         <frontend_model>Yotpo\SmsBump\Block\Adminhtml\System\Config\Form\Field\Link\DownloadCheckoutLogs</frontend_model>
                     </field>
                 </group>
-                <field id="debug_mode_active" translate="label comment" type="select" sortOrder="710" showInDefault="1"
-                       showInWebsite="1" showInStore="1" canRestore="1">
-                    <label>Enable Debug Mode</label>
-                    <config_path>yotpo_core/settings/debug_mode_active</config_path>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                </field>
             </group>
         </section>
     </system>

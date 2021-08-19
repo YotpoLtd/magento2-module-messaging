@@ -312,7 +312,7 @@ class Data
     {
         $product = null;
         if ($quoteItem->getProductType() === ProductTypeGrouped::TYPE_CODE) {
-            $this->productOptions = $quoteItem->getOptions();
+            $this->productOptions = json_decode($quoteItem->getOptionByCode('info_buyRequest')->getValue(), true);
             $productId = (isset($this->productOptions['super_product_config']) &&
                 isset($this->productOptions['super_product_config']['product_id'])) ?
                 $this->productOptions['super_product_config']['product_id'] : null;
