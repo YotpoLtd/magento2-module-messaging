@@ -82,6 +82,7 @@ class SaveCustomerAttribute implements ActionInterface
     public function execute()
     {
         $acceptsSmsMarketing = $this->request->getParam('acceptsSmsMarketing');
+        $checkoutStep = $this->request->getParam('checkoutStep');
         $customerId = $this->checkoutSession->getQuote()->getCustomerId();
         if ($customerId) {
             $customer = $this->customerRepositoryInterface->getById($customerId);
@@ -95,7 +96,10 @@ class SaveCustomerAttribute implements ActionInterface
         } else {
             $this->checkoutSession->setYotpoSmsMarketing($acceptsSmsMarketing);
         }
-        $this->checkoutProcessor->process($this->checkoutSession->getQuote());
+        if ($checkoutStep == 'payment') {
+            $this->checkoutProcessor->process($this->checkoutSession->getQuote());
+        }
+
         return $this->jsonResultFactory->create();
     }
 }

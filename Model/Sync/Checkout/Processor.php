@@ -84,7 +84,6 @@ class Processor
     public function process(Quote $quote)
     {
         $isCheckoutSyncEnabled = $this->yotpoSmsConfig->getConfig('checkout_sync_active');
-        $isProductSyncSuccess = false;
         if ($isCheckoutSyncEnabled) {
             $newCheckoutData = $this->checkoutData->prepareData($quote);
             $this->yotpoSmsBumpLogger->info('Checkout sync - data prepared', []);
@@ -95,10 +94,10 @@ class Processor
             $productIds = $this->checkoutData->getLineItemsIds();
             if ($productIds) {
                 $isProductSyncSuccess = $this->checkAndSyncProducts($productIds, $quote);
-            }
-            if (!$isProductSyncSuccess) {
-                $this->yotpoSmsBumpLogger->info('Products sync failed in checkout', []);
-                return;
+                if (!$isProductSyncSuccess) {
+                    $this->yotpoSmsBumpLogger->info('Products sync failed in checkout', []);
+                    return;
+                }
             }
             $url = $this->yotpoSmsConfig->getEndpoint('checkout');
             $newCheckoutData['entityLog'] = 'checkout';

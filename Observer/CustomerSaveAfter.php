@@ -86,18 +86,22 @@ class CustomerSaveAfter implements ObserverInterface
                 true
             );
             if ($syncActive) {
+                $isActive = 1;
                 /** @phpstan-ignore-next-line */
                 $this->request->setParam('custSync', true);//to avoid multiple calls for a single save.
                 $checkoutInProgress = $this->request->getParam('_checkout_in_progress', null);
                 if ($checkoutInProgress === null) {
                     if ($this->appState->getAreaCode() == 'frontend') {
                         /** @var Customer $customer */
-                        $customer->setData('is_active', 1);
+                        $customer->setData('is_active', $isActive);
                     } else {
                         /** @phpstan-ignore-next-line */
                         $postValue = $this->request->getPost();
+                        if (array_key_exists('is_active', $postValue['customer'])) {
+                            $isActive = $postValue['customer']['is_active'];
+                        }
                         /** @var Customer $customer */
-                        $customer->setData('is_active', $postValue['customer']['is_active']);
+                        $customer->setData('is_active', $isActive);
                     }
                     $this->customersProcessor->processCustomer($customer);
                 }
