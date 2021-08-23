@@ -9,14 +9,11 @@ define(
     function ($, ko, Component, url, fullScreenLoader) {
         'use strict';
         return Component.extend({
-            defaults: {
-                template: 'Yotpo_SmsBump/smsMarketing'
-            },
 
             getCustomAttrVal: ko.observable(window.checkoutConfig.yotpo.sms_marketing.custom_attr_val),
 
             isEnabled: function () {
-                return window.checkoutConfig.yotpo.sms_marketing.checkout_enabled;
+                return true;
             },
 
             getHeading: function () {
@@ -39,6 +36,10 @@ define(
                 return window.BASE_URL + window.checkoutConfig.yotpo.sms_marketing.privacy_policy_url;
             },
 
+            getCheckoutStep: function () {
+                return '';
+            },
+
             updateCustomerAttribute: function () {
                 var linkUrl = url.build('yotposmsbump/smsmarketing/savecustomerattribute');
                 var customDiv = $('#yotpo_accepts_sms_marketing');
@@ -47,13 +48,15 @@ define(
                     isCheckboxSelected = customDiv.is(':checked');
                 }
                 isCheckboxSelected = isCheckboxSelected ? 1 : 0;
+                var checkoutStep = this.getCheckoutStep();
                 fullScreenLoader.startLoader();
                 $.ajax({
                     url: linkUrl,
                     type: 'POST',
                     dataType: "json",
                     data: {
-                        acceptsSmsMarketing: isCheckboxSelected
+                        acceptsSmsMarketing: isCheckboxSelected,
+                        checkoutStep: checkoutStep
                     },
                     success: function (response) {
                         fullScreenLoader.stopLoader();

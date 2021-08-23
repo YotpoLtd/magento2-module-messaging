@@ -1,7 +1,9 @@
 var config = {
     map: {
         '*': {
-            smsMarketing: 'Yotpo_SmsBump/js/view/smsMarketing'
+            smsMarketingBase: 'Yotpo_SmsBump/js/view/smsMarketingBase',
+            smsMarketingPayment: 'Yotpo_SmsBump/js/view/payment/smsMarketing',
+            smsMarketingShipping: 'Yotpo_SmsBump/js/view/shipping/smsMarketing'
         }
     },
     config: {

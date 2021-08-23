@@ -144,6 +144,8 @@ class Data
         $checkoutDate = $quote->getUpdatedAt() ?: $quote->getCreatedAt();
         if (!$quote->getCustomerIsGuest()) {
             $customAttributeValue = $this->abstractData->getSmsMarketingCustomAttributeValue($customerId);
+        } else {
+            $customAttributeValue = (bool) $this->checkoutSession->getYotpoSmsMarketing();
         }
         $data = [
             'token' => $quote->getId(),
