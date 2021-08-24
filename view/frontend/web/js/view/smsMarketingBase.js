@@ -49,6 +49,10 @@ define(
                 }
                 isCheckboxSelected = isCheckboxSelected ? 1 : 0;
                 var checkoutStep = this.getCheckoutStep();
+                var customerEmail = '';
+                if ($('#customer-email') && $('#customer-email').val()) {
+                    customerEmail = $('#customer-email').val();
+                }
                 fullScreenLoader.startLoader();
                 $.ajax({
                     url: linkUrl,
@@ -56,7 +60,8 @@ define(
                     dataType: "json",
                     data: {
                         acceptsSmsMarketing: isCheckboxSelected,
-                        checkoutStep: checkoutStep
+                        checkoutStep: checkoutStep,
+                        customerEmail: customerEmail
                     },
                     success: function (response) {
                         fullScreenLoader.stopLoader();

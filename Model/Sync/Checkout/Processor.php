@@ -104,9 +104,9 @@ class Processor
             $sync = $this->yotpoSyncMain->sync('PATCH', $url, $newCheckoutData);
             if ($sync->getData('is_success')) {
                 $this->updateLastSyncDate();
-                $this->yotpoSmsBumpLogger->info('Checkout sync - success', $newCheckoutData);
+                $this->yotpoSmsBumpLogger->info('Checkout sync - success', []);
             } else {
-                $this->yotpoSmsBumpLogger->info('Checkout sync - failed', $newCheckoutData);
+                $this->yotpoSmsBumpLogger->info('Checkout sync - failed', []);
             }
         }
     }

@@ -7,6 +7,7 @@ use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\ProductRepository;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable as ProductTypeConfigurable;
+use Magento\Customer\Api\AddressRepositoryInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\GroupedProduct\Model\Product\Type\Grouped as ProductTypeGrouped;
@@ -86,6 +87,11 @@ class Data
     protected $productRepository;
 
     /**
+     * @var AddressRepositoryInterface
+     */
+    protected $customerAddressRepository;
+
+    /**
      * Data constructor.
      * @param SMSHelper $smsHelper
      * @param CheckoutSession $checkoutSession
@@ -96,6 +102,7 @@ class Data
      * @param Main $coreMain
      * @param Logger $checkoutLogger
      * @param ProductRepository $productRepository
+     * @param AddressRepositoryInterface $customerAddressRepository
      */
     public function __construct(
         SMSHelper $smsHelper,
@@ -106,7 +113,8 @@ class Data
         AbstractData $abstractData,
         Main $coreMain,
         Logger $checkoutLogger,
-        ProductRepository $productRepository
+        ProductRepository $productRepository,
+        AddressRepositoryInterface $customerAddressRepository
     ) {
         $this->smsHelper = $smsHelper;
         $this->checkoutSession = $checkoutSession;
@@ -117,6 +125,7 @@ class Data
         $this->coreMain = $coreMain;
         $this->checkoutLogger = $checkoutLogger;
         $this->productRepository = $productRepository;
+        $this->customerAddressRepository = $customerAddressRepository;
     }
 
     /**
@@ -128,6 +137,7 @@ class Data
     public function prepareData(Quote $quote)
     {
         $billingAddress = $quote->getData('newBillingAddress') ?: $quote->getBillingAddress();
+        $customerEmail = $quote->getBillingAddress()->getEmail();
         $customAttributeValue = false;
         /** @phpstan-ignore-next-line */
         if ($quote->getCustomer()->getId()) {
@@ -136,8 +146,15 @@ class Data
         } else {
             $customerData = $billingAddress;
             $customerId = $customerData->getEmail();
+            if (!$customerEmail) {
+                $customerEmail = $this->checkoutSession->getYotpoCustomerEmail();
+            }
         }
-        if (!$customerId) {
+        if (!$customerId && !$customerEmail) {
+            return [];
+        }
+        $billingAddressData = $this->prepareAddress($quote, 'billing');
+        if (!$billingAddressData || !$billingAddressData['country_code']) {
             return [];
         }
         $baseUrl = $this->storeManager->getStore()->getBaseUrl();
@@ -152,8 +169,8 @@ class Data
             'checkout_date' => $this->smsHelper->formatDate($checkoutDate),
             'landing_site_url' => $baseUrl,
             'customer' => [
-                'external_id' => $customerId,
-                'email' => $customerData->getEmail() ?: null,
+                'external_id' => $customerId ?: $customerEmail,
+                'email' => $customerEmail,
                 'phone_number' => $billingAddress->getTelephone() ? $this->smsHelper->formatPhoneNumber(
                     $billingAddress->getTelephone(),
                     $billingAddress->getCountryId()
@@ -167,7 +184,7 @@ class Data
                         $quote->getCustomer()->getEmail()
                     )
             ],
-            'billing_address' => $this->prepareAddress($quote, 'billing'),
+            'billing_address' => $billingAddressData,
             'shipping_address' => $this->prepareAddress($quote, 'shipping'),
             'currency' => $quote->getCurrency() !== null ? $quote->getCurrency()->getQuoteCurrencyCode() : null,
             'line_items' => array_values($this->prepareLineItems($quote))
@@ -201,6 +218,14 @@ class Data
     {
         if ($type == 'billing') {
             $address = $quote->getData('newBillingAddress') ?: $quote->getBillingAddress();
+            if (!$address->getCountryId() && $quote->getIsVirtual()) {
+                $customer = $quote->getCustomer();
+                /** @phpstan-ignore-next-line */
+                $customerAddressId = $customer->getDefaultBilling();
+                if ($customerAddressId) {
+                    $address = $this->customerAddressRepository->getById($customerAddressId);
+                }
+            }
         } else {
             $address = $quote->getShippingAddress();
         }
