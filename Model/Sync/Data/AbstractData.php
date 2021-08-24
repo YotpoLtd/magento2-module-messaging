@@ -72,15 +72,24 @@ class AbstractData
      */
     public function prepareAddressData($address)
     {
+        $region = $address->getRegion();
+        /** @phpstan-ignore-next-line */
+        if (is_object($region)) {
+            $state = $region->getRegion();
+            $provinceCode = $region->getRegionCode();
+        } else {
+            $state = $address->getRegion();
+            $provinceCode = $address->getRegionCode();
+        }
         $street = $address->getStreet();
         return [
             'address1' => is_array($street) && count($street) >= 1 ? $street[0] : $street,
             'address2' => is_array($street) && count($street) > 1 ? $street[1] : null,
             'city' => $address->getCity(),
             'company' => $address->getCompany(),
-            'state' => $address->getRegion(),
+            'state' => $state,
             'zip' => $address->getPostcode(),
-            'province_code' => $address->getRegionCode(),
+            'province_code' => $provinceCode,
             'country_code' => $address->getCountryId(),
             'phone_number' => $address->getTelephone() ? $this->smsHelper->formatPhoneNumber(
                 $address->getTelephone(),
