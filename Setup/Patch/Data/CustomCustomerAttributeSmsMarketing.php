@@ -69,7 +69,7 @@ class CustomCustomerAttributeSmsMarketing implements DataPatchInterface
             'input' => 'checkbox',
             'label' => 'Get a discount on your next order',
             'required' => false,
-            'default' => 0,
+            'default' => 1,
             'visible' => true,
             'user_defined' => true,
             'system' => false,
@@ -77,7 +77,7 @@ class CustomCustomerAttributeSmsMarketing implements DataPatchInterface
         ]);
         $newAttribute = $this->eavConfig->getAttribute(Customer::ENTITY, 'yotpo_accepts_sms_marketing');
         $newAttribute->addData([
-            'used_in_forms' => ['customer_account_edit','customer_account_create'],
+            'used_in_forms' => ['customer_account_edit','customer_account_create','adminhtml_customer'],
             'attribute_set_id' => $attributeSetId,
             'attribute_group_id' => $attributeGroup
         ]);

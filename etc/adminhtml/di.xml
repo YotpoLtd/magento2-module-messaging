@@ -5,4 +5,9 @@
                 type="Yotpo\SmsBump\Plugin\CustomAttributeManagement\Helper\Data"
                 sortOrder="1"/>
     </type>
+    <type name="Magento\Customer\Model\AttributeMetadataResolver">
+        <plugin name="prepareeCheckBoxAttribute"
+                type="Yotpo\SmsBump\Plugin\Customer\AttributeMetadataResolver"
+                sortOrder="1"/>
+    </type>
 </config>
