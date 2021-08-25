@@ -185,14 +185,27 @@ class Data extends Main
      */
     public function getCustomAttributeValue($customerId)
     {
-        $postValue = null;
+        $areaCode = $this->appState->getAreaCode();
         $customAttributeValue =  $this->abstractData->getSmsMarketingCustomAttributeValue($customerId);
+        $attributeCode = $this->abstractData->getSMSMarketingAttributeCode();
         $postRequest = $this->request->getPost();
+        $postValue = null;
         if ($postRequest) {
-            $postValue = $this->request->getPostValue('yotpo_accepts_sms_marketing');
+            $postParams = $this->request->getParams();
+            if ($postParams) {
+                if (isset($postParams['customer'])
+                    && isset($postParams['customer'][$attributeCode])
+                    && $areaCode == 'adminhtml'
+                ) {
+                    $postValue = $postParams['customer'][$attributeCode];
+                    return $postValue == 1;
+                } else {
+                    $postValue = $this->request->getPostValue($attributeCode);
+                }
+            }
             $countryId = $this->request->getPostValue('country_id');
             //If form submit is not from address update
-            if (!$countryId && $this->appState->getAreaCode() == 'frontend') {
+            if (!$countryId && $areaCode == 'frontend') {
                 return $postValue == 1;
             } else {
                 return $customAttributeValue;

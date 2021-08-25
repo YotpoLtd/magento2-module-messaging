@@ -65,6 +65,16 @@ class AbstractData
     }
 
     /**
+     * @return mixed|string
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
+     */
+    public function getSMSMarketingAttributeCode()
+    {
+        return $this->config->getConfig('sms_marketing_custom_attribute', $this->config->getStoreId());
+    }
+
+    /**
      * Prepare address data
      *
      * @param QuoteAddress|CustomerAddress $address
