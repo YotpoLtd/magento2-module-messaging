@@ -65,22 +65,28 @@ class Processor extends AbstractJobs
     /**
      * Process subscription
      *
-     * @return void
+     * @return boolean
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
     public function process()
     {
+        $response = [];
         /** @phpstan-ignore-next-line */
         foreach ($this->yotpoSmsConfig->getAllStoreIds(false) as $storeId) {
             $this->emulateFrontendArea($storeId);
             if (!$this->yotpoSmsConfig->isEnabled()) {
-                return;
+                $this->stopEnvironmentEmulation();
+                continue;
             }
             $this->yotpoSmsBumpLogger->info('Process subscription for the store : ' . $storeId, []);
-            $this->processSubscription();
+            $response[] = $this->processSubscription();
             $this->stopEnvironmentEmulation();
         }
+        if (in_array(0, $response)) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -88,27 +94,33 @@ class Processor extends AbstractJobs
      * corresponding to the selected website
      *
      * @param array<mixed> $storeIds
-     * @return void
+     * @return boolean
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
     public function processStore($storeIds)
     {
+        $response = [];
         foreach ($storeIds as $storeId) {
             $this->emulateFrontendArea($storeId);
             if (!$this->yotpoSmsConfig->isEnabled()) {
-                return;
+                $this->stopEnvironmentEmulation();
+                continue;
             }
             $this->yotpoSmsBumpLogger->info('Process subscription for the store : ' . $storeId, []);
-            $this->processSubscription();
+            $response[] =  $this->processSubscription();
             $this->stopEnvironmentEmulation();
         }
+        if (in_array(0, $response)) {
+            return false;
+        }
+        return true;
     }
 
     /**
      * Process subscription
      *
-     * @return void
+     * @return int
      * @throws NoSuchEntityException
      */
     public function processSubscription()
@@ -122,7 +134,9 @@ class Processor extends AbstractJobs
             $serializedData = $this->serializer->serialize($responseData);
             $this->yotpoSmsConfig->saveConfig('sync_forms_data', (string)$serializedData);
             $this->yotpoSmsBumpLogger->info('Subscription forms sync - success', []);
+            return 1;
         }
+        return 0;
     }
 
     /**

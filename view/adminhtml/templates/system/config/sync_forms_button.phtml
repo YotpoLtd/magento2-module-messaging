@@ -18,6 +18,8 @@ $escaper = $escaper ?? $block;
         $errorDiv = $('#sync_forms_message_error');
         var currentStore = <?= $escaper->escapeHtml($block->getStoreScope()) ?>;
         var currentWebsite = <?= $escaper->escapeHtml($block->getWebsiteScope()) ?>;
+        var message = '';
+        var failureMessage = 'Store not found.';
         $('#yotpo_sync_forms_btn').click(function () {
             new Ajax.Request('<?= $escaper->escapeHtml($block->getAjaxUrl()) ?>', {
                 asynchronous:   true,
@@ -27,23 +29,41 @@ $escaper = $escaper ?? $block;
                     website: currentWebsite
                 },
                 onSuccess: function(response) {
-                    $errorDiv.hide();
-                    $successDiv.show();
+                    var respStatus = JSON.parse(response.responseText);
+                    var status = respStatus.status;
+                    console.log(status);
+                    if (status == 0) {
+                        message = failureMessage;
+                    }
                     if (currentStore === 0 && currentWebsite === 0) {
-                        $successDiv.text($.mage.__('Subscription forms are synced successfully for all stores.'));
+                        if (status == 1) {
+                            message = 'Subscription forms are synced successfully for all stores.';
+                        }
                     } else if (currentStore !== 0) {
-                        $successDiv.text($.mage.__('Subscription forms are synced successfully for the store '
-                            + currentStore));
+                        if (status == 1) {
+                            message = 'Subscription forms are synced successfully for the store '
+                                + currentStore;
+                        }
                     } else if (currentWebsite !== 0) {
-                        $successDiv.
-                        text($.mage.__('Subscription forms are synced successfully for all stores under website '
-                            + currentWebsite));
+                        if (status == 1) {
+                            message = 'Subscription forms are synced successfully for all stores under website '
+                                + currentWebsite;
+                        }
+                    }
+                    if (status == 1) {
+                        $successDiv.text($.mage.__(message));
+                        $errorDiv.hide();
+                        $successDiv.show();
+                    } else {
+                        $errorDiv.text($.mage.__(failureMessage));
+                        $successDiv.hide();
+                        $errorDiv.show();
                     }
                 },
                 onError: function() {
                     $successDiv.hide();
                     $errorDiv.show();
-                    $errorDiv.text($.mage.__('Something went wrong while processing the sync job.'));
+                    $errorDiv.text($.mage.__(failureMessage));
                 },
             });
         });

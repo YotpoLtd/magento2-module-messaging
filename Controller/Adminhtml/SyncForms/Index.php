@@ -5,6 +5,7 @@ namespace Yotpo\SmsBump\Controller\Adminhtml\SyncForms;
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 use Magento\Framework\App\ResponseInterface;
+use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
@@ -34,19 +35,29 @@ class Index extends Action
     private $storeWebsiteRelation;
 
     /**
+     * Json Factory
+     *
+     * @var JsonFactory
+     */
+    protected $jsonResultFactory;
+
+    /**
      * Index constructor.
      * @param Context $context
      * @param Processor $subscriptionProcessor
      * @param StoreWebsiteRelationInterface $storeWebsiteRelation
+     * @param JsonFactory $jsonResultFactory
      */
     public function __construct(
         Context $context,
         Processor $subscriptionProcessor,
-        StoreWebsiteRelationInterface $storeWebsiteRelation
+        StoreWebsiteRelationInterface $storeWebsiteRelation,
+        JsonFactory $jsonResultFactory
     ) {
         $this->messageManager = $context->getMessageManager();
         $this->subscriptionProcessor = $subscriptionProcessor;
         $this->storeWebsiteRelation = $storeWebsiteRelation;
+        $this->jsonResultFactory = $jsonResultFactory;
         parent::__construct($context);
     }
 
@@ -63,16 +74,19 @@ class Index extends Action
             $websiteId = $this->_request->getParam('website');
             if ($storeId && $storeId !== 0) {
                 $storeIds[] = $storeId;
-                $this->subscriptionProcessor->processStore($storeIds);
+                $status = (int) $this->subscriptionProcessor->processStore($storeIds);
             } elseif ($websiteId && $websiteId !== 0) {
-                $this->subscriptionProcessor
+                $status = (int) $this->subscriptionProcessor
                    ->processStore($this->storeWebsiteRelation->getStoreByWebsiteId($websiteId));
             } else {
-                $this->subscriptionProcessor->process();
+                $status = (int) $this->subscriptionProcessor->process();
             }
         } catch (NoSuchEntityException | LocalizedException $e) {
+            $status = 0;
             $this->messageManager
-                ->addErrorMessage(__('Something went wrong while processing the subscription forms sync.'));
+                ->addErrorMessage(__('Store not found.'));
         }
+        $result = $this->jsonResultFactory->create();
+        return $result->setData(['status' => $status]);
     }
 }
