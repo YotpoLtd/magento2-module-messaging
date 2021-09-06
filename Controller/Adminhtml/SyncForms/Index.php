@@ -74,19 +74,19 @@ class Index extends Action
             $websiteId = $this->_request->getParam('website');
             if ($storeId && $storeId !== 0) {
                 $storeIds[] = $storeId;
-                $status = (int) $this->subscriptionProcessor->processStore($storeIds);
+                $this->subscriptionProcessor->processStore($storeIds);
             } elseif ($websiteId && $websiteId !== 0) {
-                $status = (int) $this->subscriptionProcessor
+                $this->subscriptionProcessor
                    ->processStore($this->storeWebsiteRelation->getStoreByWebsiteId($websiteId));
             } else {
-                $status = (int) $this->subscriptionProcessor->process();
+                $this->subscriptionProcessor->process();
             }
         } catch (NoSuchEntityException | LocalizedException $e) {
-            $status = 0;
             $this->messageManager
-                ->addErrorMessage(__('Store not found.'));
+                ->addErrorMessage(__('Something went wrong during subscription form Sync - ' . $e->getMessage()));
         }
         $result = $this->jsonResultFactory->create();
-        return $result->setData(['status' => $status]);
+        $messages = $this->subscriptionProcessor->getMessages();
+        return $result->setData(['status' => $messages]);
     }
 }

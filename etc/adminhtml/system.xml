@@ -27,21 +27,21 @@
                     <field id="checkout_consent_message" translate="label" type="textarea" sortOrder="200" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Consent message</label>
                     </field>
-                    <field id="signup_heading" translate="label" sortOrder="210" showInStore="1" showInWebsite="1" showInDefault="1">
+                    <field id="signup_heading" translate="label" sortOrder="210" showInStore="0" showInWebsite="0" showInDefault="0">
                         <label>Sign-up checkbox settings</label>
                         <frontend_model>Yotpo\SmsBump\Block\Adminhtml\System\Config\Form\Field\Heading</frontend_model>
                     </field>
-                    <field id="signup_enable" translate="label comment" type="select" sortOrder="220" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <field id="signup_enable" translate="label comment" type="select" sortOrder="220" showInDefault="0" showInWebsite="0" showInStore="0">
                         <label>Enable on sign-up</label>
                         <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     </field>
-                    <field id="signup_box_heading" translate="label" type="text" sortOrder="230" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <field id="signup_box_heading" translate="label" type="text" sortOrder="230" showInDefault="0" showInWebsite="0" showInStore="0">
                         <label>Box heading</label>
                     </field>
-                    <field id="signup_box_description" translate="label" type="text" sortOrder="240" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <field id="signup_box_description" translate="label" type="text" sortOrder="240" showInDefault="0" showInWebsite="0" showInStore="0">
                         <label>Box description</label>
                     </field>
-                    <field id="signup_consent_message" translate="label" type="textarea" sortOrder="250" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <field id="signup_consent_message" translate="label" type="textarea" sortOrder="250" showInDefault="0" showInWebsite="0" showInStore="0">
                         <label>Consent message</label>
                     </field>
                     <field id="general_heading" translate="label" sortOrder="260" showInStore="1" showInWebsite="1" showInDefault="1">

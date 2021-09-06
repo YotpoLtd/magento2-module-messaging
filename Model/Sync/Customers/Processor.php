@@ -278,7 +278,7 @@ class Processor extends Main
         $customerData['entityLog'] = 'customers';
         $response = $this->yotpoSyncMain->sync('PATCH', $url, $customerData);
         if ($response->getData('is_success')) {
-            $this->yotpoSmsBumpLogger->info('Customers sync - success', $customerData);
+            $this->yotpoSmsBumpLogger->info('Customers sync - success', []);
         }
         return $response;
     }
