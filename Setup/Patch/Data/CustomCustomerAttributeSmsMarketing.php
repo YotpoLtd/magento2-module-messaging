@@ -75,13 +75,6 @@ class CustomCustomerAttributeSmsMarketing implements DataPatchInterface
             'system' => false,
             'is_visible_on_front' => true
         ]);
-        /*$newAttribute = $this->eavConfig->getAttribute(Customer::ENTITY, 'yotpo_accepts_sms_marketing');
-        $newAttribute->addData([
-            'used_in_forms' => ['customer_account_edit','customer_account_create','adminhtml_customer'],
-            'attribute_set_id' => $attributeSetId,
-            'attribute_group_id' => $attributeGroup
-        ]);
-        $newAttribute->save();*/
     }
 
     /**

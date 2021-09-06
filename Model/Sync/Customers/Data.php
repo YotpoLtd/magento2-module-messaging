@@ -186,33 +186,6 @@ class Data extends Main
     public function getCustomAttributeValue($customerId)
     {
         return $this->abstractData->getSmsMarketingCustomAttributeValue($customerId);
-        /*$areaCode = $this->appState->getAreaCode();
-        $customAttributeValue =  $this->abstractData->getSmsMarketingCustomAttributeValue($customerId);
-        $attributeCode = $this->abstractData->getSMSMarketingAttributeCode();
-        $postRequest = $this->request->getPost();
-        $postValue = null;
-        if ($postRequest) {
-            $postParams = $this->request->getParams();
-            if ($postParams) {
-                if (isset($postParams['customer'])
-                    && isset($postParams['customer'][$attributeCode])
-                    && $areaCode == 'adminhtml'
-                ) {
-                    $postValue = $postParams['customer'][$attributeCode];
-                    return $postValue == 1;
-                } else {
-                    $postValue = $this->request->getPostValue($attributeCode);
-                }
-            }
-            $countryId = $this->request->getPostValue('country_id');
-            //If form submit is not from address update
-            if (!$countryId && $areaCode == 'frontend') {
-                return $postValue == 1;
-            } else {
-                return $customAttributeValue;
-            }
-        }
-        return $customAttributeValue;*/
     }
 
     /**
