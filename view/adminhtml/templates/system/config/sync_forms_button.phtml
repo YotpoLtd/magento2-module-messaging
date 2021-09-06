@@ -20,6 +20,8 @@ $escaper = $escaper ?? $block;
         var currentWebsite = <?= $escaper->escapeHtml($block->getWebsiteScope()) ?>;
         var message = '';
         var failureMessage = 'Store not found.';
+        $errorDiv.hide();
+        $successDiv.hide();
         $('#yotpo_sync_forms_btn').click(function () {
             new Ajax.Request('<?= $escaper->escapeHtml($block->getAjaxUrl()) ?>', {
                 asynchronous:   true,
@@ -32,38 +34,21 @@ $escaper = $escaper ?? $block;
                     var respStatus = JSON.parse(response.responseText);
                     var status = respStatus.status;
                     console.log(status);
-                    if (status == 0) {
-                        message = failureMessage;
-                    }
-                    if (currentStore === 0 && currentWebsite === 0) {
-                        if (status == 1) {
-                            message = 'Subscription forms are synced successfully for all stores.';
-                        }
-                    } else if (currentStore !== 0) {
-                        if (status == 1) {
-                            message = 'Subscription forms are synced successfully for the store '
-                                + currentStore;
-                        }
-                    } else if (currentWebsite !== 0) {
-                        if (status == 1) {
-                            message = 'Subscription forms are synced successfully for all stores under website '
-                                + currentWebsite;
-                        }
-                    }
-                    if (status == 1) {
-                        $successDiv.text($.mage.__(message));
-                        $errorDiv.hide();
-                        $successDiv.show();
-                    } else {
-                        $errorDiv.text($.mage.__(failureMessage));
-                        $successDiv.hide();
+                    var errorText = [];
+                    if (status.error.length) {
+                        var errorText = status.error.join('<br/>');
+                        $errorDiv.html(errorText);
                         $errorDiv.show();
+                    }
+                    if (status.success.length) {
+                        var successText = status.success.join('<br/>');
+                        $successDiv.html(successText);
+                        $successDiv.show();
                     }
                 },
                 onError: function() {
-                    $successDiv.hide();
                     $errorDiv.show();
-                    $errorDiv.text($.mage.__(failureMessage));
+                    $errorDiv.text($.mage.__('Something went wrong. Please try again'));
                 },
             });
         });

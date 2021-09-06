@@ -39,6 +39,11 @@ class Processor extends AbstractJobs
     protected $serializer;
 
     /**
+     * @var array <mixed>
+     */
+    protected $messages = ['success' => [], 'error' => []];
+
+    /**
      * Processor constructor.
      * @param AppEmulation $appEmulation
      * @param ResourceConnection $resourceConnection
@@ -65,7 +70,7 @@ class Processor extends AbstractJobs
     /**
      * Process subscription
      *
-     * @return boolean
+     * @return void
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
@@ -76,17 +81,14 @@ class Processor extends AbstractJobs
         foreach ($this->yotpoSmsConfig->getAllStoreIds(false) as $storeId) {
             $this->emulateFrontendArea($storeId);
             if (!$this->yotpoSmsConfig->isEnabled()) {
+                $this->addMessage('error', 'Yotpo is disabled for Store ID - ' . $storeId);
                 $this->stopEnvironmentEmulation();
                 continue;
             }
             $this->yotpoSmsBumpLogger->info('Process subscription for the store : ' . $storeId, []);
-            $response[] = $this->processSubscription();
+            $this->processSubscription();
             $this->stopEnvironmentEmulation();
         }
-        if (in_array(0, $response)) {
-            return false;
-        }
-        return true;
     }
 
     /**
@@ -94,37 +96,34 @@ class Processor extends AbstractJobs
      * corresponding to the selected website
      *
      * @param array<mixed> $storeIds
-     * @return boolean
+     * @return void
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
     public function processStore($storeIds)
     {
-        $response = [];
         foreach ($storeIds as $storeId) {
             $this->emulateFrontendArea($storeId);
             if (!$this->yotpoSmsConfig->isEnabled()) {
+                $this->addMessage('error', 'Yotpo is disabled for Store ID - ' . $storeId);
                 $this->stopEnvironmentEmulation();
                 continue;
             }
             $this->yotpoSmsBumpLogger->info('Process subscription for the store : ' . $storeId, []);
-            $response[] =  $this->processSubscription();
+            $this->processSubscription();
             $this->stopEnvironmentEmulation();
         }
-        if (in_array(0, $response)) {
-            return false;
-        }
-        return true;
     }
 
     /**
      * Process subscription
      *
-     * @return int
+     * @return void
      * @throws NoSuchEntityException
      */
     public function processSubscription()
     {
+        $storeId = $this->yotpoSmsConfig->getStoreId();
         $currentTime = date('Y-m-d H:i:s');
         //call to API
         $response = $this->syncSubscriptionForms();
@@ -134,9 +133,10 @@ class Processor extends AbstractJobs
             $serializedData = $this->serializer->serialize($responseData);
             $this->yotpoSmsConfig->saveConfig('sync_forms_data', (string)$serializedData);
             $this->yotpoSmsBumpLogger->info('Subscription forms sync - success', []);
-            return 1;
+            $this->addMessage('success', 'Subscription forms are synced successfully for Store ID - ' . $storeId);
+        } else {
+            $this->addMessage('error', 'Store not found at API for Store ID - ' . $storeId);
         }
-        return 0;
     }
 
     /**
@@ -163,5 +163,28 @@ class Processor extends AbstractJobs
     public function updateLastSyncDate($currentTime)
     {
         $this->yotpoSmsConfig->saveConfig('sms_subscription_last_sync_time', $currentTime);
+    }
+
+    /**
+     * @param string $flag
+     * @param string $message
+     * @return void
+     */
+    public function addMessage($flag, $message = '')
+    {
+        if ($flag == 'success') {
+            $this->messages['success'][] = $message;
+        }
+        if ($flag == 'error') {
+            $this->messages['error'][] = $message;
+        }
+    }
+
+    /**
+     * @return array <mixed>
+     */
+    public function getMessages()
+    {
+        return $this->messages;
     }
 }

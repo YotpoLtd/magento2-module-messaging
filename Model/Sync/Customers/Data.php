@@ -185,7 +185,8 @@ class Data extends Main
      */
     public function getCustomAttributeValue($customerId)
     {
-        $areaCode = $this->appState->getAreaCode();
+        return $this->abstractData->getSmsMarketingCustomAttributeValue($customerId);
+        /*$areaCode = $this->appState->getAreaCode();
         $customAttributeValue =  $this->abstractData->getSmsMarketingCustomAttributeValue($customerId);
         $attributeCode = $this->abstractData->getSMSMarketingAttributeCode();
         $postRequest = $this->request->getPost();
@@ -211,7 +212,7 @@ class Data extends Main
                 return $customAttributeValue;
             }
         }
-        return $customAttributeValue;
+        return $customAttributeValue;*/
     }
 
     /**

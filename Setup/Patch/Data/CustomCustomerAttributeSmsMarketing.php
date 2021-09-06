@@ -67,22 +67,21 @@ class CustomCustomerAttributeSmsMarketing implements DataPatchInterface
         $customerSetup->addAttribute(Customer::ENTITY, 'yotpo_accepts_sms_marketing', [
             'type' => 'int',
             'input' => 'checkbox',
-            'label' => 'Get a discount on your next order',
+            'label' => 'Yotpo Accepts SMS Marketing',
             'required' => false,
-            'default' => 1,
+            'default' => 0,
             'visible' => true,
             'user_defined' => true,
             'system' => false,
             'is_visible_on_front' => true
         ]);
-        $newAttribute = $this->eavConfig->getAttribute(Customer::ENTITY, 'yotpo_accepts_sms_marketing');
+        /*$newAttribute = $this->eavConfig->getAttribute(Customer::ENTITY, 'yotpo_accepts_sms_marketing');
         $newAttribute->addData([
             'used_in_forms' => ['customer_account_edit','customer_account_create','adminhtml_customer'],
             'attribute_set_id' => $attributeSetId,
             'attribute_group_id' => $attributeGroup
         ]);
-        /** @phpstan-ignore-next-line */
-        $newAttribute->save();
+        $newAttribute->save();*/
     }
 
     /**
