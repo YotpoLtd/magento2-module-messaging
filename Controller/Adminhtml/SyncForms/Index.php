@@ -74,10 +74,10 @@ class Index extends Action
             $websiteId = $this->_request->getParam('website');
             if ($storeId && $storeId !== 0) {
                 $storeIds[] = $storeId;
-                $this->subscriptionProcessor->processStore($storeIds);
+                $this->subscriptionProcessor->process($storeIds);
             } elseif ($websiteId && $websiteId !== 0) {
                 $this->subscriptionProcessor
-                   ->processStore($this->storeWebsiteRelation->getStoreByWebsiteId($websiteId));
+                   ->process($this->storeWebsiteRelation->getStoreByWebsiteId($websiteId));
             } else {
                 $this->subscriptionProcessor->process();
             }

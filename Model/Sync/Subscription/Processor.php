@@ -69,39 +69,17 @@ class Processor extends AbstractJobs
 
     /**
      * Process subscription
-     *
+     * @param array <mixed> $storeIds
      * @return void
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
-    public function process()
+    public function process($storeIds = [])
     {
-        $response = [];
-        /** @phpstan-ignore-next-line */
-        foreach ($this->yotpoSmsConfig->getAllStoreIds(false) as $storeId) {
-            $this->emulateFrontendArea($storeId);
-            if (!$this->yotpoSmsConfig->isEnabled()) {
-                $this->addMessage('error', 'Yotpo is disabled for Store ID - ' . $storeId);
-                $this->stopEnvironmentEmulation();
-                continue;
-            }
-            $this->yotpoSmsBumpLogger->info('Process subscription for the store : ' . $storeId, []);
-            $this->processSubscription();
-            $this->stopEnvironmentEmulation();
+        if (!$storeIds) {
+            $storeIds = $this->yotpoSmsConfig->getAllStoreIds(false);
         }
-    }
-
-    /**
-     * Process subscription for the selected store or for the stores
-     * corresponding to the selected website
-     *
-     * @param array<mixed> $storeIds
-     * @return void
-     * @throws LocalizedException
-     * @throws NoSuchEntityException
-     */
-    public function processStore($storeIds)
-    {
+        /** @phpstan-ignore-next-line */
         foreach ($storeIds as $storeId) {
             $this->emulateFrontendArea($storeId);
             if (!$this->yotpoSmsConfig->isEnabled()) {
