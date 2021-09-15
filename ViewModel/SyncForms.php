@@ -2,6 +2,7 @@
 
 namespace Yotpo\SmsBump\ViewModel;
 
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\View\Element\Block\ArgumentInterface;
 use Yotpo\SmsBump\Model\Config;
@@ -41,7 +42,7 @@ class SyncForms implements ArgumentInterface
      *
      * @return mixed
      * @throws NoSuchEntityException
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function getSubscriptionData()
     {

@@ -18,8 +18,6 @@ $escaper = $escaper ?? $block;
         $errorDiv = $('#sync_forms_message_error');
         var currentStore = <?= $escaper->escapeHtml($block->getStoreScope()) ?>;
         var currentWebsite = <?= $escaper->escapeHtml($block->getWebsiteScope()) ?>;
-        var message = '';
-        var failureMessage = 'Store not found.';
         $errorDiv.hide();
         $successDiv.hide();
         $('#yotpo_sync_forms_btn').click(function () {
@@ -33,7 +31,6 @@ $escaper = $escaper ?? $block;
                 onSuccess: function(response) {
                     var respStatus = JSON.parse(response.responseText);
                     var status = respStatus.status;
-                    console.log(status);
                     var errorText = [];
                     if (status.error.length) {
                         var errorText = status.error.join('<br/>');
