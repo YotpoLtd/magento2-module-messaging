@@ -14,13 +14,15 @@ $escaper = $escaper ?? $block;
         'prototype',
         'mage/translate'
     ], function($){
-        $successDiv = $('#sync_forms_message_success');
-        $errorDiv = $('#sync_forms_message_error');
+        $successMsgDiv = $('#sync_forms_message_success');
+        $errorMsgDiv = $('#sync_forms_message_error');
         var currentStore = <?= $escaper->escapeHtml($block->getStoreScope()) ?>;
         var currentWebsite = <?= $escaper->escapeHtml($block->getWebsiteScope()) ?>;
-        $errorDiv.hide();
-        $successDiv.hide();
+        $errorMsgDiv.hide();
+        $successMsgDiv.hide();
         $('#yotpo_sync_forms_btn').click(function () {
+            $('.message.message-success').hide();
+            $('.message.message-error').hide();
             new Ajax.Request('<?= $escaper->escapeHtml($block->getAjaxUrl()) ?>', {
                 asynchronous:   true,
                 showLoader: true,
@@ -34,18 +36,18 @@ $escaper = $escaper ?? $block;
                     var errorText = [];
                     if (status.error.length) {
                         var errorText = status.error.join('<br/>');
-                        $errorDiv.html(errorText);
-                        $errorDiv.show();
+                        $errorMsgDiv.html(errorText);
+                        $errorMsgDiv.show();
                     }
                     if (status.success.length) {
                         var successText = status.success.join('<br/>');
-                        $successDiv.html(successText);
-                        $successDiv.show();
+                        $successMsgDiv.html(successText);
+                        $successMsgDiv.show();
                     }
                 },
                 onError: function() {
-                    $errorDiv.show();
-                    $errorDiv.text($.mage.__('Something went wrong. Please try again'));
+                    $errorMsgDiv.show();
+                    $errorMsgDiv.text($.mage.__('Something went wrong. Please try again'));
                 },
             });
         });
