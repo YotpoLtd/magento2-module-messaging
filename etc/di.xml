@@ -71,6 +71,16 @@
         <plugin name="yotpo_smsbump_account_delegate_create"
                 type="Yotpo\SmsBump\Plugin\Checkout\Account\DelegateCreatePlugin"/>
     </type>
+    <virtualType name="Yotpo\SmsBump\Model\Session\Storage" type="Magento\Framework\Session\Storage">
+        <arguments>
+            <argument name="namespace" xsi:type="string">yotposmsbump</argument>
+        </arguments>
+    </virtualType>
+    <type name="Yotpo\SmsBump\Model\Session">
+        <arguments>
+            <argument name="storage" xsi:type="object">Yotpo\SmsBump\Model\Session\Storage</argument>
+        </arguments>
+    </type>
     <preference for="Magento\Customer\Model\Metadata\Form\Checkbox"
                 type="Yotpo\SmsBump\Model\Metadata\Form\Checkbox" />
     <preference for="Magento\Eav\Model\Attribute\Data\Checkbox"
