@@ -75,8 +75,4 @@
                 type="Yotpo\SmsBump\Model\Metadata\Form\Checkbox" />
     <preference for="Magento\Eav\Model\Attribute\Data\Checkbox"
                 type="Yotpo\SmsBump\Model\Attribute\Data\Checkbox" />
-    <type name="Magento\Customer\Model\AccountManagement">
-        <plugin name="yotpo_smsbump_guest_email_save"
-                type="Yotpo\SmsBump\Plugin\Customer\Model\AccountManagement"/>
-    </type>
 </config>
