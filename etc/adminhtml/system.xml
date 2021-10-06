@@ -97,7 +97,8 @@
                         <backend_model>Yotpo\SmsBump\Model\Config\Backend\Sync\CustomersScheduler</backend_model>
                     </field>
                     <field id="sync_limit_customers" translate="label comment" sortOrder="647" type="text" showInDefault="1" showInWebsite="1" showInStore="1">
-                        <label>Limit:</label>
+                        <label>Batch limit:</label>
+                        <comment>The batch limit on each cron job.</comment>
                     </field>
                     <field id="enable" translate="label comment" type="select" sortOrder="650" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Enable sync:</label>

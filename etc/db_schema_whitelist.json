@@ -21,5 +21,22 @@
         "column": {
             "yotpo_accepts_sms_marketing": true
         }
+    },
+    "yotpo_abandoned_cart": {
+        "column": {
+            "abandoned_cart_id": true,
+            "quote_id": true,
+            "store_id": true,
+            "email": true,
+            "quote_token": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "YOTPO_ABANDONED_CART_QUOTE_ID_STORE_ID": true,
+            "YOTPO_ABANDONED_CART_QUOTE_ID_QUOTE_ENTITY_ID": true
+        },
+        "index": {
+            "YOTPO_ABANDONED_CART_QUOTE_ID": true
+        }
     }
 }

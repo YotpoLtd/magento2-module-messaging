@@ -15,4 +15,12 @@
         <plugin name="yotpo_smsbump_customer_form_edit"
                 type="Yotpo\SmsBump\Plugin\Customer\Form\Edit"/>
     </type>
+    <type name="Magento\Checkout\Model\DefaultConfigProvider">
+        <plugin name="yotpo_smsbump_default_config_provider"
+                type="Yotpo\SmsBump\Plugin\Checkout\DefaultConfigProviderPlugin"/>
+    </type>
+    <type name="Magento\Customer\Controller\Account\LoginPost">
+        <plugin name="yotpo_smsbump_customer_login_post"
+                type="Yotpo\SmsBump\Plugin\Customer\Account\LoginPost"/>
+    </type>
 </config>
