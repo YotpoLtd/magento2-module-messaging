@@ -138,6 +138,9 @@ class Data extends Main
             case 'Male':
                 $gender = 'M';
                 break;
+            case 'Not Specified':
+                $gender = 'Other';
+                break;
             default:
                 $gender = null;
                 break;
