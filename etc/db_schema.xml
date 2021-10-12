@@ -29,7 +29,7 @@
     <table name="yotpo_abandoned_cart" resource="default" engine="innodb" comment="Yotpo Abandoned Checkout">
         <column xsi:type="int" name="abandoned_cart_id" unsigned="true" nullable="false" identity="true"
                 comment="Abandoned Card ID"/>
-        <column xsi:type="int" name="quote_id" unsigned="true" nullable="false" identity="false"
+        <column xsi:type="int" name="quote_id" padding="10" unsigned="true" nullable="false" identity="false"
                 default="0" comment="Quote ID"/>
         <column xsi:type="smallint" name="store_id" unsigned="true" nullable="true" identity="false"
                 comment="Store ID"/>
