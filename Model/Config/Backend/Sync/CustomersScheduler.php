@@ -34,7 +34,7 @@ class CustomersScheduler extends ConfigValue
     protected $_runModelPath;
 
     /**
-     * Scheduler constructor.
+     * CustomersScheduler constructor.
      * @param Context $context
      * @param Registry $registry
      * @param ScopeConfigInterface $config

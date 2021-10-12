@@ -39,7 +39,6 @@ class AccountManagement
      * @param bool $result
      * @param string $customerEmail
      * @return bool
-     * @throws LocalizedException
      */
     public function afterIsEmailAvailable(\Magento\Customer\Model\AccountManagement $subject, $result, $customerEmail)
     {

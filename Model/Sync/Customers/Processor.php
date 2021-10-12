@@ -59,6 +59,7 @@ class Processor extends Main
      * @param CustomerFactory $customerFactory
      * @param CustomersData $data
      * @param Logger $yotpoSmsBumpLogger
+     * @param StoreManagerInterface $storeManager
      */
     public function __construct(
         AppEmulation $appEmulation,
@@ -112,12 +113,12 @@ class Processor extends Main
      */
     public function processCustomer($customer, $customerAddress = null)
     {
-        $customerAccountshared = $this->config->isCustomerAccountShared();
+        $customerAccountShared = $this->config->isCustomerAccountShared();
         /** @phpstan-ignore-next-line */
         foreach ($this->config->getAllStoreIds(false) as $storeId) {
             $this->emulateFrontendArea($storeId);
             if (!$this->config->isCustomerSyncActive() || (
-                    !$customerAccountshared &&
+                    !$customerAccountShared &&
                     $this->storeManager->getStore($storeId)->getWebsiteId() != $customer->getWebsiteId()
                 )
             ) {
@@ -137,6 +138,7 @@ class Processor extends Main
      * @param Customer $magentoCustomer
      * @param null|mixed $customerAddress
      * @return void
+     * @throws NoSuchEntityException
      */
     public function processSingleEntity($magentoCustomer, $customerAddress = null)
     {
@@ -185,7 +187,7 @@ class Processor extends Main
         $websiteId = $this->storeManager->getStore($storeId)->getWebsiteId();
         $currentTime = date('Y-m-d H:i:s');
         $batchSize = $this->config->getConfig('customers_sync_limit');
-        $customerAccountshared = $this->config->isCustomerAccountShared();
+        $customerAccountShared = $this->config->isCustomerAccountShared();
 
         $customerCollection = $this->customerFactory->create();
         $customerCollection->getSelect()->joinLeft(
@@ -200,7 +202,7 @@ class Processor extends Main
         );
         $customerCollection->getSelect()
             ->where('yotpo_customers_sync.sync_status is null OR  yotpo_customers_sync.sync_status = ?', 0);
-        if (!$customerAccountshared) {
+        if (!$customerAccountShared) {
             $customerCollection->getSelect()
                 ->where('e.website_id = ? ', $websiteId);
         }
@@ -323,7 +325,7 @@ class Processor extends Main
      * @param int $value
      * @param boolean $updateAllStores
      * @return void
-     * @throws NoSuchEntityException
+     * @throws NoSuchEntityException|LocalizedException
      */
     public function forceUpdateCustomerSyncStatus($customerIds, $customerStoreId, $value, $updateAllStores = false)
     {

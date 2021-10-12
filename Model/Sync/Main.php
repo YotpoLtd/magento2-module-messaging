@@ -10,7 +10,6 @@ use Yotpo\Core\Model\Api\Request as YotpoCoreApiRequest;
  */
 class Main
 {
-
     /**
      * @var YotpoCoreApiRequest
      */
