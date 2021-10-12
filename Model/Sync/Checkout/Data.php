@@ -20,12 +20,14 @@ use Magento\Store\Model\StoreManagerInterface;
 use Magento\Newsletter\Model\SubscriberFactory;
 use Yotpo\SmsBump\Model\Sync\Data\AbstractData;
 use Yotpo\Core\Model\Sync\Data\Main;
+use Yotpo\SmsBump\Model\AbandonedCart\Data as AbandonedCartData;
 
 /**
  * Class Data - Prepare data for checkout sync
  */
 class Data
 {
+    const ABANDONED_URL = 'yotposmsbump/abandonedcart/loadcart/yotpoQuoteToken/';
     /**
      * @var SMSHelper
      */
@@ -92,6 +94,11 @@ class Data
     protected $customerAddressRepository;
 
     /**
+     * @var AbandonedCartData
+     */
+    protected $abandonedCartData;
+
+    /**
      * Data constructor.
      * @param SMSHelper $smsHelper
      * @param CheckoutSession $checkoutSession
@@ -103,6 +110,7 @@ class Data
      * @param Logger $checkoutLogger
      * @param ProductRepository $productRepository
      * @param AddressRepositoryInterface $customerAddressRepository
+     * @param AbandonedCartData $abandonedCartData
      */
     public function __construct(
         SMSHelper $smsHelper,
@@ -114,7 +122,8 @@ class Data
         Main $coreMain,
         Logger $checkoutLogger,
         ProductRepository $productRepository,
-        AddressRepositoryInterface $customerAddressRepository
+        AddressRepositoryInterface $customerAddressRepository,
+        AbandonedCartData $abandonedCartData
     ) {
         $this->smsHelper = $smsHelper;
         $this->checkoutSession = $checkoutSession;
@@ -126,6 +135,7 @@ class Data
         $this->checkoutLogger = $checkoutLogger;
         $this->productRepository = $productRepository;
         $this->customerAddressRepository = $customerAddressRepository;
+        $this->abandonedCartData = $abandonedCartData;
     }
 
     /**
@@ -138,7 +148,6 @@ class Data
     {
         $billingAddress = $quote->getData('newBillingAddress') ?: $quote->getBillingAddress();
         $customerEmail = $quote->getBillingAddress()->getEmail();
-        $customAttributeValue = false;
         /** @phpstan-ignore-next-line */
         if ($quote->getCustomer()->getId()) {
             $customerData = $quote->getCustomer();
@@ -153,6 +162,12 @@ class Data
         if (!$customerId && !$customerEmail) {
             return [];
         }
+
+        $quoteToken = $this->abandonedCartData->getQuoteToken($quote->getId());
+        if (!$quoteToken) {
+            $quoteToken = $this->abandonedCartData->updateAbandonedCartDataAndReturnToken($quote, $customerEmail);
+        }
+
         $billingAddressData = $this->prepareAddress($quote, 'billing');
         if (!$billingAddressData || !$billingAddressData['country_code']) {
             return [];
@@ -187,7 +202,9 @@ class Data
             'billing_address' => $billingAddressData,
             'shipping_address' => $this->prepareAddress($quote, 'shipping'),
             'currency' => $quote->getCurrency() !== null ? $quote->getCurrency()->getQuoteCurrencyCode() : null,
-            'line_items' => array_values($this->prepareLineItems($quote))
+            'line_items' => array_values($this->prepareLineItems($quote)),
+            'abandoned_checkout_url' =>
+                $this->storeManager->getStore()->getBaseUrl() . self::ABANDONED_URL . $quoteToken
         ];
         $dataBeforeChange = $this->getDataBeforeChange();
         $newData = json_encode($data);
@@ -213,6 +230,7 @@ class Data
      * @param Quote $quote
      * @param string $type
      * @return array<mixed>
+     * @throws LocalizedException
      */
     public function prepareAddress(Quote $quote, string $type)
     {

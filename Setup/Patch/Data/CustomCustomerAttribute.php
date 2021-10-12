@@ -2,6 +2,7 @@
 
 namespace Yotpo\SmsBump\Setup\Patch\Data;
 
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
 use Magento\Customer\Setup\CustomerSetupFactory;
@@ -39,7 +40,7 @@ class CustomCustomerAttribute implements DataPatchInterface
     /**
      * Creates custom attribute - synced_to_yotpo_customer
      * @return void|CustomCustomerAttribute
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      * @throws \Zend_Validate_Exception
      */
     public function apply()

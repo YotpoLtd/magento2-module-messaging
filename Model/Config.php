@@ -97,6 +97,8 @@ class Config extends CoreConfig
      * @param WriterInterface $configWriter
      * @param ConfigResource $configResource
      * @param ProductMetadataInterface $productMetadata
+     * @param Entity $entity
+     * @param Manager $moduleManager
      */
     public function __construct(
         StoreManagerInterface $storeManager,

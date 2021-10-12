@@ -9,7 +9,7 @@ use Yotpo\SmsBump\Model\Sync\Main;
 use Yotpo\SmsBump\Model\Config;
 use Yotpo\SmsBump\Model\Sync\Checkout\Data as CheckoutData;
 use Yotpo\SmsBump\Model\Sync\Checkout\Logger as YotpoSmsBumpLogger;
-use Yotpo\SmsBump\Helper\Data as SMShelper;
+use Yotpo\SmsBump\Helper\Data as SMSHelper;
 use Yotpo\Core\Model\Sync\Catalog\Processor as CatalogProcessor;
 
 /**
@@ -39,7 +39,7 @@ class Processor
     protected $yotpoSmsBumpLogger;
 
     /**
-     * @var SMShelper
+     * @var SMSHelper
      */
     protected $smsHelper;
 
@@ -54,7 +54,7 @@ class Processor
      * @param Config $yotpoSmsConfig
      * @param Data $checkoutData
      * @param Logger $yotpoSmsBumpLogger
-     * @param SMShelper $smsHelper
+     * @param SMSHelper $smsHelper
      * @param CatalogProcessor $catalogProcessor
      */
     public function __construct(
@@ -62,7 +62,7 @@ class Processor
         Config $yotpoSmsConfig,
         CheckoutData $checkoutData,
         YotpoSmsBumpLogger $yotpoSmsBumpLogger,
-        SMShelper $smsHelper,
+        SMSHelper $smsHelper,
         CatalogProcessor $catalogProcessor
     ) {
         $this->yotpoSyncMain = $yotpoSyncMain;

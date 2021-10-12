@@ -20,11 +20,8 @@ class Checkbox extends AbstractData
     public function extractValue(RequestInterface $request)
     {
         $value = $this->_applyInputFilter($this->_getRequestValue($request));
-        if ($value) {
-            return 1;
-        } else {
-            return 0;
-        }
+
+        return $value ? 1 : 0;
     }
 
     /**

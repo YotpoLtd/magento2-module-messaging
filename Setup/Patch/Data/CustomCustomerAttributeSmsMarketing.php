@@ -7,7 +7,6 @@ use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
 use Magento\Customer\Setup\CustomerSetupFactory;
 use Magento\Customer\Model\Customer;
-use Magento\Eav\Model\Config as EAVConfig;
 
 /**
  * Class CustomCustomerAttributeMarketing
@@ -26,24 +25,16 @@ class CustomCustomerAttributeSmsMarketing implements DataPatchInterface
     private $customerSetupFactory;
 
     /**
-     * @var EAVConfig
-     */
-    private $eavConfig;
-
-    /**
      * CustomCustomerAttributeSmsMarketing constructor.
      * @param ModuleDataSetupInterface $moduleDataSetup
      * @param CustomerSetupFactory $customerSetupFactory
-     * @param EAVConfig $eavConfig
      */
     public function __construct(
         ModuleDataSetupInterface $moduleDataSetup,
-        CustomerSetupFactory $customerSetupFactory,
-        EAVConfig $eavConfig
+        CustomerSetupFactory $customerSetupFactory
     ) {
         $this->moduleDataSetup = $moduleDataSetup;
         $this->customerSetupFactory = $customerSetupFactory;
-        $this->eavConfig = $eavConfig;
     }
 
     /**
@@ -56,14 +47,6 @@ class CustomCustomerAttributeSmsMarketing implements DataPatchInterface
     public function apply()
     {
         $customerSetup = $this->customerSetupFactory->create(['setup' => $this->moduleDataSetup]);
-        $customerEntity = $customerSetup->getEavConfig()->getEntityType(Customer::ENTITY);
-        /** @phpstan-ignore-next-line */
-        $attributeSetId = $customerSetup->getDefaultAttributeSetId($customerEntity->getEntityTypeId());
-        $attributeGroup = $customerSetup->
-                            getDefaultAttributeGroupId(
-                                $customerEntity->getEntityTypeId(), /** @phpstan-ignore-line */
-                                $attributeSetId
-                            );
         $customerSetup->addAttribute(Customer::ENTITY, 'yotpo_accepts_sms_marketing', [
             'type' => 'int',
             'input' => 'checkbox',

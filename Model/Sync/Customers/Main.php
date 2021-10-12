@@ -2,6 +2,7 @@
 
 namespace Yotpo\SmsBump\Model\Sync\Customers;
 
+use Magento\Framework\DataObject;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Yotpo\Core\Model\AbstractJobs;
 use Magento\Store\Model\App\Emulation as AppEmulation;
@@ -72,9 +73,9 @@ class Main extends AbstractJobs
     }
 
     /**
-     * Prepares custom table tada
+     * Prepares custom table data
      *
-     * @param array<mixed>|\Magento\Framework\DataObject $response
+     * @param array<mixed>|DataObject $response
      * @param int|null $magentoCustomerId
      * @return array<mixed>
      */
