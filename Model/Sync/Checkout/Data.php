@@ -17,7 +17,6 @@ use Magento\SalesRule\Model\ResourceModel\Coupon\CollectionFactory as CouponColl
 use Yotpo\SmsBump\Helper\Data as SMSHelper;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Store\Model\StoreManagerInterface;
-use Magento\Newsletter\Model\SubscriberFactory;
 use Yotpo\SmsBump\Model\Sync\Data\AbstractData;
 use Yotpo\Core\Model\Sync\Data\Main;
 use Yotpo\SmsBump\Model\AbandonedCart\Data as AbandonedCartData;
@@ -42,11 +41,6 @@ class Data
      * @var StoreManagerInterface
      */
     protected $storeManager;
-
-    /**
-     * @var SubscriberFactory
-     */
-    protected $subscriberFactory;
 
     /**
      * @var CouponCollectionFactory
@@ -103,7 +97,6 @@ class Data
      * @param SMSHelper $smsHelper
      * @param CheckoutSession $checkoutSession
      * @param StoreManagerInterface $storeManager
-     * @param SubscriberFactory $subscriberFactory
      * @param CouponCollectionFactory $couponCollectionFactory
      * @param AbstractData $abstractData
      * @param Main $coreMain
@@ -116,7 +109,6 @@ class Data
         SMSHelper $smsHelper,
         CheckoutSession $checkoutSession,
         StoreManagerInterface $storeManager,
-        SubscriberFactory $subscriberFactory,
         CouponCollectionFactory $couponCollectionFactory,
         AbstractData $abstractData,
         Main $coreMain,
@@ -128,7 +120,6 @@ class Data
         $this->smsHelper = $smsHelper;
         $this->checkoutSession = $checkoutSession;
         $this->storeManager = $storeManager;
-        $this->subscriberFactory = $subscriberFactory;
         $this->couponCollectionFactory = $couponCollectionFactory;
         $this->abstractData = $abstractData;
         $this->coreMain = $coreMain;
@@ -174,7 +165,7 @@ class Data
         }
         $baseUrl = $this->storeManager->getStore()->getBaseUrl();
         $checkoutDate = $quote->getUpdatedAt() ?: $quote->getCreatedAt();
-        if (!$quote->getCustomerIsGuest()) {
+        if (!$quote->getCustomerIsGuest() && $quote->getCustomerId()) {
             $customAttributeValue = $this->abstractData->getSmsMarketingCustomAttributeValue($customerId);
         } else {
             $customAttributeValue = (bool) $this->checkoutSession->getYotpoSmsMarketing();
@@ -192,12 +183,7 @@ class Data
                 ) : null,
                 'first_name' => $customerData->getFirstname(),
                 'last_name' => $customerData->getLastname(),
-                'accepts_sms_marketing' => $customAttributeValue,
-                'accepts_email_marketing' => $quote->getCustomer()->getEmail() && /** @phpstan-ignore-line */
-                    $this->getAcceptsEmailMarketing(
-                    /** @phpstan-ignore-next-line */
-                        $quote->getCustomer()->getEmail()
-                    )
+                'accepts_sms_marketing' => $customAttributeValue
             ],
             'billing_address' => $billingAddressData,
             'shipping_address' => $this->prepareAddress($quote, 'shipping'),
@@ -318,18 +304,6 @@ class Data
     public function getLineItemsIds()
     {
         return $this->lineItemsProductIds;
-    }
-
-    /**
-     * @param string $email
-     * @return bool
-     * @throws LocalizedException
-     */
-    public function getAcceptsEmailMarketing(string $email)
-    {
-        $subscriber = $this->subscriberFactory->create();
-        $subscriber = $subscriber->loadBySubscriberEmail($email, $this->storeManager->getWebsite(null)->getId());
-        return ($subscriber->getId() && $subscriber->isSubscribed());
     }
 
     /**
