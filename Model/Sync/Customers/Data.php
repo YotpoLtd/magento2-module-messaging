@@ -157,7 +157,6 @@ class Data extends Main
                 'first_name' => $customer->getFirstname(),
                 'last_name' => $customer->getLastname(),
                 'account_created_at' => $this->smsHelper->formatDate($customer->getCreatedAt()),
-                'account_status' => $customer->getData('is_active') ? 'enabled' : 'disabled',
                 'gender' => $gender,
                 'default_language' => $locale[0],
                 /** @phpstan-ignore-next-line */
@@ -167,6 +166,9 @@ class Data extends Main
                 'accepts_sms_marketing' => $this->getCustomAttributeValue($customer->getId())
             ]
         ];
+        if ($customer->getData('is_active_yotpo') !== null) {
+            $data['customer']['account_status'] = $customer->getData('is_active_yotpo') ? 'enabled' : 'disabled';
+        }
         if ($isRealTimeSync) {
             $dataBeforeChange = $this->getDataBeforeChange();
             $newData = json_encode($data);

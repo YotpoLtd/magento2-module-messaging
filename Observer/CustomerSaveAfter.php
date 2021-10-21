@@ -93,15 +93,16 @@ class CustomerSaveAfter implements ObserverInterface
                 if ($checkoutInProgress === null) {
                     if ($this->appState->getAreaCode() == 'frontend') {
                         /** @var Customer $customer */
-                        $customer->setData('is_active', $isActive);
+                        $customer->setData('is_active_yotpo', $isActive);
                     } else {
                         /** @phpstan-ignore-next-line */
-                        $postValue = $this->request->getPost();
-                        if (array_key_exists('is_active', $postValue['customer'])) {
-                            $isActive = $postValue['customer']['is_active'];
+                        $postValue = $this->request->getPost('customer', null);
+                        if (is_array($postValue)
+                            && isset($postValue['is_active'])) {
+                            $isActive = $postValue['is_active'];
                         }
                         /** @var Customer $customer */
-                        $customer->setData('is_active', $isActive);
+                        $customer->setData('is_active_yotpo', $isActive);
                     }
                     $this->customersProcessor->processCustomer($customer);
                 }
