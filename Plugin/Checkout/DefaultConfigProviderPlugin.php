@@ -99,7 +99,7 @@ class DefaultConfigProviderPlugin
     {
         $connection = $this->resourceConnection->getConnection();
         $select = $connection->select()->from(
-            ['yotpoAbandonedCart' => $connection->getTableName('yotpo_abandoned_cart')],
+            ['yotpoAbandonedCart' => $this->resourceConnection->getTableName('yotpo_abandoned_cart')],
             ['email']
         )->where(
             'quote_id = ?',
