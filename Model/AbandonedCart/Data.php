@@ -111,7 +111,7 @@ class Data extends AbstractJobs
     {
         $connection = $this->resourceConnection->getConnection();
         $query = $connection->select()->from(
-            ['e' => $connection->getTableName('yotpo_abandoned_cart')],
+            ['e' => $this->resourceConnection->getTableName('yotpo_abandoned_cart')],
             'e.quote_id'
         )->where(
             'quote_token = ?',
@@ -128,7 +128,7 @@ class Data extends AbstractJobs
     {
         $connection = $this->resourceConnection->getConnection();
         $query = $connection->select()->from(
-            ['e' => $connection->getTableName('yotpo_abandoned_cart')],
+            ['e' => $this->resourceConnection->getTableName('yotpo_abandoned_cart')],
             'e.quote_token'
         )->where(
             'quote_id = ?',

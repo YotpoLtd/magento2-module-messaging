@@ -60,7 +60,7 @@ class Main extends AbstractJobs
         $return     =   [];
         $connection =   $this->resourceConnection->getConnection();
         $storeId    =   $this->config->getStoreId();
-        $table      =   $connection->getTableName('yotpo_customers_sync');
+        $table      =   $this->resourceConnection->getTableName('yotpo_customers_sync');
         $customers  =   $connection->select()
             ->from($table)
             ->where('customer_id IN(?) ', array_keys($magentoCustomers))
