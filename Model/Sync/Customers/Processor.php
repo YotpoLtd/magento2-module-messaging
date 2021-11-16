@@ -244,7 +244,7 @@ class Processor extends Main
                 }
             }
         } else {
-            $this->yotpoSmsBumpLogger->info('Empty data - Store ID - ' . $storeId, []);
+            $this->yotpoSmsBumpLogger->info('Empty data - Magento Store ID - ' . $storeId, []);
         }
         if ($yotpoTableFinalData) {
             $this->insertOrUpdateYotpoTableData($yotpoTableFinalData);
