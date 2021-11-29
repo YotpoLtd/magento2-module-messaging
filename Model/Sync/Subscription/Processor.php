@@ -83,11 +83,18 @@ class Processor extends AbstractJobs
         foreach ($storeIds as $storeId) {
             $this->emulateFrontendArea($storeId);
             if (!$this->yotpoSmsConfig->isEnabled()) {
-                $this->addMessage('error', 'Yotpo is disabled for Store ID - ' . $storeId);
+                $this->addMessage(
+                    'error',
+                    'Yotpo is disabled for Store  - ' . $this->yotpoSmsConfig->getStoreName($storeId)
+                );
                 $this->stopEnvironmentEmulation();
                 continue;
             }
-            $this->yotpoSmsBumpLogger->info('Process subscription for the store : ' . $storeId, []);
+            $this->yotpoSmsBumpLogger->info(
+                'Process subscription for the store : ' . $this->yotpoSmsConfig->getStoreName($storeId),
+                []
+            );
+
             $this->processSubscription();
             $this->stopEnvironmentEmulation();
         }
@@ -105,15 +112,22 @@ class Processor extends AbstractJobs
         $currentTime = date('Y-m-d H:i:s');
         //call to API
         $response = $this->syncSubscriptionForms();
+        $storeCode = $this->yotpoSmsConfig->getStoreName($storeId);
         $this->updateLastSyncDate($currentTime);
         if ($response->getData('is_success')) {
             $responseData = $response->getData('response');
             $serializedData = $this->serializer->serialize($responseData);
             $this->yotpoSmsConfig->saveConfig('sync_forms_data', (string)$serializedData);
             $this->yotpoSmsBumpLogger->info('Subscription forms sync - success', []);
-            $this->addMessage('success', 'Subscription forms are synced successfully for Store ID - ' . $storeId);
+            $this->addMessage(
+                'success',
+                'Subscription forms are synced successfully for Store - ' . $storeCode
+            );
         } else {
-            $this->addMessage('error', 'Store not found at API for Store ID - ' . $storeId);
+            $this->addMessage(
+                'error',
+                'Store not found at API for Store - ' . $storeCode
+            );
         }
     }
 

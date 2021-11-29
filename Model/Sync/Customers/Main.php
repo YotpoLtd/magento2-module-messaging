@@ -92,21 +92,19 @@ class Main extends AbstractJobs
     /**
      * Inserts or updates custom table data
      *
-     * @param array<mixed> $yotpoTableFinalData
+     * @param array<mixed> $data
      * @return void
      */
-    public function insertOrUpdateYotpoTableData($yotpoTableFinalData)
+    public function insertOrUpdateYotpoTableData($data)
     {
         $finalData = [];
-        foreach ($yotpoTableFinalData as $data) {
-            $finalData[] = [
-                'customer_id'        =>  $data['customer_id'],
-                'synced_to_yotpo'    =>  $data['synced_to_yotpo'],
-                'response_code'      =>  $data['response_code'],
-                'store_id'           =>  $data['store_id'],
-                'sync_status'        =>  $data['sync_status']
-            ];
-        }
+        $finalData[] = [
+            'customer_id'        =>  $data['customer_id'],
+            'synced_to_yotpo'    =>  $data['synced_to_yotpo'],
+            'response_code'      =>  $data['response_code'],
+            'store_id'           =>  $data['store_id'],
+            'sync_status'        =>  $data['sync_status']
+        ];
         $this->insertOnDuplicate('yotpo_customers_sync', $finalData);
     }
 }
