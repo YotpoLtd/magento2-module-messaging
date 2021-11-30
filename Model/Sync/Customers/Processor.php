@@ -92,14 +92,22 @@ class Processor extends Main
             $this->emulateFrontendArea($storeId);
             if (!$this->config->isCustomerSyncActive()) {
                 $this->yotpoSmsBumpLogger->info(
-                    'Customer sync is disabled for store : ' . $this->config->getStoreName($storeId),
+                    __(
+                        'Customer sync is disabled for Magento Store ID: %1, Name: %2',
+                        $storeId,
+                        $this->config->getStoreName($storeId)
+                    ),
                     []
                 );
                 $this->stopEnvironmentEmulation();
                 continue;
             }
             $this->yotpoSmsBumpLogger->info(
-                'Process customers for store : ' . $this->config->getStoreName($storeId),
+                __(
+                    'Process customers for Magento Store ID: %1, Name: %2',
+                    $storeId,
+                    $this->config->getStoreName($storeId)
+                ),
                 []
             );
 
@@ -133,7 +141,11 @@ class Processor extends Main
                 continue;
             }
             $this->yotpoSmsBumpLogger->info(
-                'Process customer for the store : ' . $this->config->getStoreName($storeId),
+                __(
+                    'Process customer for the Magento Store ID: %1, Name: %2',
+                    $storeId,
+                    $this->config->getStoreName($storeId)
+                ),
                 []
             );
             $this->processSingleEntity($customer, $customerAddress);
@@ -252,7 +264,11 @@ class Processor extends Main
             }
         } else {
             $this->yotpoSmsBumpLogger->info(
-                'Empty data - Magento Store - ' . $this->config->getStoreName($storeId),
+                __(
+                    'Empty data - Magento Store ID: %1, Name: %2',
+                    $storeId,
+                    $this->config->getStoreName($storeId)
+                ),
                 []
             );
         }

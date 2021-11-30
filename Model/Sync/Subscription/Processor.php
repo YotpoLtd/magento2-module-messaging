@@ -85,13 +85,21 @@ class Processor extends AbstractJobs
             if (!$this->yotpoSmsConfig->isEnabled()) {
                 $this->addMessage(
                     'error',
-                    'Yotpo is disabled for Store  - ' . $this->yotpoSmsConfig->getStoreName($storeId)
+                    __(
+                        'Yotpo is disabled for Magento Store ID: %1, Name: %2',
+                        $storeId,
+                        $this->yotpoSmsConfig->getStoreName($storeId)
+                    )
                 );
                 $this->stopEnvironmentEmulation();
                 continue;
             }
             $this->yotpoSmsBumpLogger->info(
-                'Process subscription for the store : ' . $this->yotpoSmsConfig->getStoreName($storeId),
+                __(
+                    'Process subscription for Magento Store ID: %1, Name: %2',
+                    $storeId,
+                    $this->yotpoSmsConfig->getStoreName($storeId)
+                ),
                 []
             );
 
@@ -121,12 +129,20 @@ class Processor extends AbstractJobs
             $this->yotpoSmsBumpLogger->info('Subscription forms sync - success', []);
             $this->addMessage(
                 'success',
-                'Subscription forms are synced successfully for Store - ' . $storeCode
+                __(
+                    'Subscription forms are synced successfully for Magento Store ID: %1, Name: %2',
+                    $storeId,
+                    $storeCode
+                )
             );
         } else {
             $this->addMessage(
                 'error',
-                'Store not found at API for Store - ' . $storeCode
+                __(
+                    'Store not found at API for Magento Store ID: %1, Name: %2',
+                    $storeId,
+                    $storeCode
+                )
             );
         }
     }
