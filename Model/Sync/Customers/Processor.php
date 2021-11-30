@@ -91,11 +91,26 @@ class Processor extends Main
         foreach ($this->config->getAllStoreIds(false) as $storeId) {
             $this->emulateFrontendArea($storeId);
             if (!$this->config->isCustomerSyncActive()) {
-                $this->yotpoSmsBumpLogger->info('Customer sync is disabled for store : ' . $storeId, []);
+                $this->yotpoSmsBumpLogger->info(
+                    __(
+                        'Customer sync is disabled for Magento Store ID: %1, Name: %2',
+                        $storeId,
+                        $this->config->getStoreName($storeId)
+                    ),
+                    []
+                );
                 $this->stopEnvironmentEmulation();
                 continue;
             }
-            $this->yotpoSmsBumpLogger->info('Process customers for store : ' . $storeId, []);
+            $this->yotpoSmsBumpLogger->info(
+                __(
+                    'Process customers for Magento Store ID: %1, Name: %2',
+                    $storeId,
+                    $this->config->getStoreName($storeId)
+                ),
+                []
+            );
+
             $this->processEntities();
             $this->stopEnvironmentEmulation();
         }
@@ -125,7 +140,14 @@ class Processor extends Main
                 $this->stopEnvironmentEmulation();
                 continue;
             }
-            $this->yotpoSmsBumpLogger->info('Process customer for the store : ' . $storeId, []);
+            $this->yotpoSmsBumpLogger->info(
+                __(
+                    'Process customer for the Magento Store ID: %1, Name: %2',
+                    $storeId,
+                    $this->config->getStoreName($storeId)
+                ),
+                []
+            );
             $this->processSingleEntity($customer, $customerAddress);
             $this->stopEnvironmentEmulation();
         }
@@ -163,10 +185,7 @@ class Processor extends Main
                     if ($this->config->canUpdateCustomAttribute($yotpoTableData['response_code'])) {
                         $yotpoTableData['sync_status'] = 1;
                     }
-                    $yotpoTableFinalData[] = $yotpoTableData;
-                }
-                if ($yotpoTableFinalData) {
-                    $this->insertOrUpdateYotpoTableData($yotpoTableFinalData);
+                    $this->insertOrUpdateYotpoTableData($yotpoTableData);
                 }
             }
         } catch (NoSuchEntityException | LocalizedException $e) {
@@ -240,14 +259,18 @@ class Processor extends Main
                     if ($this->config->canUpdateCustomAttribute($yotpoTableData['response_code'])) {
                         $yotpoTableData['sync_status'] = 1;
                     }
-                    $yotpoTableFinalData[] = $yotpoTableData;
+                    $this->insertOrUpdateYotpoTableData($yotpoTableData);
                 }
             }
         } else {
-            $this->yotpoSmsBumpLogger->info('Empty data - Magento Store ID - ' . $storeId, []);
-        }
-        if ($yotpoTableFinalData) {
-            $this->insertOrUpdateYotpoTableData($yotpoTableFinalData);
+            $this->yotpoSmsBumpLogger->info(
+                __(
+                    'Empty data - Magento Store ID: %1, Name: %2',
+                    $storeId,
+                    $this->config->getStoreName($storeId)
+                ),
+                []
+            );
         }
         $this->updateLastSyncDate($currentTime);
     }
@@ -272,6 +295,7 @@ class Processor extends Main
         }
 
         $this->yotpoSmsBumpLogger->info('Customers sync - data prepared', []);
+
         if (!$customerData) {
             $this->yotpoSmsBumpLogger->info('Customers sync - no new data to sync', []);
             return [];

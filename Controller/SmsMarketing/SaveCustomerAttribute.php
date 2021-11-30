@@ -85,23 +85,28 @@ class SaveCustomerAttribute implements ActionInterface
         $checkoutStep = $this->request->getParam('checkoutStep');
         $customerId = $this->checkoutSession->getQuote()->getCustomerId();
         $customerEmail = $this->request->getParam('customerEmail');
-        if ($customerId) {
-            $customer = $this->customerRepositoryInterface->getById($customerId);
-            $customer->setCustomAttribute(
-                \Yotpo\SmsBump\Model\Config::YOTPO_CUSTOM_ATTRIBUTE_SMS_MARKETING,
-                $acceptsSmsMarketing
-            );
-            /** @phpstan-ignore-next-line */
-            $this->request->setParam('_checkout_in_progress', 1);
-            $this->customerRepositoryInterface->save($customer);
-        } else {
-            $this->checkoutSession->setYotpoSmsMarketing($acceptsSmsMarketing);
-            $this->checkoutSession->setYotpoCustomerEmail($customerEmail);
+        try {
+            if ($customerId) {
+                $customer = $this->customerRepositoryInterface->getById($customerId);
+                $customer->setCustomAttribute(
+                    \Yotpo\SmsBump\Model\Config::YOTPO_CUSTOM_ATTRIBUTE_SMS_MARKETING,
+                    $acceptsSmsMarketing
+                );
+                /** @phpstan-ignore-next-line */
+                $this->request->setParam('_checkout_in_progress', 1);
+                $this->customerRepositoryInterface->save($customer);
+            } else {
+                $this->checkoutSession->setYotpoSmsMarketing($acceptsSmsMarketing);
+                $this->checkoutSession->setYotpoCustomerEmail($customerEmail);
+            }
+            if ($checkoutStep == 'payment') {
+                $this->checkoutProcessor->process($this->checkoutSession->getQuote());
+            }
+            $status = 'success';
+        } catch (InputException | LocalizedException | InputMismatchException | NoSuchEntityException $e) {
+            $status = $e->getMessage();
         }
-        if ($checkoutStep == 'payment') {
-            $this->checkoutProcessor->process($this->checkoutSession->getQuote());
-        }
-
-        return $this->jsonResultFactory->create();
+        $result = $this->jsonResultFactory->create();
+        return $result->setData(['status' => $status]);
     }
 }

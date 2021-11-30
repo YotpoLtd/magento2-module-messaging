@@ -87,6 +87,7 @@ class Processor
         if ($isCheckoutSyncEnabled) {
             $newCheckoutData = $this->checkoutData->prepareData($quote);
             $this->yotpoSmsBumpLogger->info('Checkout sync - data prepared', []);
+
             if (!$newCheckoutData) {
                 $this->yotpoSmsBumpLogger->info('Checkout sync - no new data to sync', []);
                 return;
