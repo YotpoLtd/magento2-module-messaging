@@ -33,7 +33,22 @@ define(
             },
 
             getPrivacyPolicyUrl: function () {
-                return window.BASE_URL + window.checkoutConfig.yotpo.sms_marketing.privacy_policy_url;
+                var baseURL = window.BASE_URL;
+                var privacyPolicyUrl = window.checkoutConfig.yotpo.sms_marketing.privacy_policy_url;
+                if (this.isValidUrl(privacyPolicyUrl)){
+                    if (privacyPolicyUrl.indexOf('http://') === 0 || privacyPolicyUrl.indexOf('https://') === 0) {
+                        return privacyPolicyUrl;
+                    } else {
+                        return '//' + privacyPolicyUrl;
+                    }
+                } else {
+                    return baseURL + privacyPolicyUrl;
+                }
+            },
+
+            isValidUrl: function (inputUrl) {
+                const matchPattern = /^(?:https?:\/\/)?(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/gm;
+                return matchPattern.test(inputUrl);
             },
 
             getCheckoutStep: function () {

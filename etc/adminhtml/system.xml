@@ -58,7 +58,7 @@
                     </field>
                     <field id="privacy_policy_link" translate="label" type="text" sortOrder="290" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Privacy policy link</label>
-                        <comment>The link to the privacy policy will appear right after the consent message</comment>
+                        <comment><![CDATA[The link to the privacy policy will appear right after the consent message. If it is the cms page within the same site, please add the url key only. For eg: "privacy-policy"]]></comment>
                     </field>
                 </group>
                 <group id="sms_subscription" translate="label" type="text" sortOrder="300" showInDefault="1" showInWebsite="1" showInStore="1">
