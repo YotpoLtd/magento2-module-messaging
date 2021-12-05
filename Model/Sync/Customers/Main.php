@@ -4,15 +4,15 @@ namespace Yotpo\SmsBump\Model\Sync\Customers;
 
 use Magento\Framework\DataObject;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Yotpo\Core\Model\AbstractJobs;
 use Magento\Store\Model\App\Emulation as AppEmulation;
 use Magento\Framework\App\ResourceConnection;
 use Yotpo\SmsBump\Model\Config;
+use Yotpo\Core\Model\Sync\Customers\Processor as CoreCustomersProcessor;
 
 /**
  * Class Main - Manage Customers sync
  */
-class Main extends AbstractJobs
+class Main extends CoreCustomersProcessor
 {
     /**
      * @var Config
