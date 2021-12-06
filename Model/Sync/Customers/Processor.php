@@ -123,6 +123,11 @@ class Processor extends Main
                     ),
                     []
                 );
+                if ($this->isCommandLineSync) {
+                    // phpcs:ignore
+                    echo 'Customer sync is disabled for store - ' .
+                        $this->config->getStoreName($storeId) . PHP_EOL;
+                }
                 $this->stopEnvironmentEmulation();
                 continue;
             }
@@ -335,11 +340,8 @@ class Processor extends Main
         $response = $this->yotpoSyncMain->sync('PATCH', $url, $customerData);
         if ($response->getData('is_success')) {
             $this->yotpoSmsBumpLogger->info('Customers sync - success', []);
-            if ($this->isCommandLineSync) {
-                // phpcs:ignore
-                echo 'Customer process completed for customerId - ' . $customerId . PHP_EOL;
-            }
-        } elseif ($this->isCommandLineSync && $response->getData('status') == '401') {
+        }
+        if ($this->isCommandLineSync) {
             // phpcs:ignore
             echo 'Customer process completed for customerId - ' . $customerId . PHP_EOL;
         }
