@@ -139,7 +139,7 @@ class Processor extends Main
                 ),
                 []
             );
-            $retryCustomerIds = isset($retryCustomers[$storeId]) ? $retryCustomers[$storeId] : [];
+            $retryCustomerIds = $retryCustomers[$storeId] ?? $retryCustomers;
             $this->processEntities($retryCustomerIds);
             $this->stopEnvironmentEmulation();
         }
