@@ -39,15 +39,19 @@ define(
                     if (privacyPolicyUrl.indexOf('http://') === 0 || privacyPolicyUrl.indexOf('https://') === 0) {
                         return privacyPolicyUrl;
                     } else {
-                        return '//' + privacyPolicyUrl;
+                        return '//' + privacyPolicyUrl.replace(/^\/+/g, '');
                     }
                 } else {
-                    return baseURL + privacyPolicyUrl;
+                    if (privacyPolicyUrl.indexOf("http://") == 0 || privacyPolicyUrl.indexOf("https://") == 0) {
+                        return privacyPolicyUrl.replace(/^\/+/g, '');
+                    } else {
+                        return baseURL + privacyPolicyUrl.replace(/^\/+/g, '');
+                    }
                 }
             },
 
             isValidUrl: function (inputUrl) {
-                const matchPattern = /^(?:https?:\/\/)?(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/gm;
+                const matchPattern = /([(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*))*?([a-zA-Z0-9][.](?!html)[a-zA-z])/g;
                 return matchPattern.test(inputUrl);
             },
 
