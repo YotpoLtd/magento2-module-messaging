@@ -193,12 +193,13 @@ class Data
                 $this->storeManager->getStore()->getBaseUrl() . self::ABANDONED_URL . $quoteToken
         ];
         $dataBeforeChange = $this->getDataBeforeChange();
-        $newData = json_encode($data);
-
+        $newData = $data;
+        unset($newData['checkout_date']);
+        $newData = json_encode($newData);
         if ($dataBeforeChange == $newData) {
             return [];//no change in quote data
         }
-        $this->checkoutSession->setYotpoCheckoutData(json_encode($data));
+        $this->checkoutSession->setYotpoCheckoutData($newData);
         return ['checkout' => $data];
     }
 

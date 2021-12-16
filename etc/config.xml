@@ -20,6 +20,7 @@
                     <signup_consent_message>By checking this box I consent to receive recurring automated marketing by text message through an automatic telephone dialing system. Consent is not a condition to purchase. Message and Data rate apply. Opt-Out by texting STOP.</signup_consent_message>
                     <attr_customer>yotpo_accepts_sms_marketing</attr_customer>
                     <privacy_policy_text>View Privacy Policy</privacy_policy_text>
+                    <privacy_policy_link>privacy-policy</privacy_policy_link>
                 </marketing_settings>
             </widget_settings>
         </yotpo_core>
