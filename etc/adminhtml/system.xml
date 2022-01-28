@@ -120,6 +120,10 @@
                         <label>Enable sync:</label>
                         <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     </field>
+                    <field id="allowed_urls" translate="label" type="text" sortOrder="695" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Allowed URLs</label>
+                        <comment><![CDATA[Add any customized checkout url, if checkout sync is not triggering as expected. E.g, /save-shipping, /shipping-address]]></comment>
+                    </field>
                     <field id="download_logs" translate="label" type="label" sortOrder="700" showInDefault="1" showInWebsite="1" showInStore="1">
                         <frontend_model>Yotpo\SmsBump\Block\Adminhtml\System\Config\Form\Field\Link\DownloadCheckoutLogs</frontend_model>
                     </field>

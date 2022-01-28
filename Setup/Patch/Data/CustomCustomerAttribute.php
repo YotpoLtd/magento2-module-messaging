@@ -2,6 +2,7 @@
 
 namespace Yotpo\SmsBump\Setup\Patch\Data;
 
+use Yotpo\Core\Model\CustomCustomerAttribute as CoreCustomCustomerAttribute;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
@@ -12,7 +13,7 @@ use Magento\Customer\Model\Customer;
  * Class CustomCustomerAttribute
  * Add custom attribute to customer
  */
-class CustomCustomerAttribute implements DataPatchInterface
+class CustomCustomerAttribute extends CoreCustomCustomerAttribute implements DataPatchInterface
 {
     /**
      * @var ModuleDataSetupInterface
