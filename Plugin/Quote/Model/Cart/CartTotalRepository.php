@@ -81,6 +81,12 @@ class CartTotalRepository
     ) {
         $currentUrl = $this->urlInterface->getCurrentUrl();
         $allowedUrls = ['/shipping-information','/totals'];
+        $allowedUrlsFromConfig = $this->yotpoSmsConfig->getConfig('checkout_sync_allowed_urls');
+        if ($allowedUrlsFromConfig) {
+            $allowedUrlConfigValues = explode(',', $allowedUrlsFromConfig);
+            $allowedUrlConfigValues = array_map('trim', $allowedUrlConfigValues);
+            $allowedUrls = array_merge($allowedUrls, $allowedUrlConfigValues);
+        }
         $disAllowedUrls = ['/totals-information', '/checkout/cart/'];
         $urlFound = false;
         foreach ($disAllowedUrls as $disAllowedUrl) {

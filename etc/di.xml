@@ -89,4 +89,10 @@
             <argument name="customersProcessor" xsi:type="object">Yotpo\SmsBump\Model\Sync\Customers\Processor</argument>
         </arguments>
     </type>
+    <type name="Yotpo\Core\Model\System\Message\CustomSystemMessage">
+        <arguments>
+            <argument name="customCustomerAttribute" xsi:type="object">Yotpo\SmsBump\Setup\Patch\Data\CustomCustomerAttribute</argument>
+            <argument name="customCustomerAttributeSmsMarketing" xsi:type="object">Yotpo\SmsBump\Setup\Patch\Data\CustomCustomerAttributeSmsMarketing</argument>
+        </arguments>
+    </type>
 </config>
