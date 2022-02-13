@@ -83,7 +83,7 @@ class Processor
      */
     public function process(Quote $quote)
     {
-        $isCheckoutSyncEnabled = $this->yotpoSmsConfig->getConfig('checkout_sync_active');
+        $isCheckoutSyncEnabled = $this->yotpoSmsConfig->isCheckoutSyncActive();
         if ($isCheckoutSyncEnabled) {
             $newCheckoutData = $this->checkoutData->prepareData($quote);
             $this->yotpoSmsBumpLogger->info('Checkout sync - data prepared', []);
