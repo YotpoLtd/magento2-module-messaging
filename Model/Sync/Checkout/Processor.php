@@ -8,7 +8,7 @@ use Magento\Quote\Model\Quote;
 use Yotpo\SmsBump\Model\Sync\Main;
 use Yotpo\SmsBump\Model\Config;
 use Yotpo\SmsBump\Model\Sync\Checkout\Data as CheckoutData;
-use Yotpo\SmsBump\Model\Sync\Checkout\Logger as YotpoSmsBumpLogger;
+use Yotpo\SmsBump\Model\Sync\Checkout\Logger as YotpoLogger;
 use Yotpo\SmsBump\Helper\Data as SMSHelper;
 use Yotpo\Core\Model\Sync\Catalog\Processor as CatalogProcessor;
 
@@ -36,7 +36,7 @@ class Processor
     /**
      * @var Logger
      */
-    protected $yotpoSmsBumpLogger;
+    protected $yotpoLogger;
 
     /**
      * @var SMSHelper
@@ -53,7 +53,7 @@ class Processor
      * @param Main $yotpoSyncMain
      * @param Config $yotpoSmsConfig
      * @param Data $checkoutData
-     * @param Logger $yotpoSmsBumpLogger
+     * @param Logger $yotpoLogger
      * @param SMSHelper $smsHelper
      * @param CatalogProcessor $catalogProcessor
      */
@@ -61,14 +61,14 @@ class Processor
         Main $yotpoSyncMain,
         Config $yotpoSmsConfig,
         CheckoutData $checkoutData,
-        YotpoSmsBumpLogger $yotpoSmsBumpLogger,
+        YotpoLogger $yotpoLogger,
         SMSHelper $smsHelper,
         CatalogProcessor $catalogProcessor
     ) {
         $this->yotpoSyncMain = $yotpoSyncMain;
         $this->yotpoSmsConfig = $yotpoSmsConfig;
         $this->checkoutData = $checkoutData;
-        $this->yotpoSmsBumpLogger = $yotpoSmsBumpLogger;
+        $this->yotpoLogger = $yotpoLogger;
         $this->smsHelper = $smsHelper;
         $this->catalogProcessor = $catalogProcessor;
     }
@@ -86,10 +86,10 @@ class Processor
         $isCheckoutSyncEnabled = $this->yotpoSmsConfig->isCheckoutSyncActive();
         if ($isCheckoutSyncEnabled) {
             $newCheckoutData = $this->checkoutData->prepareData($quote);
-            $this->yotpoSmsBumpLogger->info('Checkout sync - data prepared', []);
+            $this->yotpoLogger->info('Checkout sync - data prepared', []);
 
             if (!$newCheckoutData) {
-                $this->yotpoSmsBumpLogger->info('Checkout sync - no new data to sync', []);
+                $this->yotpoLogger->info('Checkout sync - no new data to sync', []);
                 return;
             }
             $productIds = $this->checkoutData->getLineItemsIds();
@@ -98,7 +98,7 @@ class Processor
                 $storeId = $quote->getStoreId();
                 $isProductSyncSuccess = $this->catalogProcessor->syncProducts($productIds, $visibleItems, $storeId);
                 if (!$isProductSyncSuccess) {
-                    $this->yotpoSmsBumpLogger->info('Products sync failed in checkout', []);
+                    $this->yotpoLogger->info('Products sync failed in checkout', []);
                     return;
                 }
             }
@@ -107,9 +107,9 @@ class Processor
             $sync = $this->yotpoSyncMain->sync('PATCH', $url, $newCheckoutData);
             if ($sync->getData('is_success')) {
                 $this->updateLastSyncDate();
-                $this->yotpoSmsBumpLogger->info('Checkout sync - success', []);
+                $this->yotpoLogger->info('Checkout sync - success', []);
             } else {
-                $this->yotpoSmsBumpLogger->info('Checkout sync - failed', []);
+                $this->yotpoLogger->info('Checkout sync - failed', []);
             }
         }
     }
