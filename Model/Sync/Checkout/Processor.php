@@ -94,7 +94,9 @@ class Processor
             }
             $productIds = $this->checkoutData->getLineItemsIds();
             if ($productIds) {
-                $isProductSyncSuccess = $this->checkAndSyncProducts($productIds, $quote);
+                $visibleItems = $quote->getAllVisibleItems();
+                $storeId = $quote->getStoreId();
+                $isProductSyncSuccess = $this->catalogProcessor->syncProducts($productIds, $visibleItems, $storeId);
                 if (!$isProductSyncSuccess) {
                     $this->yotpoSmsBumpLogger->info('Products sync failed in checkout', []);
                     return;
@@ -110,22 +112,6 @@ class Processor
                 $this->yotpoSmsBumpLogger->info('Checkout sync - failed', []);
             }
         }
-    }
-
-    /**
-     * Check and sync the products if not already synced
-     *
-     * @param array <mixed> $productIds
-     * @param Quote $quote
-     * @return bool
-     */
-    public function checkAndSyncProducts($productIds, $quote)
-    {
-        $unSyncedProductIds = $this->checkoutData->getUnSyncedProductIds($productIds, $quote);
-        if ($unSyncedProductIds) {
-            return $this->catalogProcessor->processCheckoutProducts($unSyncedProductIds);
-        }
-        return true;
     }
 
     /**
