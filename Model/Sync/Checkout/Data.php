@@ -18,7 +18,6 @@ use Yotpo\SmsBump\Helper\Data as SMSHelper;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Store\Model\StoreManagerInterface;
 use Yotpo\SmsBump\Model\Sync\Data\AbstractData;
-use Yotpo\Core\Model\Sync\Data\Main;
 use Yotpo\SmsBump\Model\AbandonedCart\Data as AbandonedCartData;
 
 /**
@@ -51,11 +50,6 @@ class Data
      * @var AbstractData
      */
     protected $abstractData;
-
-    /**
-     * @var Main
-     */
-    protected $coreMain;
 
     /**
      * @var Logger
@@ -99,7 +93,6 @@ class Data
      * @param StoreManagerInterface $storeManager
      * @param CouponCollectionFactory $couponCollectionFactory
      * @param AbstractData $abstractData
-     * @param Main $coreMain
      * @param Logger $checkoutLogger
      * @param ProductRepository $productRepository
      * @param AddressRepositoryInterface $customerAddressRepository
@@ -111,7 +104,6 @@ class Data
         StoreManagerInterface $storeManager,
         CouponCollectionFactory $couponCollectionFactory,
         AbstractData $abstractData,
-        Main $coreMain,
         Logger $checkoutLogger,
         ProductRepository $productRepository,
         AddressRepositoryInterface $customerAddressRepository,
@@ -122,7 +114,6 @@ class Data
         $this->storeManager = $storeManager;
         $this->couponCollectionFactory = $couponCollectionFactory;
         $this->abstractData = $abstractData;
-        $this->coreMain = $coreMain;
         $this->checkoutLogger = $checkoutLogger;
         $this->productRepository = $productRepository;
         $this->customerAddressRepository = $customerAddressRepository;
@@ -305,22 +296,6 @@ class Data
     public function getLineItemsIds()
     {
         return $this->lineItemsProductIds;
-    }
-
-    /**
-     * Get the productIds of the products that are not synced
-     *
-     * @param array <mixed> $productIds
-     * @param  Quote $quote
-     * @return mixed
-     */
-    public function getUnSyncedProductIds($productIds, $quote)
-    {
-        $quoteItems = [];
-        foreach ($quote->getAllVisibleItems() as $quoteItem) {
-            $quoteItems[$quoteItem->getProduct()->getId()] = $quoteItem->getProduct();
-        }
-        return $this->coreMain->getProductIds($productIds, $quote->getStoreId(), $quoteItems);
     }
 
     /**
