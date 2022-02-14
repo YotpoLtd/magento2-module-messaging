@@ -26,7 +26,7 @@ class Processor
     /**
      * @var Config
      */
-    protected $yotpoSmsConfig;
+    protected $yotpoConfig;
 
     /**
      * @var Data
@@ -66,7 +66,7 @@ class Processor
         CatalogProcessor $catalogProcessor
     ) {
         $this->yotpoSyncMain = $yotpoSyncMain;
-        $this->yotpoSmsConfig = $yotpoSmsConfig;
+        $this->yotpoConfig = $yotpoSmsConfig;
         $this->checkoutData = $checkoutData;
         $this->yotpoLogger = $yotpoLogger;
         $this->smsHelper = $smsHelper;
@@ -83,7 +83,7 @@ class Processor
      */
     public function process(Quote $quote)
     {
-        $isCheckoutSyncEnabled = $this->yotpoSmsConfig->isCheckoutSyncActive();
+        $isCheckoutSyncEnabled = $this->yotpoConfig->isCheckoutSyncActive();
         if ($isCheckoutSyncEnabled) {
             $newCheckoutData = $this->checkoutData->prepareData($quote);
             $this->yotpoLogger->info('Checkout sync - data prepared', []);
@@ -102,7 +102,7 @@ class Processor
                     return;
                 }
             }
-            $url = $this->yotpoSmsConfig->getEndpoint('checkout');
+            $url = $this->yotpoConfig->getEndpoint('checkout');
             $newCheckoutData['entityLog'] = 'checkout';
             $sync = $this->yotpoSyncMain->sync('PATCH', $url, $newCheckoutData);
             if ($sync->getData('is_success')) {
@@ -122,6 +122,6 @@ class Processor
      */
     public function updateLastSyncDate()
     {
-        $this->yotpoSmsConfig->saveConfig('checkout_last_sync_time', date('Y-m-d H:i:s'));
+        $this->yotpoConfig->saveConfig('checkout_last_sync_time', date('Y-m-d H:i:s'));
     }
 }
