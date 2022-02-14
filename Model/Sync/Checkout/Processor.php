@@ -11,6 +11,7 @@ use Yotpo\SmsBump\Model\Sync\Checkout\Data as CheckoutData;
 use Yotpo\SmsBump\Model\Sync\Checkout\Logger as YotpoSmsBumpLogger;
 use Yotpo\SmsBump\Helper\Data as SMSHelper;
 use Yotpo\Core\Model\Sync\Catalog\Processor as CatalogProcessor;
+use Yotpo\Core\Model\Sync\Data\Main as SyncDataMain;
 
 /**
  * Class Processor - Process checkout sync
@@ -22,6 +23,11 @@ class Processor
      * @var Main
      */
     protected $yotpoSyncMain;
+
+    /**
+     * @var SyncDataMain
+     */
+    protected $syncDataMain;
 
     /**
      * @var Config
@@ -121,7 +127,7 @@ class Processor
      */
     public function checkAndSyncProducts($productIds, $quote)
     {
-        $unSyncedProductIds = $this->checkoutData->getUnSyncedProductIds($productIds, $quote);
+        $unSyncedProductIds = $this->syncDataMain->getUnSyncedProductIds($productIds, $quote);
         if ($unSyncedProductIds) {
             return $this->catalogProcessor->processCheckoutProducts($unSyncedProductIds);
         }

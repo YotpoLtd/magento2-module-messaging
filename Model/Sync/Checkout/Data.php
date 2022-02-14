@@ -308,22 +308,6 @@ class Data
     }
 
     /**
-     * Get the productIds of the products that are not synced
-     *
-     * @param array <mixed> $productIds
-     * @param  Quote $quote
-     * @return mixed
-     */
-    public function getUnSyncedProductIds($productIds, $quote)
-    {
-        $quoteItems = [];
-        foreach ($quote->getAllVisibleItems() as $quoteItem) {
-            $quoteItems[$quoteItem->getProduct()->getId()] = $quoteItem->getProduct();
-        }
-        return $this->coreMain->getProductIds($productIds, $quote->getStoreId(), $quoteItems);
-    }
-
-    /**
      * @param Item $quoteItem
      * @return ProductInterface|Product|mixed|null
      * @throws NoSuchEntityException
