@@ -11,6 +11,7 @@ use Yotpo\SmsBump\Model\Sync\Checkout\Data as CheckoutData;
 use Yotpo\SmsBump\Model\Sync\Checkout\Logger as YotpoLogger;
 use Yotpo\SmsBump\Helper\Data as SMSHelper;
 use Yotpo\Core\Model\Sync\Catalog\Processor as CatalogProcessor;
+use Yotpo\Core\Http\YotpoRetry;
 
 /**
  * Class Processor - Process checkout sync
@@ -49,6 +50,11 @@ class Processor
     protected $catalogProcessor;
 
     /**
+     * @var YotpoRetry
+     */
+    protected $yotpoRetry;
+
+    /**
      * Processor constructor.
      * @param Main $yotpoSyncMain
      * @param Config $yotpoSmsConfig
@@ -56,6 +62,7 @@ class Processor
      * @param Logger $yotpoLogger
      * @param SMSHelper $smsHelper
      * @param CatalogProcessor $catalogProcessor
+     * @param YotpoRetry $yotpoRetry
      */
     public function __construct(
         Main $yotpoSyncMain,
@@ -63,7 +70,8 @@ class Processor
         CheckoutData $checkoutData,
         YotpoLogger $yotpoLogger,
         SMSHelper $smsHelper,
-        CatalogProcessor $catalogProcessor
+        CatalogProcessor $catalogProcessor,
+        YotpoRetry $yotpoRetry
     ) {
         $this->yotpoSyncMain = $yotpoSyncMain;
         $this->yotpoConfig = $yotpoSmsConfig;
@@ -71,6 +79,7 @@ class Processor
         $this->yotpoLogger = $yotpoLogger;
         $this->smsHelper = $smsHelper;
         $this->catalogProcessor = $catalogProcessor;
+        $this->yotpoRetry = $yotpoRetry;
     }
 
     /**
@@ -102,10 +111,13 @@ class Processor
                     return;
                 }
             }
+
+            $method = 'PATCH';
             $url = $this->yotpoConfig->getEndpoint('checkout');
             $newCheckoutData['entityLog'] = 'checkout';
-            $sync = $this->yotpoSyncMain->sync('PATCH', $url, $newCheckoutData);
-            if ($sync->getData('is_success')) {
+            $syncFunction = call_user_func_array('syncCheckout', array($method, $url, $newCheckoutData));
+            $syncResult = $this->yotpoRetry->retryRequest($syncFunction);
+            if ($syncResult->getData('is_success')) {
                 $this->updateLastSyncDate();
                 $this->yotpoLogger->info('Checkout sync - success', []);
             } else {
@@ -123,5 +135,16 @@ class Processor
     public function updateLastSyncDate()
     {
         $this->yotpoConfig->saveConfig('checkout_last_sync_time', date('Y-m-d H:i:s'));
+    }
+
+    /**
+     * @param string $method
+     * @param string $url
+     * @param array $newCheckoutData
+     * @return \Magento\Framework\DataObject
+     */
+    private function syncCheckout($method, $url, array $newCheckoutData)
+    {
+        return $this->yotpoSyncMain->sync($method, $url, $newCheckoutData);
     }
 }
