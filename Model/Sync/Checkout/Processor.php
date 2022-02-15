@@ -82,6 +82,11 @@ class Processor
         $this->yotpoRetry = $yotpoRetry;
     }
 
+    const IS_SUCCESS_MESSAGE_KEY = 'is_success';
+    const STATUS_CODE_KEY = 'status';
+    const RESPONSE_KEY = 'response';
+    const REASON_KEY = 'reason';
+
     /**
      * Process checkout sync
      *
@@ -107,7 +112,7 @@ class Processor
                 $storeId = $quote->getStoreId();
                 $isProductSyncSuccess = $this->catalogProcessor->syncProducts($productIds, $visibleItems, $storeId);
                 if (!$isProductSyncSuccess) {
-                    $this->yotpoLogger->info('Products sync failed in checkout', []);
+                    $this->yotpoLogger->error('Products sync failed in checkout', []);
                     return;
                 }
             }
@@ -117,11 +122,11 @@ class Processor
             $newCheckoutData['entityLog'] = 'checkout';
             $syncFunction = call_user_func_array('syncCheckout', array($method, $url, $newCheckoutData));
             $syncResult = $this->yotpoRetry->retryRequest($syncFunction);
-            if ($syncResult->getData('is_success')) {
+            if ($syncResult->getData(self::IS_SUCCESS_MESSAGE_KEY)) {
                 $this->updateLastSyncDate();
                 $this->yotpoLogger->info('Checkout sync - success', []);
             } else {
-                $this->yotpoLogger->info('Checkout sync - failed', []);
+                $this->logCheckoutSyncFailure($syncResult);
             }
         }
     }
@@ -146,5 +151,18 @@ class Processor
     private function syncCheckout($method, $url, array $newCheckoutData)
     {
         return $this->yotpoSyncMain->sync($method, $url, $newCheckoutData);
+    }
+
+    /**
+     * @param $syncResult
+     * @return void
+     */
+    private function logCheckoutSyncFailure($syncResult)
+    {
+        $statusCode = $syncResult->getData(self::STATUS_CODE_KEY);
+        $failureReason = $syncResult->getData(self::REASON_KEY);
+        $innerResponse = $syncResult->getData(self::RESPONSE_KEY);
+
+        $this->yotpoLogger->error('Checkout sync - failed', [$statusCode, $failureReason, $innerResponse]);
     }
 }
