@@ -48,6 +48,12 @@ class Processor
      */
     protected $catalogProcessor;
 
+    const PATCH_METHOD_STRING = 'PATCH';
+    const IS_SUCCESS_MESSAGE_KEY = 'is_success';
+    const STATUS_CODE_KEY = 'status';
+    const RESPONSE_KEY = 'response';
+    const REASON_KEY = 'reason';
+
     /**
      * Processor constructor.
      * @param Main $yotpoSyncMain
@@ -100,14 +106,16 @@ class Processor
                     return;
                 }
             }
+
+            $method = self::PATCH_METHOD_STRING;
             $url = $this->yotpoSmsConfig->getEndpoint('checkout');
             $newCheckoutData['entityLog'] = 'checkout';
-            $sync = $this->yotpoSyncMain->sync('PATCH', $url, $newCheckoutData);
-            if ($sync->getData('is_success')) {
+            $syncCheckoutResult = $this->yotpoSyncMain->sync($method, $url, $newCheckoutData);
+            if ($syncCheckoutResult->getData(self::IS_SUCCESS_MESSAGE_KEY)) {
                 $this->updateLastSyncDate();
                 $this->yotpoChekoutLogger->info('Checkout sync - success', []);
             } else {
-                $this->yotpoChekoutLogger->info('Checkout sync - failed', []);
+                $this->logCheckoutSyncFailure($syncCheckoutResult);
             }
         }
     }
@@ -137,5 +145,18 @@ class Processor
     public function updateLastSyncDate()
     {
         $this->yotpoSmsConfig->saveConfig('checkout_last_sync_time', date('Y-m-d H:i:s'));
+    }
+
+    /**
+     * @param $syncResult
+     * @return void
+     */
+    private function logCheckoutSyncFailure($syncResult)
+    {
+        $statusCode = $syncResult->getData(self::STATUS_CODE_KEY);
+        $failureReason = $syncResult->getData(self::REASON_KEY);
+        $innerResponse = $syncResult->getData(self::RESPONSE_KEY);
+
+        $this->yotpoChekoutLogger->info('Checkout sync - failed', [$statusCode, $failureReason, $innerResponse]);
     }
 }
