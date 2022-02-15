@@ -321,6 +321,17 @@ class Processor extends Main
      */
     public function syncCustomer($customer, $realTImeSync = false, $customerAddress = null)
     {
+        $storeId = $this->config->getStoreId();
+        if ($this->config->syncResetInProgress($storeId, 'customer')) {
+            $this->yotpoSmsBumpLogger->info(
+                __(
+                    'Customer sync is skipped because sync reset is in progress - Magento Store ID: %1, Name: %2',
+                    $storeId,
+                    $this->config->getStoreName($storeId)
+                )
+            );
+            return [];
+        }
         $customerId = $customer->getId();
         if (isset($this->customerDataPrepared[$customerId])) {
             $customerData = $this->customerDataPrepared[$customerId];
