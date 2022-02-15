@@ -37,7 +37,7 @@ define([
              * Trigger checkout sync
              */
             triggerCheckoutSync: function () {
-                var linkUrl = url.build('yotposmsbump/checkoutsync/billingaddressupdate');
+                var linkUrl = url.build('yotpo/checkoutsync/billingaddressupdate');
                 fullScreenLoader.startLoader();
                 $.ajax({
                     url: linkUrl,

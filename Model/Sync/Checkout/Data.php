@@ -25,7 +25,7 @@ use Yotpo\SmsBump\Model\AbandonedCart\Data as AbandonedCartData;
  */
 class Data
 {
-    const ABANDONED_URL = 'yotposmsbump/abandonedcart/loadcart/yotpoQuoteToken/';
+    const ABANDONED_URL = 'yotpo/abandonedcart/loadcart/yotpoQuoteToken/';
     /**
      * @var SMSHelper
      */
