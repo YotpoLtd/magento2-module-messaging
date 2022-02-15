@@ -95,4 +95,9 @@
             <argument name="customCustomerAttributeSmsMarketing" xsi:type="object">Yotpo\SmsBump\Setup\Patch\Data\CustomCustomerAttributeSmsMarketing</argument>
         </arguments>
     </type>
+    <type name="Yotpo\Core\Model\Sync\Reset">
+        <arguments>
+            <argument name="customersReset" xsi:type="object">Yotpo\SmsBump\Model\Sync\Reset\Customers</argument>
+        </arguments>
+    </type>
 </config>
