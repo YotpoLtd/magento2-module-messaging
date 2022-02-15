@@ -69,9 +69,9 @@ class LoginPost
         }
 
         $customRedirectionUrl = $this->url->getUrl('checkout', ['_fragment' => 'payment']);
-        $yotpoToken = $this->abandonedCartData->getYotpoToken();
-        if ($yotpoToken) {
-            $isValidQuote = $this->abandonedCartData->setQuoteData($yotpoToken);
+        $yotpoQuoteToken = $this->abandonedCartData->getYotpoQuoteToken();
+        if ($yotpoQuoteToken) {
+            $this->abandonedCartData->setQuoteData($yotpoQuoteToken);
             $resultRedirect = $this->resultRedirectFactory->create();
             $resultRedirect->setUrl($customRedirectionUrl);
             return $resultRedirect;

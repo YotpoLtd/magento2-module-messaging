@@ -68,7 +68,7 @@ class DefaultConfigProviderPlugin
      */
     public function afterGetConfig($subject, $result)
     {
-        $yotpoAbandonedQuoteId = $this->yotpoSmsBumpSession->getData('yotpoToken');
+        $yotpoAbandonedQuoteId = $this->yotpoSmsBumpSession->getData('yotpoQuoteToken');
         $quote = $this->checkoutSession->getQuote();
         $email = $quote->getShippingAddress()->getEmail();
         if (!$email) {

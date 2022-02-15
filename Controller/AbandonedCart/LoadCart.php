@@ -157,7 +157,7 @@ class LoadCart implements ActionInterface
         /** @phpstan-ignore-next-line */
         if ($abandonedQuote->getCustomerId()) {
             $this->yotpoSmsBumpSession->start();
-            $this->yotpoSmsBumpSession->setData('yotpoToken', $abandonedCartQuoteId);
+            $this->yotpoSmsBumpSession->setData('yotpoQuoteToken', $abandonedCartQuoteId);
             return $this->resultRedirectFactory->create()->setPath('customer/account/login');
         }
 
