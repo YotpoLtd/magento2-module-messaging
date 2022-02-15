@@ -17,7 +17,6 @@ use Magento\Framework\App\Response\RedirectInterface;
 use Magento\Framework\Controller\Result\RedirectFactory;
 use Magento\Quote\Model\QuoteRepository;
 use Magento\Checkout\Model\Type\Onepage;
-use Magento\Framework\View\Result\PageFactory;
 use Magento\Checkout\Model\DefaultConfigProvider;
 use Yotpo\SmsBump\Model\Session as YotpoSmsBumpSession;
 use Yotpo\SmsBump\Model\AbandonedCart\Data as AbandonedCartData;
@@ -48,11 +47,6 @@ class LoadCart implements ActionInterface
      * @var RedirectFactory
      */
     protected $resultRedirectFactory;
-
-    /**
-     * @var PageFactory
-     */
-    protected $resultPageFactory;
 
     /**
      * @var Onepage
@@ -97,7 +91,6 @@ class LoadCart implements ActionInterface
      * @param QuoteRepository $quoteRepository
      * @param RedirectFactory $resultRedirectFactory
      * @param Onepage $onepage
-     * @param PageFactory $resultPageFactory
      * @param CustomerSession $customerSession
      * @param DefaultConfigProvider $defaultConfigProvider
      * @param YotpoSmsBumpSession $yotpoSmsBumpSession
@@ -111,7 +104,6 @@ class LoadCart implements ActionInterface
         QuoteRepository $quoteRepository,
         RedirectFactory $resultRedirectFactory,
         Onepage $onepage,
-        PageFactory $resultPageFactory,
         CustomerSession $customerSession,
         DefaultConfigProvider $defaultConfigProvider,
         YotpoSmsBumpSession $yotpoSmsBumpSession,
@@ -124,7 +116,6 @@ class LoadCart implements ActionInterface
         $this->quoteRepository = $quoteRepository;
         $this->resultRedirectFactory = $resultRedirectFactory;
         $this->onepage = $onepage;
-        $this->resultPageFactory = $resultPageFactory;
         $this->customerSession = $customerSession;
         $this->defaultConfigProvider = $defaultConfigProvider;
         $this->yotpoSmsBumpSession = $yotpoSmsBumpSession;
@@ -175,7 +166,8 @@ class LoadCart implements ActionInterface
             return $this->resultRedirectFactory->create()->setPath('/');
         }
 
-        $resultPage = $this->resultPageFactory->create();
+        $this->checkoutSession->setQuoteId($abandonedCartQuoteId);
+        $resultPage = $this->resultRedirectFactory->create()->setPath('checkout/cart');
         $resultPage->setHeader('Yotpo-Abandoned-Cart', 'true');
         return $resultPage;
     }
