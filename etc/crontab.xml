@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
-    <group id="yotpo">
-        <job name="yotpo_cron_smsbumb_customers_sync" instance="Yotpo\SmsBump\Model\Sync\Customers\Cron\CustomersSync" method="processCustomers">
-            <config_path>crontab/default/jobs/yotpo_cron_smsbumb_customers_sync/schedule/cron_expr</config_path>
+    <group id="yotpo_smsbump_customers_sync">
+        <job name="yotpo_cron_smsbump_customers_sync" instance="Yotpo\SmsBump\Model\Sync\Customers\Cron\CustomersSync" method="processCustomers">
+            <config_path>crontab/yotpo_smsbump_customers_sync/jobs/yotpo_cron_smsbump_customers_sync/schedule/cron_expr</config_path>
         </job>
     </group>
 </config>

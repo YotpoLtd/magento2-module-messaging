@@ -25,15 +25,15 @@
             </widget_settings>
         </yotpo_core>
         <crontab>
-            <yotpo>
+            <yotpo_smsbump_customers_sync>
                 <jobs>
-                    <yotpo_cron_smsbumb_customers_sync>
+                    <yotpo_cron_smsbump_customers_sync>
                         <schedule>
                             <cron_expr>*/2 * * * *</cron_expr>
                         </schedule>
-                    </yotpo_cron_smsbumb_customers_sync>
+                    </yotpo_cron_smsbump_customers_sync>
                 </jobs>
-            </yotpo>
+            </yotpo_smsbump_customers_sync>
         </crontab>
     </default>
 </config>
