@@ -18,7 +18,7 @@ class Storage extends \Magento\Framework\Session\Storage
     public function __construct(
         Share $configShare,
         StoreManagerInterface $storeManager,
-        $namespace = 'yotposmsbump',
+        $namespace = 'yotpo_messaging',
         array $data = []
     ) {
         if ($configShare->isWebsiteScope()) {

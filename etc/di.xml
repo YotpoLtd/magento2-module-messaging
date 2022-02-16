@@ -70,7 +70,7 @@
     </type>
     <virtualType name="Yotpo\SmsBump\Model\Session\Storage" type="Magento\Framework\Session\Storage">
         <arguments>
-            <argument name="namespace" xsi:type="string">yotposmsbump</argument>
+            <argument name="namespace" xsi:type="string">yotpo_messaging</argument>
         </arguments>
     </virtualType>
     <type name="Yotpo\SmsBump\Model\Session">
