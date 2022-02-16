@@ -49,7 +49,7 @@ class YotpoCustomersSyncRepository implements YotpoCustomersSyncRepositoryInterf
     {
         $customers = $this->yotpoCustomersSyncCollectionFactory->create();
         $customers
-            ->addFieldToFilter('response_code', ['gteq' => \Yotpo\Core\Model\Config::RETRY_RESPONSE_CODE_FROM])
+            ->addFieldToFilter('response_code', ['gteq' => \Yotpo\Core\Model\Config::BAD_REQUEST_RESPONSE_CODE])
             ->addFieldToSelect(['customer_id', 'store_id']);
         return $customers->getItems();
     }
