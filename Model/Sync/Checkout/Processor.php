@@ -5,6 +5,7 @@ namespace Yotpo\SmsBump\Model\Sync\Checkout;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Quote\Model\Quote;
+use Yotpo\Core\Model\AbstractJobs;
 use Yotpo\SmsBump\Model\Sync\Main;
 use Yotpo\SmsBump\Model\Config;
 use Yotpo\SmsBump\Model\Sync\Checkout\Data as CheckoutData;
@@ -15,7 +16,7 @@ use Yotpo\Core\Model\Sync\Catalog\Processor as CatalogProcessor;
 /**
  * Class Processor - Process checkout sync
  */
-class Processor
+class Processor extends AbstractJobs
 {
 
     /**
@@ -112,6 +113,7 @@ class Processor
             $method = self::PATCH_METHOD_STRING;
             $url = $this->yotpoSmsConfig->getEndpoint('checkout');
             $newCheckoutData['entityLog'] = 'checkout';
+            $this->emulateFrontendArea($storeId);
             $syncCheckoutResult = $this->yotpoSyncMain->sync($method, $url, $newCheckoutData, 'api', true);
             if ($syncCheckoutResult->getData(self::IS_SUCCESS_MESSAGE_KEY)) {
                 $this->updateLastSyncDate();
