@@ -22,7 +22,7 @@ class CustomersScheduler extends ConfigValue
      * Path of the cron string
      */
     // phpcs:ignore
-    const CRON_STRING_PATH = 'crontab/yotpo_smsbump_customers_sync/jobs/yotpo_cron_smsbump_customers_sync/schedule/cron_expr';
+    const CRON_STRING_PATH = 'crontab/yotpo_messaging_customers_sync/jobs/yotpo_cron_smsbump_customers_sync/schedule/cron_expr';
 
     /**
      * @var ValueFactory

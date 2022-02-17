@@ -25,7 +25,7 @@
             </widget_settings>
         </yotpo_core>
         <crontab>
-            <yotpo_smsbump_customers_sync>
+            <yotpo_messaging_customers_sync>
                 <jobs>
                     <yotpo_cron_smsbump_customers_sync>
                         <schedule>
@@ -33,7 +33,7 @@
                         </schedule>
                     </yotpo_cron_smsbump_customers_sync>
                 </jobs>
-            </yotpo_smsbump_customers_sync>
+            </yotpo_messaging_customers_sync>
         </crontab>
     </default>
 </config>
