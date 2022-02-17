@@ -60,7 +60,7 @@ define(
             },
 
             updateCustomerAttribute: function () {
-                var linkUrl = url.build('yotposmsbump/smsmarketing/savecustomerattribute');
+                var linkUrl = url.build('yotpo_messaging/smsmarketing/savecustomerattribute');
                 var customDiv = $('#yotpo_accepts_sms_marketing');
                 var isCheckboxSelected = false;
                 if (customDiv) {

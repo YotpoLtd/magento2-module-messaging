@@ -75,9 +75,9 @@ class Data extends AbstractJobs
     /**
      * @return mixed|null
      */
-    public function getYotpoToken()
+    public function getYotpoQuoteToken()
     {
-        return $this->yotpoSmsBumpSession->getData('yotpoToken');
+        return $this->yotpoSmsBumpSession->getData('yotpoQuoteToken');
     }
 
     /**
@@ -104,10 +104,10 @@ class Data extends AbstractJobs
     }
 
     /**
-     * @param string $yotpoToken
+     * @param string $quoteToken
      * @return string
      */
-    public function getQuoteId($yotpoToken)
+    public function getQuoteId($quoteToken)
     {
         $connection = $this->resourceConnection->getConnection();
         $query = $connection->select()->from(
@@ -115,7 +115,7 @@ class Data extends AbstractJobs
             'e.quote_id'
         )->where(
             'quote_token = ?',
-            $yotpoToken
+            $quoteToken
         );
         return $connection->fetchOne($query);
     }
