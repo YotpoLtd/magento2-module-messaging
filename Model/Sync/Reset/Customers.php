@@ -10,6 +10,7 @@ class Customers extends \Yotpo\Core\Model\Sync\Reset\Customers
     /**
      * @param int $storeId
      * @return void
+     * @throws \Zend_Db_Statement_Exception
      */
     public function resetSync($storeId)
     {
@@ -17,7 +18,6 @@ class Customers extends \Yotpo\Core\Model\Sync\Reset\Customers
         $this->setCronJobCodes(self::CRONJOB_CODES);
         parent::resetSync($storeId);
         $tableName = $this->resourceConnection->getTableName(self::CUSTOMERS_SYNC_TABLE);
-        $totalCount = $this->getTotalCount($tableName, $storeId);
-        $this->deleteFromTable($tableName, $totalCount, $storeId);
+        $this->deleteAllFromTable($tableName, $storeId);
     }
 }

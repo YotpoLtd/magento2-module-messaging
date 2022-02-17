@@ -2,6 +2,7 @@
 
 namespace Yotpo\SmsBump\Model\Sync\Checkout;
 
+use Magento\Framework\DataObject;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Quote\Model\Quote;
@@ -148,7 +149,7 @@ class Processor
     }
 
     /**
-     * @param $syncResult
+     * @param DataObject $syncResult
      * @return void
      */
     private function logCheckoutSyncFailure($syncResult)
