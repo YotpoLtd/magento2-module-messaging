@@ -233,13 +233,23 @@ class Processor extends Main
         $customerCollectionWithYotpoSyncDataQuery =
             $this->createCustomerCollectionWithYotpoSyncDataQuery($storeId, $retryCustomerIds, $customerAccountShared, $websiteId, $batchSize);
         $magentoCustomers = [];
-        foreach ($customerCollectionWithYotpoSyncDataQuery->getItems() as $customerWithYotpoSyncData) {
-            $id = $customerWithYotpoSyncData->getId();
-            $id = explode('-', $id);
-            $customerWithYotpoSyncData->setId($id[0]);
-            $magentoCustomers[$customerWithYotpoSyncData->getId()] = $customerWithYotpoSyncData;
-        }
-        if ($magentoCustomers) {
+        $customerCollectionWithYotpoSyncData = $customerCollectionWithYotpoSyncDataQuery->getItems();
+        if (!count($customerCollectionWithYotpoSyncData)) {
+            $this->yotpoSmsBumpLogger->info(
+                __(
+                    'No customers that should be synced found - Magento Store ID: %1, Name: %2',
+                    $storeId,
+                    $this->config->getStoreName($storeId)
+                )
+            );
+        } else {
+            foreach ($customerCollectionWithYotpoSyncData as $customerWithYotpoSyncData) {
+                $id = $customerWithYotpoSyncData->getId();
+                $id = explode('-', $id);
+                $customerWithYotpoSyncData->setId($id[0]);
+                $magentoCustomers[$customerWithYotpoSyncData->getId()] = $customerWithYotpoSyncData;
+            }
+
             foreach ($magentoCustomers as $magentoCustomer) {
                 $magentoCustomerId = $magentoCustomer->getId();
                 $customerSyncData = [];
@@ -260,15 +270,6 @@ class Processor extends Main
                     $this->insertOrUpdateCustomerSyncData($customerSyncData);
                 }
             }
-        } else {
-            $this->yotpoSmsBumpLogger->info(
-                __(
-                    'Empty data - Magento Store ID: %1, Name: %2',
-                    $storeId,
-                    $this->config->getStoreName($storeId)
-                ),
-                []
-            );
         }
         $this->updateLastSyncDate($currentTime);
     }
