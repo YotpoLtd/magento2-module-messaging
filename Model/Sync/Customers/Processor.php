@@ -232,8 +232,8 @@ class Processor extends Main
 
         $customerCollectionWithYotpoSyncDataQuery =
             $this->createCustomerCollectionWithYotpoSyncDataQuery($storeId, $retryCustomerIds, $customerAccountShared, $websiteId, $batchSize);
-        $magentoCustomers = [];
         $customerCollectionWithYotpoSyncData = $customerCollectionWithYotpoSyncDataQuery->getItems();
+
         if (!count($customerCollectionWithYotpoSyncData)) {
             $this->yotpoSmsBumpLogger->info(
                 __(
@@ -244,25 +244,21 @@ class Processor extends Main
             );
         } else {
             foreach ($customerCollectionWithYotpoSyncData as $customerWithYotpoSyncData) {
-                $id = $customerWithYotpoSyncData->getId();
-                $id = explode('-', $id);
-                $customerWithYotpoSyncData->setId($id[0]);
-                $magentoCustomers[$customerWithYotpoSyncData->getId()] = $customerWithYotpoSyncData;
-            }
-
-            foreach ($magentoCustomers as $magentoCustomer) {
-                $magentoCustomerId = $magentoCustomer->getId();
+                $customerId = explode('-', $customerWithYotpoSyncData->getId())[0];
+                $customerWithYotpoSyncData->setId($customerId);
                 $customerSyncData = [];
-                $responseCode = $magentoCustomer['response_code'];
+                $responseCode = $customerWithYotpoSyncData['response_code'];
+
                 if (!$this->config->canResync($responseCode, [], $this->isCommandLineSync)) {
                     $this->yotpoSmsBumpLogger->info('Customer sync cannot be done for customerId: '
-                        . $magentoCustomerId . ', due to response code: ' . $responseCode, []);
+                        . $customerId . ', due to response code: ' . $responseCode, []);
                     continue;
                 }
-                /** @var Customer $magentoCustomer */
-                $response = $this->syncCustomer($magentoCustomer);
+
+                /** @var Customer $customerWithYotpoSyncData */
+                $response = $this->syncCustomer($customerWithYotpoSyncData);
                 if ($response) {
-                    $customerSyncData = $this->createCustomerSyncData($response, $magentoCustomerId);
+                    $customerSyncData = $this->createCustomerSyncData($response, $customerId);
                 }
 
                 if ($customerSyncData) {
@@ -271,6 +267,7 @@ class Processor extends Main
                 }
             }
         }
+
         $this->updateLastSyncDate($currentTime);
     }
 
