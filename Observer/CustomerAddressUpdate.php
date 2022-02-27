@@ -74,6 +74,7 @@ class CustomerAddressUpdate implements ObserverInterface
         $isCustomerSyncActive = $this->yotpoSmsConfig->isCustomerSyncActive(
             $customerAddress->getCustomer()->getStoreId()
         );
+
         if (!$this->request->getParam('custSync')) {
             $this->customersProcessor->resetCustomerSyncStatus(
                 $customer->getId(),
@@ -81,13 +82,12 @@ class CustomerAddressUpdate implements ObserverInterface
                 0,
                 true
             );
-            if ($isCustomerSyncActive) {
-                $customerAddress = $customerAddress->getDefaultBilling() ? $customerAddress : null;
-                if ($customerAddress) {
+
+            $customerAddress = $customerAddress->getDefaultBilling() ? $customerAddress : null;
+            if ($isCustomerSyncActive && $customerAddress) {
                     /** @phpstan-ignore-next-line */
                     $this->request->setParam('custSync', true);//to avoid multiple calls for a single save.
                     $this->customersProcessor->processCustomer($customer, $customerAddress);
-                }
             }
         }
     }
