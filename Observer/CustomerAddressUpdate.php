@@ -64,31 +64,30 @@ class CustomerAddressUpdate implements ObserverInterface
      */
     public function execute(Observer $observer)
     {
-        $address = $observer->getCustomerAddress();
-        if ($this->session->getDelegateGuestCustomer() && !$address->getDefaultBilling()) {
+        $customerAddress = $observer->getCustomerAddress();
+        if ($this->session->getDelegateGuestCustomer() && !$customerAddress->getDefaultBilling()) {
             return;
         } else {
             $this->session->unsDelegateGuestCustomer();
         }
-        $customer = $address->getCustomer();
-        $syncActive = $this->yotpoSmsConfig->isCustomerSyncActive(
-            $address->getCustomer()->getStoreId(),
-            ScopeInterface::SCOPE_STORE
+        $customer = $customerAddress->getCustomer();
+        $isCustomerSyncActive = $this->yotpoSmsConfig->isCustomerSyncActive(
+            $customerAddress->getCustomer()->getStoreId()
         );
+
         if (!$this->request->getParam('custSync')) {
-            $this->customersProcessor->forceUpdateCustomerSyncStatus(
-                [$customer->getId()],
+            $this->customersProcessor->resetCustomerSyncStatus(
+                $customer->getId(),
                 $customer->getStoreId(),
                 0,
                 true
             );
-            if ($syncActive) {
-                $customerAddress = $address->getDefaultBilling() ? $address : null;
-                if ($customerAddress) {
+
+            $customerAddress = $customerAddress->getDefaultBilling() ? $customerAddress : null;
+            if ($isCustomerSyncActive && $customerAddress) {
                     /** @phpstan-ignore-next-line */
                     $this->request->setParam('custSync', true);//to avoid multiple calls for a single save.
                     $this->customersProcessor->processCustomer($customer, $customerAddress);
-                }
             }
         }
     }

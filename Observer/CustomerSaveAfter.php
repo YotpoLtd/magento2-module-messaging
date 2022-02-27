@@ -77,20 +77,20 @@ class CustomerSaveAfter implements ObserverInterface
             return;
         }
         $customer = $observer->getEvent()->getCustomer();
-        $syncActive = $this->yotpoSmsConfig->isCustomerSyncActive();
+        $isCustomerSyncActive = $this->yotpoSmsConfig->isCustomerSyncActive();
         if (!$this->request->getParam('custSync')) {
-            $this->customersProcessor->forceUpdateCustomerSyncStatus(
-                [$customer->getId()],
+            $this->customersProcessor->resetCustomerSyncStatus(
+                $customer->getId(),
                 $customer->getStoreId(),
                 0,
                 true
             );
-            if ($syncActive) {
+            if ($isCustomerSyncActive) {
                 $isActive = 1;
                 /** @phpstan-ignore-next-line */
                 $this->request->setParam('custSync', true);//to avoid multiple calls for a single save.
-                $checkoutInProgress = $this->request->getParam('_checkout_in_progress', null);
-                if ($checkoutInProgress === null) {
+                $isCheckoutInProgress = $this->request->getParam('_checkout_in_progress', null);
+                if ($isCheckoutInProgress === null) {
                     if ($this->appState->getAreaCode() == 'frontend') {
                         /** @var Customer $customer */
                         $customer->setData('is_active_yotpo', $isActive);
