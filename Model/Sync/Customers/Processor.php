@@ -195,7 +195,6 @@ class Processor extends Main
     {
         $magentoCustomerId = $magentoCustomer->getId();
         $currentTime = date('Y-m-d H:i:s');
-        $yotpoTableFinalData = [];
         $customerToUpdate[] = $magentoCustomerId;
         $storeId = $this->config->getStoreId();
         try {
