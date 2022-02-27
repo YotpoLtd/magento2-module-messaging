@@ -331,7 +331,7 @@ class Processor extends Main
      */
     public function resetCustomerSyncStatus($customerId, $customerStoreId, $value, $updateAllStores = false)
     {
-        $dataToInsertOrUpdate = [];
+        $customersSyncData = [];
         $storeIds = [];
         if (!$updateAllStores && !$this->config->isCustomerAccountShared()) {
             $storeIds[] = $customerStoreId;
@@ -343,16 +343,15 @@ class Processor extends Main
         }
 
         foreach ($storeIds as $storeId) {
-            $data = [
+            $customersSyncData[] = [
                 'customer_id' => $customerId,
                 'store_id' => $storeId,
                 'sync_status' => $value,
                 'response_code' => '200'
             ];
-            $dataToInsertOrUpdate[] = $data;
         }
 
-        $this->insertOnDuplicate('yotpo_customers_sync', $dataToInsertOrUpdate);
+        $this->insertOnDuplicate('yotpo_customers_sync', $customersSyncData);
     }
 
     /**
