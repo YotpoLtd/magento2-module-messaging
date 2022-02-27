@@ -77,7 +77,7 @@ class CustomerAddressUpdate implements ObserverInterface
         );
         if (!$this->request->getParam('custSync')) {
             $this->customersProcessor->resetCustomerSyncStatus(
-                [$customer->getId()],
+                $customer->getId(),
                 $customer->getStoreId(),
                 0,
                 true

@@ -193,10 +193,9 @@ class Processor extends Main
     {
         $magentoCustomerId = $magentoCustomer->getId();
         $currentTime = date('Y-m-d H:i:s');
-        $customerToUpdate[] = $magentoCustomerId;
         $storeId = $this->config->getStoreId();
         try {
-            $this->resetCustomerSyncStatus($customerToUpdate, $storeId, 0);
+            $this->resetCustomerSyncStatus($magentoCustomerId, $storeId, 0);
 
             $response = $this->syncCustomer($magentoCustomer, true, $customerAddress);
             if ($response) {
@@ -323,14 +322,14 @@ class Processor extends Main
     }
 
     /**
-     * @param array <mixed> $customerIds
+     * @param string $customerId
      * @param int $customerStoreId
      * @param int $value
      * @param boolean $updateAllStores
      * @return void
      * @throws NoSuchEntityException|LocalizedException
      */
-    public function resetCustomerSyncStatus($customerIds, $customerStoreId, $value, $updateAllStores = false)
+    public function resetCustomerSyncStatus($customerId, $customerStoreId, $value, $updateAllStores = false)
     {
         $dataToInsertOrUpdate = [];
         $storeIds = [];
@@ -347,17 +346,16 @@ class Processor extends Main
             $storeIds[] = $customerStoreId;
         }
 
-        foreach ($customerIds as $customerId) {
-            foreach ($storeIds as $storeId) {
-                $data = [
-                    'customer_id' => $customerId,
-                    'store_id' => $storeId,
-                    'sync_status' => $value,
-                    'response_code' => '200'
-                ];
-                $dataToInsertOrUpdate[] = $data;
-            }
+        foreach ($storeIds as $storeId) {
+            $data = [
+                'customer_id' => $customerId,
+                'store_id' => $storeId,
+                'sync_status' => $value,
+                'response_code' => '200'
+            ];
+            $dataToInsertOrUpdate[] = $data;
         }
+
         $this->insertOnDuplicate('yotpo_customers_sync', $dataToInsertOrUpdate);
     }
 
