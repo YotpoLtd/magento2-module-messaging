@@ -196,7 +196,7 @@ class Processor extends Main
         $customerToUpdate[] = $magentoCustomerId;
         $storeId = $this->config->getStoreId();
         try {
-            $this->forceUpdateCustomerSyncStatus($customerToUpdate, $storeId, 0);
+            $this->resetCustomerSyncStatus($customerToUpdate, $storeId, 0);
 
             $response = $this->syncCustomer($magentoCustomer, true, $customerAddress);
             if ($response) {
@@ -330,7 +330,7 @@ class Processor extends Main
      * @return void
      * @throws NoSuchEntityException|LocalizedException
      */
-    public function forceUpdateCustomerSyncStatus($customerIds, $customerStoreId, $value, $updateAllStores = false)
+    public function resetCustomerSyncStatus($customerIds, $customerStoreId, $value, $updateAllStores = false)
     {
         $dataToInsertOrUpdate = [];
         $storeIds = [];

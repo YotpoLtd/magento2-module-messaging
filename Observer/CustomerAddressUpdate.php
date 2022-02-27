@@ -76,7 +76,7 @@ class CustomerAddressUpdate implements ObserverInterface
             ScopeInterface::SCOPE_STORE
         );
         if (!$this->request->getParam('custSync')) {
-            $this->customersProcessor->forceUpdateCustomerSyncStatus(
+            $this->customersProcessor->resetCustomerSyncStatus(
                 [$customer->getId()],
                 $customer->getStoreId(),
                 0,
