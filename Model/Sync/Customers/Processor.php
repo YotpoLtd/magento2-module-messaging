@@ -202,18 +202,18 @@ class Processor extends Main
 
             $response = $this->syncCustomer($magentoCustomer, true, $customerAddress);
             if ($response) {
-                $yotpoTableData = $this->prepareYotpoTableData($response, $magentoCustomerId);
+                $customerSyncData = $this->createCustomerSyncData($response, $magentoCustomerId);
                 $this->updateLastSyncDate($currentTime);
                 $this->yotpoSmsBumpLogger->info('Last sync date updated for customer : '
                     . $magentoCustomerId, []);
-                if ($yotpoTableData) {
-                    $yotpoTableData['store_id'] = $this->config->getStoreId();
-                    $yotpoTableData['synced_to_yotpo'] = $currentTime;
-                    $yotpoTableData['sync_status'] = 0;
-                    if ($this->config->canUpdateCustomAttribute($yotpoTableData['response_code'])) {
-                        $yotpoTableData['sync_status'] = 1;
+                if ($customerSyncData) {
+                    $customerSyncData['store_id'] = $this->config->getStoreId();
+                    $customerSyncData['synced_to_yotpo'] = $currentTime;
+                    $customerSyncData['sync_status'] = 0;
+                    if ($this->config->canUpdateCustomAttribute($customerSyncData['response_code'])) {
+                        $customerSyncData['sync_status'] = 1;
                     }
-                    $this->insertOrUpdateYotpoTableData($yotpoTableData);
+                    $this->insertOrUpdateCustomerSyncData($customerSyncData);
                 }
             }
         } catch (NoSuchEntityException | LocalizedException $e) {
@@ -270,7 +270,7 @@ class Processor extends Main
         if ($magentoCustomers) {
             foreach ($magentoCustomers as $magentoCustomer) {
                 $magentoCustomerId = $magentoCustomer->getId();
-                $yotpoTableData = [];
+                $customerSyncData = [];
                 $responseCode = $magentoCustomer['response_code'];
                 if (!$this->config->canResync($responseCode, [], $this->isCommandLineSync)) {
                     $this->yotpoSmsBumpLogger->info('Customer sync cannot be done for customerId: '
@@ -280,17 +280,17 @@ class Processor extends Main
                 /** @var Customer $magentoCustomer */
                 $response = $this->syncCustomer($magentoCustomer);
                 if ($response) {
-                    $yotpoTableData = $this->prepareYotpoTableData($response, $magentoCustomerId);
+                    $customerSyncData = $this->createCustomerSyncData($response, $magentoCustomerId);
                 }
 
-                if ($yotpoTableData) {
-                    $yotpoTableData['store_id'] = $this->config->getStoreId();
-                    $yotpoTableData['synced_to_yotpo'] = $currentTime;
-                    $yotpoTableData['sync_status'] = 0;
-                    if ($this->config->canUpdateCustomAttribute($yotpoTableData['response_code'])) {
-                        $yotpoTableData['sync_status'] = 1;
+                if ($customerSyncData) {
+                    $customerSyncData['store_id'] = $this->config->getStoreId();
+                    $customerSyncData['synced_to_yotpo'] = $currentTime;
+                    $customerSyncData['sync_status'] = 0;
+                    if ($this->config->canUpdateCustomAttribute($customerSyncData['response_code'])) {
+                        $customerSyncData['sync_status'] = 1;
                     }
-                    $this->insertOrUpdateYotpoTableData($yotpoTableData);
+                    $this->insertOrUpdateCustomerSyncData($customerSyncData);
                 }
             }
         } else {

@@ -79,31 +79,31 @@ class Main extends CoreCustomersProcessor
      * @param int|null $magentoCustomerId
      * @return array<mixed>
      */
-    public function prepareYotpoTableData($response, $magentoCustomerId)
+    public function createCustomerSyncData($response, $magentoCustomerId)
     {
-        $data = [
+        $customerSyncData = [
             /** @phpstan-ignore-next-line */
             'response_code' =>  $response->getData('status'),
             'customer_id'   =>  $magentoCustomerId
         ];
-        return $data;
+        return $customerSyncData;
     }
 
     /**
      * Inserts or updates custom table data
      *
-     * @param array<mixed> $data
+     * @param array<mixed> $customerSyncData
      * @return void
      */
-    public function insertOrUpdateYotpoTableData($data)
+    public function insertOrUpdateCustomerSyncData($customerSyncData)
     {
         $finalData = [];
         $finalData[] = [
-            'customer_id'        =>  $data['customer_id'],
-            'synced_to_yotpo'    =>  $data['synced_to_yotpo'],
-            'response_code'      =>  $data['response_code'],
-            'store_id'           =>  $data['store_id'],
-            'sync_status'        =>  $data['sync_status']
+            'customer_id'        =>  $customerSyncData['customer_id'],
+            'synced_to_yotpo'    =>  $customerSyncData['synced_to_yotpo'],
+            'response_code'      =>  $customerSyncData['response_code'],
+            'store_id'           =>  $customerSyncData['store_id'],
+            'sync_status'        =>  $customerSyncData['sync_status']
         ];
         $this->insertOnDuplicate('yotpo_customers_sync', $finalData);
     }
