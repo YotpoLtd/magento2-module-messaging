@@ -351,7 +351,7 @@ class Processor extends Main
             ];
         }
 
-        $this->insertOnDuplicate('yotpo_customers_sync', $customersSyncData);
+        $this->insertOrUpdateCustomerSyncData($customersSyncData);
     }
 
     /**
