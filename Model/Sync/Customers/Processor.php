@@ -205,12 +205,7 @@ class Processor extends Main
                 $this->yotpoSmsBumpLogger->info('Last sync date updated for customer : '
                     . $magentoCustomerId, []);
                 if ($customerSyncData) {
-                    $customerSyncData['store_id'] = $this->config->getStoreId();
-                    $customerSyncData['synced_to_yotpo'] = $currentTime;
-                    $customerSyncData['sync_status'] = 0;
-                    if ($this->config->canUpdateCustomAttribute($customerSyncData['response_code'])) {
-                        $customerSyncData['sync_status'] = 1;
-                    }
+                    $customerSyncData = $this->updateCustomerSyncData($customerSyncData, $currentTime);
                     $this->insertOrUpdateCustomerSyncData($customerSyncData);
                 }
             }
@@ -282,12 +277,7 @@ class Processor extends Main
                 }
 
                 if ($customerSyncData) {
-                    $customerSyncData['store_id'] = $this->config->getStoreId();
-                    $customerSyncData['synced_to_yotpo'] = $currentTime;
-                    $customerSyncData['sync_status'] = 0;
-                    if ($this->config->canUpdateCustomAttribute($customerSyncData['response_code'])) {
-                        $customerSyncData['sync_status'] = 1;
-                    }
+                    $customerSyncData = $this->updateCustomerSyncData($customerSyncData, $currentTime);
                     $this->insertOrUpdateCustomerSyncData($customerSyncData);
                 }
             }
@@ -417,5 +407,22 @@ class Processor extends Main
             // phpcs:ignore
             echo 'No customer data to process.' . PHP_EOL;
         }
+    }
+
+    /**
+     * @param array $customerSyncData
+     * @param string $currentTime
+     * @return array
+     */
+    private function updateCustomerSyncData(array $customerSyncData, $currentTime)
+    {
+        $customerSyncData['store_id'] = $this->config->getStoreId();
+        $customerSyncData['synced_to_yotpo'] = $currentTime;
+        $customerSyncData['sync_status'] = 0;
+        if ($this->config->canUpdateCustomAttribute($customerSyncData['response_code'])) {
+            $customerSyncData['sync_status'] = 1;
+        }
+
+        return $customerSyncData;
     }
 }
