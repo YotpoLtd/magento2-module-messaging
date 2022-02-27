@@ -32,7 +32,7 @@ class CustomerSaveAfter implements ObserverInterface
     /**
      * @var RequestInterface
      */
-    protected $request;
+    protected $requestInterface;
 
     /**
      * @var Session
@@ -48,20 +48,20 @@ class CustomerSaveAfter implements ObserverInterface
      * CustomerSaveAfter constructor.
      * @param CustomersProcessor $customersProcessor
      * @param Config $yotpoSmsConfig
-     * @param RequestInterface $request
+     * @param RequestInterface $requestInterface
      * @param Session $session
      * @param AppState $appState
      */
     public function __construct(
         CustomersProcessor $customersProcessor,
         Config $yotpoSmsConfig,
-        RequestInterface $request,
+        RequestInterface $requestInterface,
         Session $session,
         AppState $appState
     ) {
         $this->customersProcessor = $customersProcessor;
         $this->yotpoSmsConfig = $yotpoSmsConfig;
-        $this->request = $request;
+        $this->requestInterface = $requestInterface;
         $this->session = $session;
         $this->appState = $appState;
     }
@@ -78,7 +78,7 @@ class CustomerSaveAfter implements ObserverInterface
         }
         $customer = $observer->getEvent()->getCustomer();
         $isCustomerSyncActive = $this->yotpoSmsConfig->isCustomerSyncActive();
-        if (!$this->request->getParam('custSync')) {
+        if (!$this->requestInterface->getParam('custSync')) {
             $this->customersProcessor->resetCustomerSyncStatus(
                 $customer->getId(),
                 $customer->getStoreId(),
@@ -88,15 +88,15 @@ class CustomerSaveAfter implements ObserverInterface
             if ($isCustomerSyncActive) {
                 $isActive = 1;
                 /** @phpstan-ignore-next-line */
-                $this->request->setParam('custSync', true);//to avoid multiple calls for a single save.
-                $isCheckoutInProgress = $this->request->getParam('_checkout_in_progress', null);
+                $this->requestInterface->setParam('custSync', true);//to avoid multiple calls for a single save.
+                $isCheckoutInProgress = $this->requestInterface->getParam('_checkout_in_progress', null);
                 if ($isCheckoutInProgress === null) {
                     if ($this->appState->getAreaCode() == 'frontend') {
                         /** @var Customer $customer */
                         $customer->setData('is_active_yotpo', $isActive);
                     } else {
                         /** @phpstan-ignore-next-line */
-                        $postValue = $this->request->getPost('customer', null);
+                        $postValue = $this->requestInterface->getPost('customer', null);
                         if (is_array($postValue)
                             && isset($postValue['is_active'])) {
                             $isActive = $postValue['is_active'];
