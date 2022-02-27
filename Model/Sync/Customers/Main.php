@@ -79,11 +79,11 @@ class Main extends CoreCustomersProcessor
      * @param int|null $magentoCustomerId
      * @return array<mixed>
      */
-    public function createCustomerSyncData($response, $magentoCustomerId)
+    public function createCustomerSyncData($customerSyncToYotpoResponse, $magentoCustomerId)
     {
         $customerSyncData = [
             /** @phpstan-ignore-next-line */
-            'response_code' =>  $response->getData('status'),
+            'response_code' =>  $customerSyncToYotpoResponse->getData('status'),
             'customer_id'   =>  $magentoCustomerId
         ];
         return $customerSyncData;

@@ -197,9 +197,9 @@ class Processor extends Main
         try {
             $this->resetCustomerSyncStatus($magentoCustomerId, $storeId, 0);
 
-            $response = $this->syncCustomer($magentoCustomer, true, $customerAddress);
-            if ($response) {
-                $customerSyncData = $this->createCustomerSyncData($response, $magentoCustomerId);
+            $customerSyncToYotpoResponse = $this->syncCustomer($magentoCustomer, true, $customerAddress);
+            if ($customerSyncToYotpoResponse) {
+                $customerSyncData = $this->createCustomerSyncData($customerSyncToYotpoResponse, $magentoCustomerId);
                 $this->updateLastSyncDate($currentTime);
                 $this->yotpoSmsBumpLogger->info('Last sync date updated for customer : '
                     . $magentoCustomerId, []);
