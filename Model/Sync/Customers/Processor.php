@@ -230,35 +230,14 @@ class Processor extends Main
         $batchSize = $this->config->getConfig('customers_sync_limit');
         $customerAccountShared = $this->config->isCustomerAccountShared();
 
-        $customerCollection = $this->customerFactory->create();
-        $customerCollection->getSelect()->joinLeft(
-            ['yotpo_customers_sync' => $customerCollection->getTable('yotpo_customers_sync')],
-            'e.entity_id = yotpo_customers_sync.customer_id
-            AND (yotpo_customers_sync.store_id is null OR yotpo_customers_sync.store_id = \''.$storeId.'\')',
-            [
-                'store_id',
-                'sync_status',
-                'response_code'
-            ]
-        );
-        if (!$retryCustomerIds) {
-            $customerCollection->getSelect()
-                ->where('yotpo_customers_sync.sync_status is null OR  yotpo_customers_sync.sync_status = ?', 0);
-        } else {
-            $customerCollection->getSelect()
-                ->where('e.entity_id in (?)', $retryCustomerIds);
-        }
-        if (!$customerAccountShared) {
-            $customerCollection->getSelect()
-                ->where('e.website_id = ? ', $websiteId);
-        }
-        $customerCollection->getSelect()->limit($batchSize);
+        $customerCollectionWithYotpoSyncDataQuery =
+            $this->createCustomerCollectionWithYotpoSyncDataQuery($storeId, $retryCustomerIds, $customerAccountShared, $websiteId, $batchSize);
         $magentoCustomers = [];
-        foreach ($customerCollection->getItems() as $customer) {
-            $id = $customer->getId();
+        foreach ($customerCollectionWithYotpoSyncDataQuery->getItems() as $customerWithYotpoSyncData) {
+            $id = $customerWithYotpoSyncData->getId();
             $id = explode('-', $id);
-            $customer->setId($id[0]);
-            $magentoCustomers[$customer->getId()] = $customer;
+            $customerWithYotpoSyncData->setId($id[0]);
+            $magentoCustomers[$customerWithYotpoSyncData->getId()] = $customerWithYotpoSyncData;
         }
         if ($magentoCustomers) {
             foreach ($magentoCustomers as $magentoCustomer) {
@@ -424,5 +403,41 @@ class Processor extends Main
         }
 
         return $customerSyncData;
+    }
+
+    /**
+     * @param string $storeId
+     * @param array $retryCustomerIds
+     * @param bool $customerAccountShared
+     * @param string $websiteId
+     * @param integer $batchSize
+     * @return mixed
+     */
+    private function createCustomerCollectionWithYotpoSyncDataQuery($storeId, array $retryCustomerIds, $customerAccountShared, $websiteId, $batchSize)
+    {
+        $customerCollection = $this->customerFactory->create();
+        $customerCollection->getSelect()->joinLeft(
+            ['yotpo_customers_sync' => $customerCollection->getTable('yotpo_customers_sync')],
+            'e.entity_id = yotpo_customers_sync.customer_id
+            AND (yotpo_customers_sync.store_id is null OR yotpo_customers_sync.store_id = \'' . $storeId . '\')',
+            [
+                'store_id',
+                'sync_status',
+                'response_code'
+            ]
+        );
+        if (!$retryCustomerIds) {
+            $customerCollection->getSelect()
+                ->where('yotpo_customers_sync.sync_status is null OR  yotpo_customers_sync.sync_status = ?', 0);
+        } else {
+            $customerCollection->getSelect()
+                ->where('e.entity_id in (?)', $retryCustomerIds);
+        }
+        if (!$customerAccountShared) {
+            $customerCollection->getSelect()
+                ->where('e.website_id = ? ', $websiteId);
+        }
+        $customerCollection->getSelect()->limit($batchSize);
+        return $customerCollection;
     }
 }
