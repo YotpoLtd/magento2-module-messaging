@@ -161,10 +161,8 @@ class Processor extends Main
         /** @phpstan-ignore-next-line */
         foreach ($this->config->getAllStoreIds(false) as $storeId) {
             $this->emulateFrontendArea($storeId);
-            if (!$this->config->isCustomerSyncActive() || (
-                    !$customerAccountShared &&
-                    $this->storeManager->getStore($storeId)->getWebsiteId() != $customer->getWebsiteId()
-                )
+            if (!$customerAccountShared &&
+                $this->storeManager->getStore($storeId)->getWebsiteId() != $customer->getWebsiteId()
             ) {
                 $this->stopEnvironmentEmulation();
                 continue;
