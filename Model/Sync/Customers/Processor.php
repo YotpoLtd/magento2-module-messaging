@@ -184,29 +184,27 @@ class Processor extends Main
     /**
      * Process single customer entity
      *
-     * @param Customer $magentoCustomer
+     * @param Customer $customer
      * @param null|mixed $customerAddress
      * @return void
      * @throws NoSuchEntityException
      */
-    public function processSingleEntity($magentoCustomer, $customerAddress = null)
+    public function processSingleEntity($customer, $customerAddress = null)
     {
-        $magentoCustomerId = $magentoCustomer->getId();
+        $customerId = $customer->getId();
         $currentTime = date('Y-m-d H:i:s');
         $storeId = $this->config->getStoreId();
         try {
-            $this->resetCustomerSyncStatus($magentoCustomerId, $storeId, 0);
+            $this->resetCustomerSyncStatus($customerId, $storeId, 0);
 
-            $customerSyncToYotpoResponse = $this->syncCustomer($magentoCustomer, true, $customerAddress);
+            $customerSyncToYotpoResponse = $this->syncCustomer($customer, true, $customerAddress);
             if ($customerSyncToYotpoResponse) {
-                $customerSyncData = $this->createCustomerSyncData($customerSyncToYotpoResponse, $magentoCustomerId);
+                $customerSyncData = $this->createCustomerSyncData($customerSyncToYotpoResponse, $customerId);
                 $this->updateLastSyncDate($currentTime);
                 $this->yotpoSmsBumpLogger->info('Last sync date updated for customer : '
-                    . $magentoCustomerId, []);
-                if ($customerSyncData) {
-                    $customerSyncData = $this->updateCustomerSyncData($customerSyncData, $currentTime);
-                    $this->insertOrUpdateCustomerSyncData($customerSyncData);
-                }
+                    . $customerId, []);
+                $customerSyncData = $this->updateCustomerSyncData($customerSyncData, $currentTime);
+                $this->insertOrUpdateCustomerSyncData($customerSyncData);
             }
         } catch (NoSuchEntityException | LocalizedException $e) {
             $this->yotpoSmsBumpLogger->info($e->getMessage(), []);
