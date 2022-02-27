@@ -157,11 +157,11 @@ class Processor extends Main
      */
     public function processCustomer($customer, $customerAddress = null)
     {
-        $customerAccountShared = $this->config->isCustomerAccountShared();
+        $isCustomerAccountShared = $this->config->isCustomerAccountShared();
         /** @phpstan-ignore-next-line */
         foreach ($this->config->getAllStoreIds(false) as $storeId) {
             $this->emulateFrontendArea($storeId);
-            if (!$customerAccountShared &&
+            if (!$isCustomerAccountShared &&
                 $this->storeManager->getStore($storeId)->getWebsiteId() != $customer->getWebsiteId()
             ) {
                 $this->stopEnvironmentEmulation();
@@ -225,11 +225,11 @@ class Processor extends Main
         $websiteId = $this->storeManager->getStore($storeId)->getWebsiteId();
         $currentTime = date('Y-m-d H:i:s');
         $batchSize = $this->config->getConfig('customers_sync_limit');
-        $customerAccountShared = $this->config->isCustomerAccountShared();
+        $isCustomerAccountShared = $this->config->isCustomerAccountShared();
 
-        $customerCollectionWithYotpoSyncDataQuery =
-            $this->createCustomerCollectionWithYotpoSyncDataQuery($storeId, $retryCustomerIds, $customerAccountShared, $websiteId, $batchSize);
-        $customerCollectionWithYotpoSyncData = $customerCollectionWithYotpoSyncDataQuery->getItems();
+        $customerCollectionWithYotpoDataQuery =
+            $this->createCustomerCollectionWithYotpoSyncDataQuery($storeId, $retryCustomerIds, $isCustomerAccountShared, $websiteId, $batchSize);
+        $customerCollectionWithYotpoSyncData = $customerCollectionWithYotpoDataQuery->getItems();
 
         if (!count($customerCollectionWithYotpoSyncData)) {
             $this->yotpoSmsBumpLogger->info(
