@@ -72,8 +72,7 @@ class CustomerAddressUpdate implements ObserverInterface
         }
         $customer = $address->getCustomer();
         $syncActive = $this->yotpoSmsConfig->isCustomerSyncActive(
-            $address->getCustomer()->getStoreId(),
-            ScopeInterface::SCOPE_STORE
+            $address->getCustomer()->getStoreId()
         );
         if (!$this->request->getParam('custSync')) {
             $this->customersProcessor->resetCustomerSyncStatus(
