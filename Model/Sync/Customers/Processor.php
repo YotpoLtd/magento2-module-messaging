@@ -262,7 +262,6 @@ class Processor extends Main
         }
         $customerCollection->getSelect()->limit($batchSize);
         $magentoCustomers = [];
-        $customersToUpdate = [];
         foreach ($customerCollection->getItems() as $customer) {
             $id = $customer->getId();
             $id = explode('-', $id);
@@ -275,7 +274,6 @@ class Processor extends Main
                 $yotpoTableData = [];
                 $responseCode = $magentoCustomer['response_code'];
                 if (!$this->config->canResync($responseCode, [], $this->isCommandLineSync)) {
-                    $customersToUpdate[] = $magentoCustomerId;
                     $this->yotpoSmsBumpLogger->info('Customer sync cannot be done for customerId: '
                         . $magentoCustomerId . ', due to response code: ' . $responseCode, []);
                     continue;
