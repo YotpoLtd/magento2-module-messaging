@@ -333,17 +333,13 @@ class Processor extends Main
     {
         $dataToInsertOrUpdate = [];
         $storeIds = [];
-        if ($updateAllStores) {
-            if ($this->config->isCustomerAccountShared()) {
-                /** @phpstan-ignore-next-line */
-                foreach ($this->config->getAllStoreIds(false) as $storeId) {
-                    $storeIds[] = $storeId;
-                }
-            } else {
-                $storeIds[] = $customerStoreId;
-            }
-        } else {
+        if (!$updateAllStores && !$this->config->isCustomerAccountShared()) {
             $storeIds[] = $customerStoreId;
+        } else {
+            /** @phpstan-ignore-next-line */
+            foreach ($this->config->getAllStoreIds(false) as $storeId) {
+                $storeIds[] = $storeId;
+            }
         }
 
         foreach ($storeIds as $storeId) {
