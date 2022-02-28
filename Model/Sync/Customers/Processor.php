@@ -272,13 +272,13 @@ class Processor extends Main
      * Calls customer sync api
      *
      * @param Customer $customer
-     * @param bool $realTImeSync
+     * @param bool $isRealTimeSync
      * @param null|mixed $customerAddress
      * @return array<mixed>|DataObject
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
-    public function syncCustomer($customer, $realTImeSync = false, $customerAddress = null)
+    public function syncCustomer($customer, $isRealTimeSync = false, $customerAddress = null)
     {
         $customerId = $customer->getId();
         $this->yotpoSmsBumpLogger->info(
@@ -291,7 +291,7 @@ class Processor extends Main
         if (isset($this->customerDataPrepared[$customerId])) {
             $customerData = $this->customerDataPrepared[$customerId];
         } else {
-            $customerData = $this->data->prepareData($customer, $realTImeSync, $customerAddress);
+            $customerData = $this->data->prepareData($customer, $isRealTimeSync, $customerAddress);
             $this->customerDataPrepared[$customerId] = $customerData;
         }
 
