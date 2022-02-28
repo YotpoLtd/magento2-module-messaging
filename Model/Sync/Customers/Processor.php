@@ -281,6 +281,13 @@ class Processor extends Main
     public function syncCustomer($customer, $realTImeSync = false, $customerAddress = null)
     {
         $customerId = $customer->getId();
+        $this->yotpoSmsBumpLogger->info(
+            __(
+                'Starting syncing Customer to Yotpo - Customer ID: %1',
+                $customerId
+            )
+        );
+
         if (isset($this->customerDataPrepared[$customerId])) {
             $customerData = $this->customerDataPrepared[$customerId];
         } else {
@@ -288,22 +295,28 @@ class Processor extends Main
             $this->customerDataPrepared[$customerId] = $customerData;
         }
 
-        $this->yotpoSmsBumpLogger->info('Customers sync - data prepared', []);
-
         if (!$customerData) {
-            $this->yotpoSmsBumpLogger->info('Customers sync - no new data to sync', []);
+            $this->yotpoSmsBumpLogger->info(
+                __(
+                    'Stopped syncing Customer to Yotpo - no new data to sync - Customer ID: %1',
+                    $customerId
+                )
+            );
             return [];
         }
+
         $url = $this->config->getEndpoint('customers');
         $customerData['entityLog'] = 'customers';
         $response = $this->yotpoSyncMain->sync('PATCH', $url, $customerData);
         if ($response->getData('is_success')) {
-            $this->yotpoSmsBumpLogger->info('Customers sync - success', []);
+            $this->yotpoSmsBumpLogger->info(
+                __(
+                    'Finished syncing Customer to Yotpo successfully - Customer ID: %1',
+                    $customerId
+                )
+            );
         }
-        if ($this->isCommandLineSync) {
-            // phpcs:ignore
-            echo 'Customer process completed for customerId - ' . $customerId . PHP_EOL;
-        }
+
         return $response;
     }
 
