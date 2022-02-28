@@ -240,6 +240,14 @@ class Processor extends Main
                 )
             );
         } else {
+            $this->yotpoSmsBumpLogger->info(
+                __(
+                    'Starting Customers sync to Yotpo Cron job - Magento Store ID: %1, Name: %2',
+                    $storeId,
+                    $this->config->getStoreName($storeId)
+                )
+            );
+
             foreach ($customerCollectionWithYotpoSyncData as $customerWithYotpoSyncData) {
                 $customerId = explode('-', $customerWithYotpoSyncData->getId())[0];
                 $customerWithYotpoSyncData->setId($customerId);
@@ -263,6 +271,15 @@ class Processor extends Main
                     $this->insertOrUpdateCustomerSyncData($customerSyncData);
                 }
             }
+
+            $this->yotpoSmsBumpLogger->info(
+                __(
+                    'Finished Customers sync to Yotpo Cron job - Magento Store ID: %1, Name: %2',
+                    $storeId,
+                    $this->config->getStoreName($storeId),
+                    $customerId
+                )
+            );
         }
 
         $this->updateLastSyncDate($currentTime);
