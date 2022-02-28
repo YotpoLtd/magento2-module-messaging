@@ -207,7 +207,15 @@ class Processor extends Main
                 $this->insertOrUpdateCustomerSyncData($customerSyncData);
             }
         } catch (NoSuchEntityException | LocalizedException $e) {
-            $this->yotpoSmsBumpLogger->info($e->getMessage(), []);
+            $this->yotpoSmsBumpLogger->info(
+                __(
+                    'Failed to sync Customer to Yotpo - Magento Store ID: %1, Name: %2, CustomerID: %3, Exception Message: %4',
+                    $storeId,
+                    $this->config->getStoreName($storeId),
+                    $customerId,
+                    $e->getMessage()
+                )
+            );
         }
     }
 
