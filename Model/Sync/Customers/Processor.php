@@ -201,7 +201,7 @@ class Processor extends Main
             if ($customerSyncToYotpoResponse) {
                 $customerSyncData = $this->createCustomerSyncData($customerSyncToYotpoResponse, $customerId);
                 $this->updateLastSyncDate($currentTime);
-                $this->yotpoSmsBumpLogger->info('Last sync date updated for customer : '
+                $this->yotpoSmsBumpLogger->info('Updated last sync to Yotpo date for customer: '
                     . $customerId, []);
                 $customerSyncData = $this->updateCustomerSyncData($customerSyncData, $currentTime);
                 $this->insertOrUpdateCustomerSyncData($customerSyncData);
