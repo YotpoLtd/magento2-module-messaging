@@ -31,7 +31,7 @@ class CustomerAddressUpdate implements ObserverInterface
     /**
      * @var RequestInterface
      */
-    protected $request;
+    protected $requestInterface;
 
     /**
      * @var Session
@@ -42,18 +42,18 @@ class CustomerAddressUpdate implements ObserverInterface
      * CustomerAddressUpdate constructor.
      * @param CustomersProcessor $customersProcessor
      * @param Config $yotpoSmsConfig
-     * @param RequestInterface $request
+     * @param RequestInterface $requestInterface
      * @param Session $session
      */
     public function __construct(
         CustomersProcessor $customersProcessor,
         Config $yotpoSmsConfig,
-        RequestInterface $request,
+        RequestInterface $requestInterface,
         Session $session
     ) {
         $this->customersProcessor = $customersProcessor;
         $this->yotpoSmsConfig = $yotpoSmsConfig;
-        $this->request = $request;
+        $this->requestInterface = $requestInterface;
         $this->session = $session;
     }
 
@@ -75,7 +75,7 @@ class CustomerAddressUpdate implements ObserverInterface
             $customerAddress->getCustomer()->getStoreId()
         );
 
-        if (!$this->request->getParam('custSync')) {
+        if (!$this->requestInterface->getParam('custSync')) {
             $this->customersProcessor->resetCustomerSyncStatus(
                 $customer->getId(),
                 $customer->getStoreId(),
@@ -86,7 +86,7 @@ class CustomerAddressUpdate implements ObserverInterface
             $customerAddress = $customerAddress->getDefaultBilling() ? $customerAddress : null;
             if ($isCustomerSyncActive && $customerAddress) {
                     /** @phpstan-ignore-next-line */
-                    $this->request->setParam('custSync', true);//to avoid multiple calls for a single save.
+                    $this->requestInterface->setParam('custSync', true);//to avoid multiple calls for a single save.
                     $this->customersProcessor->processCustomer($customer, $customerAddress);
             }
         }
