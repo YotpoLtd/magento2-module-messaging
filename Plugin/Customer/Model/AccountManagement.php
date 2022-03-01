@@ -4,7 +4,6 @@ namespace Yotpo\SmsBump\Plugin\Customer\Model;
 
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Framework\App\Request\Http;
-use Magento\Framework\Exception\LocalizedException;
 
 /**
  * AccountManagement - Save guest email on session
