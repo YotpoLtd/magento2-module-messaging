@@ -24,7 +24,7 @@ class LoginPost
     /**
      * @var UrlInterface
      */
-    protected $url;
+    protected $urlInterface;
 
     /**
      * @var Session
@@ -39,18 +39,18 @@ class LoginPost
     /**
      * LoginPost constructor.
      * @param RedirectFactory $resultRedirectFactory
-     * @param UrlInterface $url
+     * @param UrlInterface $urlInterface
      * @param Session $session
      * @param AbandonedCartData $abandonedCartData
      */
     public function __construct(
         RedirectFactory $resultRedirectFactory,
-        UrlInterface $url,
+        UrlInterface $urlInterface,
         Session $session,
         AbandonedCartData $abandonedCartData
     ) {
         $this->resultRedirectFactory = $resultRedirectFactory;
-        $this->url = $url;
+        $this->urlInterface = $urlInterface;
         $this->session = $session;
         $this->abandonedCartData = $abandonedCartData;
     }
@@ -68,7 +68,7 @@ class LoginPost
             return $result;
         }
 
-        $customRedirectionUrl = $this->url->getUrl('checkout', ['_fragment' => 'payment']);
+        $customRedirectionUrl = $this->urlInterface->getUrl('checkout', ['_fragment' => 'payment']);
         $yotpoQuoteToken = $this->abandonedCartData->getYotpoQuoteToken();
         if ($yotpoQuoteToken) {
             $this->abandonedCartData->setQuoteData($yotpoQuoteToken);
