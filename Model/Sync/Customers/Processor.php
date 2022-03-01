@@ -169,11 +169,11 @@ class Processor extends Main
             }
             $this->yotpoSmsBumpLogger->info(
                 __(
-                    'Process customer for the Magento Store ID: %1, Name: %2',
+                    'Starting syncing Customer to Yotpo - Magento Store ID: %1, Name: %2, Customer ID: %3',
                     $storeId,
-                    $this->config->getStoreName($storeId)
-                ),
-                []
+                    $this->config->getStoreName($storeId),
+                    $customer->getId()
+                )
             );
             $this->processSingleEntity($customer, $customerAddress);
             $this->stopEnvironmentEmulation();
@@ -201,10 +201,16 @@ class Processor extends Main
             if ($customerSyncToYotpoResponse) {
                 $customerSyncData = $this->createCustomerSyncData($customerSyncToYotpoResponse, $customerId);
                 $this->updateLastSyncDate($currentTime);
-                $this->yotpoSmsBumpLogger->info('Updated last sync to Yotpo date for customer: '
-                    . $customerId, []);
                 $customerSyncData = $this->updateCustomerSyncData($customerSyncData, $currentTime);
                 $this->insertOrUpdateCustomerSyncData($customerSyncData);
+                $this->yotpoSmsBumpLogger->info(
+                    __(
+                        'Finished syncing Customer to Yotpo - Magento Store ID: %1, Name: %2, CustomerID: %3',
+                        $storeId,
+                        $this->config->getStoreName($storeId),
+                        $customerId
+                    )
+                );
             }
         } catch (NoSuchEntityException | LocalizedException $e) {
             $this->yotpoSmsBumpLogger->info(
