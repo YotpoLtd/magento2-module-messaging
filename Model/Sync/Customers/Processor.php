@@ -324,16 +324,16 @@ class Processor extends Main
     /**
      * @param string $customerId
      * @param int $customerStoreId
-     * @param int $value
-     * @param boolean $updateAllStores
+     * @param int $syncStatus
+     * @param boolean $shouldUpdateAllStores
      * @return void
      * @throws NoSuchEntityException|LocalizedException
      */
-    public function resetCustomerSyncStatus($customerId, $customerStoreId, $value, $updateAllStores = false)
+    public function resetCustomerSyncStatus($customerId, $customerStoreId, $syncStatus, $shouldUpdateAllStores = false)
     {
         $customersSyncData = [];
         $storeIds = [];
-        if (!$updateAllStores && !$this->config->isCustomerAccountShared()) {
+        if (!$shouldUpdateAllStores && !$this->config->isCustomerAccountShared()) {
             $storeIds[] = $customerStoreId;
         } else {
             /** @phpstan-ignore-next-line */
@@ -346,7 +346,7 @@ class Processor extends Main
             $customersSyncData[] = [
                 'customer_id' => $customerId,
                 'store_id' => $storeId,
-                'sync_status' => $value,
+                'sync_status' => $syncStatus,
                 'response_code' => '200'
             ];
         }
