@@ -349,28 +349,6 @@ class Processor extends Main
     }
 
     /**
-     * Update custom attribute - synced_to_yotpo_customer
-     *
-     * @param array<mixed> $customerIds
-     * @param int $value
-     * @return void
-     */
-    public function updateCustomerAttribute($customerIds, $value)
-    {
-        $dataToInsertOrUpdate = [];
-        $attributeId = $this->data->getAttributeId('synced_to_yotpo_customer');
-        foreach ($customerIds as $customerId) {
-            $data = [
-                'attribute_id' => $attributeId,
-                'entity_id' => $customerId,
-                'value' => $value
-            ];
-            $dataToInsertOrUpdate[] = $data;
-        }
-        $this->insertOnDuplicate('customer_entity_int', $dataToInsertOrUpdate);
-    }
-
-    /**
      * Updates the last sync date to the database
      *
      * @param string $currentTime
