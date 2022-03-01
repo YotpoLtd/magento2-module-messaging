@@ -47,7 +47,7 @@ class SaveCustomCustomerAttributeSmsMarketing implements DataPatchInterface
     }
 
     /**
-     * Creates custom attribute - synced_to_yotpo_customer
+     * Creates custom attribute - yotpo_accepts_sms_marketing
      *
      * @return void|SaveCustomCustomerAttributeSmsMarketing
      * @throws LocalizedException
