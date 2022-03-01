@@ -7,7 +7,7 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Quote\Model\Quote;
 use Yotpo\SmsBump\Model\Sync\Main;
-use Yotpo\SmsBump\Model\Config;
+use Yotpo\SmsBump\Model\Config as YotpoMessagingConfig;
 use Yotpo\SmsBump\Model\Sync\Checkout\Data as CheckoutData;
 use Yotpo\SmsBump\Model\Sync\Checkout\Logger as YotpoCheckoutLogger;
 use Yotpo\SmsBump\Helper\Data as SMSHelper;
@@ -25,9 +25,9 @@ class Processor
     protected $yotpoSyncMain;
 
     /**
-     * @var Config
+     * @var YotpoMessagingConfig
      */
-    protected $yotpoSmsConfig;
+    protected $yotpoMessagingConfig;
 
     /**
      * @var Data
@@ -58,7 +58,7 @@ class Processor
     /**
      * Processor constructor.
      * @param Main $yotpoSyncMain
-     * @param Config $yotpoSmsConfig
+     * @param YotpoMessagingConfig $yotpoMessagingConfig
      * @param Data $checkoutData
      * @param Logger $yotpoCheckoutLogger
      * @param SMSHelper $smsHelper
@@ -66,14 +66,14 @@ class Processor
      */
     public function __construct(
         Main $yotpoSyncMain,
-        Config $yotpoSmsConfig,
+        YotpoMessagingConfig $yotpoMessagingConfig,
         CheckoutData $checkoutData,
         YotpoCheckoutLogger $yotpoCheckoutLogger,
         SMSHelper $smsHelper,
         CatalogProcessor $catalogProcessor
     ) {
         $this->yotpoSyncMain = $yotpoSyncMain;
-        $this->yotpoSmsConfig = $yotpoSmsConfig;
+        $this->yotpoMessagingConfig = $yotpoMessagingConfig;
         $this->checkoutData = $checkoutData;
         $this->yotpoCheckoutLogger = $yotpoCheckoutLogger;
         $this->smsHelper = $smsHelper;
@@ -90,7 +90,7 @@ class Processor
      */
     public function process(Quote $quote)
     {
-        $isCheckoutSyncEnabled = $this->yotpoSmsConfig->isCheckoutSyncActive();
+        $isCheckoutSyncEnabled = $this->yotpoMessagingConfig->isCheckoutSyncActive();
         if ($isCheckoutSyncEnabled) {
             $newCheckoutData = $this->checkoutData->prepareData($quote);
             $this->yotpoCheckoutLogger->info('Checkout sync - data prepared', []);
@@ -111,7 +111,7 @@ class Processor
             }
 
             $method = self::PATCH_METHOD_STRING;
-            $url = $this->yotpoSmsConfig->getEndpoint('checkout');
+            $url = $this->yotpoMessagingConfig->getEndpoint('checkout');
             $newCheckoutData['entityLog'] = 'checkout';
             $syncCheckoutResult = $this->yotpoSyncMain->sync($method, $url, $newCheckoutData, 'api', true);
             if ($syncCheckoutResult->getData(self::IS_SUCCESS_MESSAGE_KEY)) {
@@ -131,7 +131,7 @@ class Processor
      */
     public function updateLastSyncDate()
     {
-        $this->yotpoSmsConfig->saveConfig('checkout_last_sync_time', date('Y-m-d H:i:s'));
+        $this->yotpoMessagingConfig->saveConfig('checkout_last_sync_time', date('Y-m-d H:i:s'));
     }
 
     /**
