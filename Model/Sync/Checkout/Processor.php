@@ -10,7 +10,7 @@ use Yotpo\SmsBump\Model\Sync\Main;
 use Yotpo\SmsBump\Model\Config as YotpoMessagingConfig;
 use Yotpo\SmsBump\Model\Sync\Checkout\Data as CheckoutData;
 use Yotpo\SmsBump\Model\Sync\Checkout\Logger as YotpoCheckoutLogger;
-use Yotpo\SmsBump\Helper\Data as SMSHelper;
+use Yotpo\SmsBump\Helper\Data as MessagingDataHelper;
 use Yotpo\Core\Model\Sync\Catalog\Processor as CatalogProcessor;
 
 /**
@@ -40,9 +40,9 @@ class Processor
     protected $yotpoCheckoutLogger;
 
     /**
-     * @var SMSHelper
+     * @var MessagingDataHelper
      */
-    protected $smsHelper;
+    protected $messagingDataHelper;
 
     /**
      * @var CatalogProcessor
@@ -60,7 +60,7 @@ class Processor
      * @param YotpoMessagingConfig $yotpoMessagingConfig
      * @param Data $checkoutData
      * @param Logger $yotpoCheckoutLogger
-     * @param SMSHelper $smsHelper
+     * @param MessagingDataHelper $messagingDataHelper
      * @param CatalogProcessor $catalogProcessor
      */
     public function __construct(
@@ -68,14 +68,14 @@ class Processor
         YotpoMessagingConfig $yotpoMessagingConfig,
         CheckoutData $checkoutData,
         YotpoCheckoutLogger $yotpoCheckoutLogger,
-        SMSHelper $smsHelper,
+        MessagingDataHelper $messagingDataHelper,
         CatalogProcessor $catalogProcessor
     ) {
         $this->yotpoSyncMain = $yotpoSyncMain;
         $this->yotpoMessagingConfig = $yotpoMessagingConfig;
         $this->checkoutData = $checkoutData;
         $this->yotpoCheckoutLogger = $yotpoCheckoutLogger;
-        $this->smsHelper = $smsHelper;
+        $this->messagingDataHelper = $messagingDataHelper;
         $this->catalogProcessor = $catalogProcessor;
     }
 

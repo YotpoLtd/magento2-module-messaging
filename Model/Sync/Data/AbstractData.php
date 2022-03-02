@@ -8,7 +8,7 @@ use Magento\Framework\Exception\NoSuchEntityException;
 use Yotpo\SmsBump\Model\Config;
 use Magento\Quote\Model\Quote\Address as QuoteAddress;
 use Magento\Customer\Model\Address as CustomerAddress;
-use Yotpo\SmsBump\Helper\Data as SMSHelper;
+use Yotpo\SmsBump\Helper\Data as MessagingDataHelper;
 
 /**
  * Class AbstractData for common methods
@@ -21,9 +21,9 @@ class AbstractData
     protected $customerRepository;
 
     /**
-     * @var SMSHelper
+     * @var MessagingDataHelper
      */
-    protected $smsHelper;
+    protected $messagingDataHelper;
 
     /**
      * @var Config
@@ -33,16 +33,16 @@ class AbstractData
     /**
      * AbstractData constructor.
      * @param CustomerRepositoryInterface $customerRepository
-     * @param SMSHelper $smsHelper
+     * @param MessagingDataHelper $messagingDataHelper
      * @param Config $config
      */
     public function __construct(
         CustomerRepositoryInterface $customerRepository,
-        SMShelper $smsHelper,
+        MessagingDataHelper $messagingDataHelper,
         Config $config
     ) {
         $this->customerRepository = $customerRepository;
-        $this->smsHelper = $smsHelper;
+        $this->messagingDataHelper = $messagingDataHelper;
         $this->config = $config;
     }
 
@@ -101,7 +101,7 @@ class AbstractData
             'zip' => $address->getPostcode(),
             'province_code' => $provinceCode,
             'country_code' => $address->getCountryId(),
-            'phone_number' => $address->getTelephone() ? $this->smsHelper->formatPhoneNumber(
+            'phone_number' => $address->getTelephone() ? $this->messagingDataHelper->formatPhoneNumber(
                 $address->getTelephone(),
                 $address->getCountryId()
             ) : null

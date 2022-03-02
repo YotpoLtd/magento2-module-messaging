@@ -14,7 +14,7 @@ use Magento\GroupedProduct\Model\Product\Type\Grouped as ProductTypeGrouped;
 use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\Quote\Item;
 use Magento\SalesRule\Model\ResourceModel\Coupon\CollectionFactory as CouponCollectionFactory;
-use Yotpo\SmsBump\Helper\Data as SMSHelper;
+use Yotpo\SmsBump\Helper\Data as MessagingDataHelper;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Store\Model\StoreManagerInterface;
 use Yotpo\SmsBump\Model\Sync\Data\AbstractData;
@@ -27,9 +27,9 @@ class Data
 {
     const ABANDONED_URL = 'yotpo_messaging/abandonedcart/loadcart/yotpoQuoteToken/';
     /**
-     * @var SMSHelper
+     * @var MessagingDataHelper
      */
-    protected $smsHelper;
+    protected $messagingDataHelper;
 
     /**
      * @var CheckoutSession
@@ -88,7 +88,7 @@ class Data
 
     /**
      * Data constructor.
-     * @param SMSHelper $smsHelper
+     * @param MessagingDataHelper $smsHelper
      * @param CheckoutSession $checkoutSession
      * @param StoreManagerInterface $storeManager
      * @param CouponCollectionFactory $couponCollectionFactory
@@ -99,7 +99,7 @@ class Data
      * @param AbandonedCartData $abandonedCartData
      */
     public function __construct(
-        SMSHelper $smsHelper,
+        MessagingDataHelper $messagingDataHelper,
         CheckoutSession $checkoutSession,
         StoreManagerInterface $storeManager,
         CouponCollectionFactory $couponCollectionFactory,
@@ -109,7 +109,7 @@ class Data
         AddressRepositoryInterface $customerAddressRepository,
         AbandonedCartData $abandonedCartData
     ) {
-        $this->smsHelper = $smsHelper;
+        $this->messagingDataHelper = $messagingDataHelper;
         $this->checkoutSession = $checkoutSession;
         $this->storeManager = $storeManager;
         $this->couponCollectionFactory = $couponCollectionFactory;
@@ -163,12 +163,12 @@ class Data
         }
         $data = [
             'token' => $quote->getId(),
-            'checkout_date' => $this->smsHelper->formatDate($checkoutDate),
+            'checkout_date' => $this->messagingDataHelper->formatDate($checkoutDate),
             'landing_site_url' => $baseUrl,
             'customer' => [
                 'external_id' => $customerId ?: $customerEmail,
                 'email' => $customerEmail,
-                'phone_number' => $billingAddress->getTelephone() ? $this->smsHelper->formatPhoneNumber(
+                'phone_number' => $billingAddress->getTelephone() ? $this->messagingDataHelper->formatPhoneNumber(
                     $billingAddress->getTelephone(),
                     $billingAddress->getCountryId()
                 ) : null,
