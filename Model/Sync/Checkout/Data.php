@@ -144,6 +144,12 @@ class Data
             }
         }
         if (!$customerId && !$customerEmail) {
+            $this->checkoutLogger->info(
+                __(
+                    'Did not sync Checkout to Yotpo - Checkout event without address data - Checkout ID: %1',
+                    $quote->getId()
+                )
+            );
             return [];
         }
 
@@ -154,6 +160,13 @@ class Data
 
         $billingAddressData = $this->prepareBillingAddress($quote);
         if (!$billingAddressData || !$billingAddressData['country_code']) {
+            $this->checkoutLogger->info(
+                __(
+                    'Failed to sync Checkout to Yotpo - Billing Address didn\'t contain valid Country ID - Checkout ID: %1, Country ID: %2',
+                    $quote->getId(),
+                    $quote->getBillingAddress()->getCountryId()
+                )
+            );
             return [];
         }
 
@@ -182,6 +195,12 @@ class Data
         unset($newCheckoutData['checkout_date']);
         $newCheckoutData = json_encode($newCheckoutData);
         if ($dataBeforeChange == $newCheckoutData) {
+            $this->checkoutLogger->info(
+                __(
+                    'Did not sync Checkout to Yotpo - No new data was found - Checkout ID: %1',
+                    $quote->getId()
+                )
+            );
             return [];//no change in quote data
         }
 

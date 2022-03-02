@@ -95,7 +95,6 @@ class Processor
             $this->yotpoCheckoutLogger->info('Checkout sync to Yotpo - finished preparing checkout data for sync');
 
             if (!$newCheckoutData) {
-                $this->yotpoCheckoutLogger->info('Checkout sync to Yotpo - no new data to sync');
                 return;
             }
             $productIds = $this->checkoutData->getLineItemsIds();
