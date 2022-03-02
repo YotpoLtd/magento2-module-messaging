@@ -156,6 +156,7 @@ class Data
         if (!$billingAddressData || !$billingAddressData['country_code']) {
             return [];
         }
+
         $baseUrl = $this->storeManager->getStore()->getBaseUrl();
         $checkoutDate = $quote->getUpdatedAt() ?: $quote->getCreatedAt();
         if (!$quote->getCustomerIsGuest() && $quote->getCustomerId()) {
@@ -163,7 +164,8 @@ class Data
         } else {
             $isCustomerAcceptsSmsMarketing = (bool) $this->checkoutSession->getYotpoSmsMarketing();
         }
-        $data = [
+
+        $checkoutData = [
             'token' => $quote->getId(),
             'checkout_date' => $this->messagingDataHelper->formatDate($checkoutDate),
             'landing_site_url' => $baseUrl,
@@ -176,14 +178,15 @@ class Data
                 $this->storeManager->getStore()->getBaseUrl() . self::ABANDONED_URL . $quoteToken
         ];
         $dataBeforeChange = $this->getDataBeforeChange();
-        $newData = $data;
-        unset($newData['checkout_date']);
-        $newData = json_encode($newData);
-        if ($dataBeforeChange == $newData) {
+        $newCheckoutData = $checkoutData;
+        unset($newCheckoutData['checkout_date']);
+        $newCheckoutData = json_encode($newCheckoutData);
+        if ($dataBeforeChange == $newCheckoutData) {
             return [];//no change in quote data
         }
-        $this->checkoutSession->setYotpoCheckoutData($newData);
-        return ['checkout' => $data];
+
+        $this->checkoutSession->setYotpoCheckoutData($newCheckoutData);
+        return ['checkout' => $checkoutData];
     }
 
     /**
