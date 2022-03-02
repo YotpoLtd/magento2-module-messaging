@@ -257,6 +257,7 @@ class Data
                         $couponCode = null;
                     }
                     $product = $this->prepareProductObject($item);
+
                     if (($item->getProductType() === ProductTypeGrouped::TYPE_CODE
                             || $item->getProductType() === ProductTypeConfigurable::TYPE_CODE
                             || $item->getProductType() === ProductTypeBundle::TYPE_CODE
@@ -265,12 +266,12 @@ class Data
                         $lineItems[$product->getId()]['total_price'] +=
                             $item->getData('row_total_incl_tax');
                         $lineItems[$product->getId()]['subtotal_price'] += $item->getRowTotal();
-                        $lineItems[$product->getId()]['quantity'] += $item->getQty() * 1;
+                        $lineItems[$product->getId()]['quantity'] += (integer)$item->getQty();
                     } else {
                         $this->lineItemsProductIds[] = $product->getId();
                         $lineItems[$product->getId()] = [
                             'external_product_id' => $product->getId(),
-                            'quantity' => $item->getQty() * 1,
+                            'quantity' => (integer)$item->getQty(),
                             'total_price' => $item->getData('row_total_incl_tax'),
                             'subtotal_price' => $item->getRowTotal(),
                             'coupon_code' => $couponCode
