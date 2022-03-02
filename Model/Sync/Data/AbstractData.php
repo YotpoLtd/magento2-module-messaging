@@ -91,6 +91,7 @@ class AbstractData
             $state = $address->getRegion();
             $provinceCode = $address->getRegionCode();
         }
+
         $street = $address->getStreet();
         return [
             'address1' => is_array($street) && count($street) >= 1 ? $street[0] : $street,
@@ -101,10 +102,19 @@ class AbstractData
             'zip' => $address->getPostcode(),
             'province_code' => $provinceCode,
             'country_code' => $address->getCountryId(),
-            'phone_number' => $address->getTelephone() ? $this->messagingDataHelper->formatPhoneNumber(
-                $address->getTelephone(),
-                $address->getCountryId()
-            ) : null
+            'phone_number' => $this->preparePhoneNumber($address)
         ];
+    }
+
+    /**
+     * @param QuoteAddress|CustomerAddress $address
+     * @return string|null
+     */
+    public function preparePhoneNumber($address)
+    {
+        return $address->getTelephone() ? $this->messagingDataHelper->formatPhoneNumber(
+            $address->getTelephone(),
+            $address->getCountryId()
+        ) : null;
     }
 }

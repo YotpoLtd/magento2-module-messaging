@@ -11,6 +11,7 @@ use Magento\Customer\Api\AddressRepositoryInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\GroupedProduct\Model\Product\Type\Grouped as ProductTypeGrouped;
+use Magento\Quote\Model\Quote\Address as QuoteAddress;
 use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\Quote\Item;
 use Magento\SalesRule\Model\ResourceModel\Coupon\CollectionFactory as CouponCollectionFactory;
@@ -165,17 +166,7 @@ class Data
             'token' => $quote->getId(),
             'checkout_date' => $this->messagingDataHelper->formatDate($checkoutDate),
             'landing_site_url' => $baseUrl,
-            'customer' => [
-                'external_id' => $customerId ?: $customerEmail,
-                'email' => $customerEmail,
-                'phone_number' => $billingAddress->getTelephone() ? $this->messagingDataHelper->formatPhoneNumber(
-                    $billingAddress->getTelephone(),
-                    $billingAddress->getCountryId()
-                ) : null,
-                'first_name' => $customerData->getFirstname(),
-                'last_name' => $customerData->getLastname(),
-                'accepts_sms_marketing' => $isCustomerAcceptsSmsMarketing
-            ],
+            'customer' => $this->prepareCustomer($customerId, $customerEmail, $billingAddress, $customerData, $isCustomerAcceptsSmsMarketing),
             'billing_address' => $billingAddressData,
             'shipping_address' => $this->prepareShippingAddress($quote),
             'currency' => $quote->getCurrency() !== null ? $quote->getCurrency()->getQuoteCurrencyCode() : null,
@@ -331,5 +322,25 @@ class Data
             $product = $quoteItem->getProduct();
         }
         return $product;
+    }
+
+    /**
+     * @param string $customerId
+     * @param string $customerEmail
+     * @param QuoteAddress $billingAddress
+     * @param array $customerData
+     * @param boolean $isCustomerAcceptsSmsMarketing
+     * @return array
+     */
+    private function prepareCustomer($customerId, $customerEmail, $billingAddress, $customerData, $isCustomerAcceptsSmsMarketing)
+    {
+        return [
+            'external_id' => $customerId ?: $customerEmail,
+            'email' => $customerEmail,
+            'phone_number' => $this->abstractData->preparePhoneNumber($billingAddress),
+            'first_name' => $customerData->getFirstname(),
+            'last_name' => $customerData->getLastname(),
+            'accepts_sms_marketing' => $isCustomerAcceptsSmsMarketing
+        ];
     }
 }
