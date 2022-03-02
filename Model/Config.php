@@ -27,6 +27,11 @@ class Config extends CoreConfig
     const YOTPO_CUSTOM_ATTRIBUTE_SMS_MARKETING = 'yotpo_accepts_sms_marketing';
 
     /**
+     * HTTP Request PATCH method string
+     */
+    const PATCH_METHOD_STRING = 'PATCH';
+
+    /**
      * @var string[]
      */
     protected $endPoints = [

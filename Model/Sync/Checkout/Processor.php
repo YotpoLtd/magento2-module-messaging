@@ -49,7 +49,6 @@ class Processor
      */
     protected $catalogProcessor;
 
-    const PATCH_METHOD_STRING = 'PATCH';
     const IS_SUCCESS_MESSAGE_KEY = 'is_success';
     const STATUS_CODE_KEY = 'status';
     const RESPONSE_KEY = 'response';
@@ -110,7 +109,7 @@ class Processor
                 }
             }
 
-            $method = self::PATCH_METHOD_STRING;
+            $method = $this->yotpoMessagingConfig::PATCH_METHOD_STRING;
             $url = $this->yotpoMessagingConfig->getEndpoint('checkout');
             $newCheckoutData['entityLog'] = 'checkout';
             $syncCheckoutResult = $this->yotpoSyncMain->sync($method, $url, $newCheckoutData, 'api', true);
