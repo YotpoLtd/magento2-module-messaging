@@ -217,9 +217,9 @@ class Data
             if (!$address->getCountryId() && $quote->getIsVirtual()) {
                 $customer = $quote->getCustomer();
                 /** @phpstan-ignore-next-line */
-                $customerAddressId = $customer->getDefaultBilling();
-                if ($customerAddressId) {
-                    $address = $this->customerAddressRepository->getById($customerAddressId);
+                $defaultCustomerBillingAddressId = $customer->getDefaultBilling();
+                if ($defaultCustomerBillingAddressId) {
+                    $address = $this->customerAddressRepository->getById($defaultCustomerBillingAddressId);
                 }
             }
         } else {
