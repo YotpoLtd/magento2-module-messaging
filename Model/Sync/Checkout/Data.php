@@ -252,32 +252,27 @@ class Data
         }
         try {
             foreach ($quote->getAllVisibleItems() as $item) {
-                try {
-                    $itemRuleIds = explode(',', $item->getAppliedRuleIds());
-                    if ($ruleId != null || !in_array($ruleId, $itemRuleIds)) {
-                        $couponCode = null;
-                    }
-                    $product = $this->prepareProductObject($item);
+                $itemRuleIds = explode(',', $item->getAppliedRuleIds());
+                if ($ruleId != null || !in_array($ruleId, $itemRuleIds)) {
+                    $couponCode = null;
+                }
+                $product = $this->prepareProductObject($item);
 
-                    $nonSimpleProductProductTypes = [ProductTypeGrouped::TYPE_CODE, ProductTypeGrouped::TYPE_CODE,
-                        ProductTypeConfigurable::TYPE_CODE, ProductTypeBundle::TYPE_CODE, $this::GIFTCARD_STRING];
-                    if (in_array($item->getProductType(), $nonSimpleProductProductTypes) && isset($lineItems[$product->getId()])) {
-                        $lineItems[$product->getId()]['total_price'] += $item->getData('row_total_incl_tax');
-                        $lineItems[$product->getId()]['subtotal_price'] += $item->getRowTotal();
-                        $lineItems[$product->getId()]['quantity'] += (integer)$item->getQty();
-                    } else {
-                        $this->lineItemsProductIds[] = $product->getId();
-                        $lineItems[$product->getId()] = [
-                            'external_product_id' => $product->getId(),
-                            'quantity' => (integer)$item->getQty(),
-                            'total_price' => $item->getData('row_total_incl_tax'),
-                            'subtotal_price' => $item->getRowTotal(),
-                            'coupon_code' => $couponCode
-                        ];
-                    }
-                } catch (\Exception $e) {
-                    $this->checkoutLogger->info('Checkout sync::prepareLineItems() - exception: ' .
-                        $e->getMessage(), []);
+                $nonSimpleProductProductTypes = [ProductTypeGrouped::TYPE_CODE, ProductTypeGrouped::TYPE_CODE,
+                    ProductTypeConfigurable::TYPE_CODE, ProductTypeBundle::TYPE_CODE, $this::GIFTCARD_STRING];
+                if (in_array($item->getProductType(), $nonSimpleProductProductTypes) && isset($lineItems[$product->getId()])) {
+                    $lineItems[$product->getId()]['total_price'] += $item->getData('row_total_incl_tax');
+                    $lineItems[$product->getId()]['subtotal_price'] += $item->getRowTotal();
+                    $lineItems[$product->getId()]['quantity'] += (integer)$item->getQty();
+                } else {
+                    $this->lineItemsProductIds[] = $product->getId();
+                    $lineItems[$product->getId()] = [
+                        'external_product_id' => $product->getId(),
+                        'quantity' => (integer)$item->getQty(),
+                        'total_price' => $item->getData('row_total_incl_tax'),
+                        'subtotal_price' => $item->getRowTotal(),
+                        'coupon_code' => $couponCode
+                    ];
                 }
             }
         } catch (\Exception $e) {
