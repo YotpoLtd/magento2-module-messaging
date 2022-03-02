@@ -49,10 +49,10 @@ class Processor
      */
     protected $catalogProcessor;
 
-    const IS_SUCCESS_MESSAGE_KEY = 'is_success';
-    const STATUS_CODE_KEY = 'status';
-    const RESPONSE_KEY = 'response';
-    const REASON_KEY = 'reason';
+    const SYNC_RESULT_IS_SUCCESS_KEY = 'is_success';
+    const SYNC_RESULT_STATUS_CODE_KEY = 'status';
+    const SYNC_RESULT_RESPONSE_KEY = 'response';
+    const SYNC_RESULT_REASON_KEY = 'reason';
 
     /**
      * Processor constructor.
@@ -113,7 +113,7 @@ class Processor
             $url = $this->yotpoMessagingConfig->getEndpoint('checkout');
             $newCheckoutData['entityLog'] = 'checkout';
             $syncCheckoutResult = $this->yotpoSyncMain->sync($method, $url, $newCheckoutData, 'api', true);
-            if ($syncCheckoutResult->getData(self::IS_SUCCESS_MESSAGE_KEY)) {
+            if ($syncCheckoutResult->getData(self::SYNC_RESULT_IS_SUCCESS_KEY)) {
                 $this->updateLastSyncDate();
                 $this->yotpoCheckoutLogger->info('Checkout sync - success', []);
             } else {
@@ -139,9 +139,9 @@ class Processor
      */
     private function logCheckoutSyncFailure($syncResult)
     {
-        $statusCode = $syncResult->getData(self::STATUS_CODE_KEY);
-        $failureReason = $syncResult->getData(self::REASON_KEY);
-        $innerResponse = $syncResult->getData(self::RESPONSE_KEY);
+        $statusCode = $syncResult->getData(self::SYNC_RESULT_STATUS_CODE_KEY);
+        $failureReason = $syncResult->getData(self::SYNC_RESULT_REASON_KEY);
+        $innerResponse = $syncResult->getData(self::SYNC_RESULT_RESPONSE_KEY);
 
         $this->yotpoCheckoutLogger->info('Checkout sync - failed', [$statusCode, $failureReason, $innerResponse]);
     }
