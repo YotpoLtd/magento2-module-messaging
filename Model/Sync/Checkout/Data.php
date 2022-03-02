@@ -150,7 +150,7 @@ class Data
             $quoteToken = $this->abandonedCartData->updateAbandonedCartDataAndReturnToken($quote, $customerEmail);
         }
 
-        $billingAddressData = $this->prepareAddress($quote, 'billing');
+        $billingAddressData = $this->prepareBillingAddress($quote);
         if (!$billingAddressData || !$billingAddressData['country_code']) {
             return [];
         }
@@ -177,7 +177,7 @@ class Data
                 'accepts_sms_marketing' => $isCustomerAcceptsSmsMarketing
             ],
             'billing_address' => $billingAddressData,
-            'shipping_address' => $this->prepareAddress($quote, 'shipping'),
+            'shipping_address' => $this->prepareShippingAddress($quote),
             'currency' => $quote->getCurrency() !== null ? $quote->getCurrency()->getQuoteCurrencyCode() : null,
             'line_items' => array_values($this->prepareLineItems($quote)),
             'abandoned_checkout_url' =>
@@ -204,28 +204,37 @@ class Data
     }
 
     /**
-     * Prepare address data
+     * Prepare billing address data
      * @param Quote $quote
-     * @param string $type
      * @return array<mixed>
      * @throws LocalizedException
      */
-    public function prepareAddress(Quote $quote, string $type)
+    public function prepareBillingAddress(Quote $quote)
     {
-        if ($type == 'billing') {
-            $address = $quote->getData('newBillingAddress') ?: $quote->getBillingAddress();
-            if (!$address->getCountryId() && $quote->getIsVirtual()) {
-                $customer = $quote->getCustomer();
-                /** @phpstan-ignore-next-line */
-                $defaultCustomerBillingAddressId = $customer->getDefaultBilling();
-                if ($defaultCustomerBillingAddressId) {
-                    $address = $this->customerAddressRepository->getById($defaultCustomerBillingAddressId);
-                }
+        $billingAddress = $quote->getData('newBillingAddress') ?: $quote->getBillingAddress();
+        if (!$billingAddress->getCountryId() && $quote->getIsVirtual()) {
+            $customer = $quote->getCustomer();
+            /** @phpstan-ignore-next-line */
+            $defaultCustomerBillingAddressId = $customer->getDefaultBilling();
+            if ($defaultCustomerBillingAddressId) {
+                $billingAddress = $this->customerAddressRepository->getById($defaultCustomerBillingAddressId);
             }
-        } else {
-            $address = $quote->getShippingAddress();
         }
-        return $this->abstractData->prepareAddressData($address);
+
+        return $this->abstractData->prepareAddressData($billingAddress);
+    }
+
+    /**
+     * Prepare shipping address data
+     * @param Quote $quote
+     * @return array<mixed>
+     * @throws LocalizedException
+     */
+    public function prepareShippingAddress(Quote $quote)
+    {
+        $shippingAddress = $quote->getShippingAddress();
+
+        return $this->abstractData->prepareAddressData($shippingAddress);
     }
 
     /**
