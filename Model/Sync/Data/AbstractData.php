@@ -61,7 +61,7 @@ class AbstractData
         if ($customAttribute) {
             $isAcceptsSmsMarketing = $customAttribute->getValue();
         }
-        return $isAcceptsSmsMarketing == 1;
+        return (bool) $isAcceptsSmsMarketing;
     }
 
     /**
