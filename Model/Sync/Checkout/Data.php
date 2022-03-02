@@ -279,8 +279,13 @@ class Data
                 }
             }
         } catch (\Exception $e) {
-            $this->checkoutLogger->info('Checkout sync::prepareLineItems() - exception: ' .
-                $e->getMessage(), []);
+            $this->checkoutLogger->info(
+                __(
+                    'Failed to sync Checkout when preparing line items for sync - Checkout ID: %1, Error Message: %2',
+                    $quote->getId(),
+                    $e->getMessage()
+                )
+            );
         }
         return $lineItems;
     }
