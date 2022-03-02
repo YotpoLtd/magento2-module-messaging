@@ -54,14 +54,14 @@ class AbstractData
      */
     public function getSmsMarketingCustomAttributeValue($customerId)
     {
-        $customAttributeValue = false;
+        $isAcceptsSmsMarketing = false;
         $attributeCode = $this->config->getConfig('sms_marketing_custom_attribute', $this->config->getStoreId());
         $customAttribute = $this->customerRepository->getById($customerId)
             ->getCustomAttribute($attributeCode);
         if ($customAttribute) {
-            $customAttributeValue = $customAttribute->getValue();
+            $isAcceptsSmsMarketing = $customAttribute->getValue();
         }
-        return $customAttributeValue == 1;
+        return $isAcceptsSmsMarketing == 1;
     }
 
     /**

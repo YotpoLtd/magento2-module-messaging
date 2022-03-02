@@ -157,9 +157,9 @@ class Data
         $baseUrl = $this->storeManager->getStore()->getBaseUrl();
         $checkoutDate = $quote->getUpdatedAt() ?: $quote->getCreatedAt();
         if (!$quote->getCustomerIsGuest() && $quote->getCustomerId()) {
-            $customAttributeValue = $this->abstractData->getSmsMarketingCustomAttributeValue($customerId);
+            $isCustomerAcceptsSmsMarketing = $this->abstractData->getSmsMarketingCustomAttributeValue($customerId);
         } else {
-            $customAttributeValue = (bool) $this->checkoutSession->getYotpoSmsMarketing();
+            $isCustomerAcceptsSmsMarketing = (bool) $this->checkoutSession->getYotpoSmsMarketing();
         }
         $data = [
             'token' => $quote->getId(),
@@ -174,7 +174,7 @@ class Data
                 ) : null,
                 'first_name' => $customerData->getFirstname(),
                 'last_name' => $customerData->getLastname(),
-                'accepts_sms_marketing' => $customAttributeValue
+                'accepts_sms_marketing' => $isCustomerAcceptsSmsMarketing
             ],
             'billing_address' => $billingAddressData,
             'shipping_address' => $this->prepareAddress($quote, 'shipping'),
