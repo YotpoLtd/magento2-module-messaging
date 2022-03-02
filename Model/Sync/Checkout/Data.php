@@ -27,6 +27,7 @@ use Yotpo\SmsBump\Model\AbandonedCart\Data as AbandonedCartData;
 class Data
 {
     const ABANDONED_URL = 'yotpo_messaging/abandonedcart/loadcart/yotpoQuoteToken/';
+    const GIFTCARD_STRING = 'giftcard';
     /**
      * @var MessagingDataHelper
      */
@@ -258,13 +259,10 @@ class Data
                     }
                     $product = $this->prepareProductObject($item);
 
-                    if (($item->getProductType() === ProductTypeGrouped::TYPE_CODE
-                            || $item->getProductType() === ProductTypeConfigurable::TYPE_CODE
-                            || $item->getProductType() === ProductTypeBundle::TYPE_CODE
-                            || $item->getProductType() === 'giftcard')
-                        && (isset($lineItems[$product->getId()]))) {
-                        $lineItems[$product->getId()]['total_price'] +=
-                            $item->getData('row_total_incl_tax');
+                    $nonSimpleProductProductTypes = [ProductTypeGrouped::TYPE_CODE, ProductTypeGrouped::TYPE_CODE,
+                        ProductTypeConfigurable::TYPE_CODE, ProductTypeBundle::TYPE_CODE, $this::GIFTCARD_STRING];
+                    if (in_array($item->getProductType(), $nonSimpleProductProductTypes) && isset($lineItems[$product->getId()])) {
+                        $lineItems[$product->getId()]['total_price'] += $item->getData('row_total_incl_tax');
                         $lineItems[$product->getId()]['subtotal_price'] += $item->getRowTotal();
                         $lineItems[$product->getId()]['quantity'] += (integer)$item->getQty();
                     } else {
@@ -281,7 +279,6 @@ class Data
                     $this->checkoutLogger->info('Checkout sync::prepareLineItems() - exception: ' .
                         $e->getMessage(), []);
                 }
-
             }
         } catch (\Exception $e) {
             $this->checkoutLogger->info('Checkout sync::prepareLineItems() - exception: ' .
