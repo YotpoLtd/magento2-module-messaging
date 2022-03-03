@@ -74,18 +74,24 @@ class Main extends CoreCustomersProcessor
 
     /**
      * Prepares custom table data
-     *
      * @param array<mixed>|DataObject $response
      * @param int|null $magentoCustomerId
+     * @param string $currentTime
      * @return array<mixed>
      */
-    public function prepareYotpoTableData($response, $magentoCustomerId)
+    public function prepareYotpoTableData($response, $magentoCustomerId, $currentTime)
     {
         $data = [
             /** @phpstan-ignore-next-line */
             'response_code' =>  $response->getData('status'),
             'customer_id'   =>  $magentoCustomerId
         ];
+        $data['store_id'] = $this->config->getStoreId();
+        $data['synced_to_yotpo'] = $currentTime;
+        $data['sync_status'] = 0;
+        if ($this->config->canUpdateCustomAttribute($data['response_code'])) {
+            $data['sync_status'] = 1;
+        }
         return $data;
     }
 

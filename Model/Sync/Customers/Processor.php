@@ -195,7 +195,6 @@ class Processor extends Main
     {
         $magentoCustomerId = $magentoCustomer->getId();
         $currentTime = date('Y-m-d H:i:s');
-        $yotpoTableFinalData = [];
         $customerToUpdate[] = $magentoCustomerId;
         $storeId = $this->config->getStoreId();
         try {
@@ -203,19 +202,11 @@ class Processor extends Main
 
             $response = $this->syncCustomer($magentoCustomer, true, $customerAddress);
             if ($response) {
-                $yotpoTableData = $this->prepareYotpoTableData($response, $magentoCustomerId);
                 $this->updateLastSyncDate($currentTime);
                 $this->yotpoSmsBumpLogger->info('Last sync date updated for customer : '
                     . $magentoCustomerId, []);
-                if ($yotpoTableData) {
-                    $yotpoTableData['store_id'] = $this->config->getStoreId();
-                    $yotpoTableData['synced_to_yotpo'] = $currentTime;
-                    $yotpoTableData['sync_status'] = 0;
-                    if ($this->config->canUpdateCustomAttribute($yotpoTableData['response_code'])) {
-                        $yotpoTableData['sync_status'] = 1;
-                    }
-                    $this->insertOrUpdateYotpoTableData($yotpoTableData);
-                }
+                $yotpoTableData = $this->prepareYotpoTableData($response, $magentoCustomerId, $currentTime);
+                $this->insertOrUpdateYotpoTableData($yotpoTableData);
             }
         } catch (NoSuchEntityException | LocalizedException $e) {
             $this->yotpoSmsBumpLogger->info($e->getMessage(), []);
@@ -237,25 +228,24 @@ class Processor extends Main
         $currentTime = date('Y-m-d H:i:s');
         $batchSize = $this->config->getConfig('customers_sync_limit');
         $customerAccountShared = $this->config->isCustomerAccountShared();
-
         $customerCollection = $this->customerFactory->create();
-        $customerCollection->getSelect()->joinLeft(
-            ['yotpo_customers_sync' => $customerCollection->getTable('yotpo_customers_sync')],
-            'e.entity_id = yotpo_customers_sync.customer_id
-            AND (yotpo_customers_sync.store_id is null OR yotpo_customers_sync.store_id = \''.$storeId.'\')',
-            [
-                'store_id',
-                'sync_status',
-                'response_code'
-            ]
-        );
-        if (!$retryCustomerIds) {
-            $customerCollection->getSelect()
-                ->where('yotpo_customers_sync.sync_status is null OR  yotpo_customers_sync.sync_status = ?', 0);
-        } else {
+        if ($retryCustomerIds) {
             $customerCollection->getSelect()
                 ->where('e.entity_id in (?)', $retryCustomerIds);
+        } else {
+            $connection = $this->getConnection();
+            $selectFromSyncTable = $connection->select()->from(
+                $this->resourceConnection->getTableName('yotpo_customers_sync'),
+                ['customer_id']
+            )->where(
+                'sync_status=\'1\''
+            )->where(
+                'store_id = \'?\'',
+                $storeId
+            );
+            $customerCollection->getSelect()->where('entity_id NOT IN (?)', $selectFromSyncTable);
         }
+
         if (!$customerAccountShared) {
             $customerCollection->getSelect()
                 ->where('e.website_id = ? ', $websiteId);
@@ -269,11 +259,14 @@ class Processor extends Main
             $customer->setId($id[0]);
             $magentoCustomers[$customer->getId()] = $customer;
         }
+        $syncResponse = $this->getYotpoSyncedResponseCodes($magentoCustomers);
         if ($magentoCustomers) {
             foreach ($magentoCustomers as $magentoCustomer) {
                 $magentoCustomerId = $magentoCustomer->getId();
-                $yotpoTableData = [];
-                $responseCode = $magentoCustomer['response_code'];
+                $responseCode = $syncResponse &&
+                    isset($syncResponse[$magentoCustomerId]) ?
+                    $syncResponse[$magentoCustomerId] :
+                    null;
                 if (!$this->config->canResync($responseCode, [], $this->isCommandLineSync)) {
                     $customersToUpdate[] = $magentoCustomerId;
                     $this->yotpoSmsBumpLogger->info('Customer sync cannot be done for customerId: '
@@ -283,16 +276,7 @@ class Processor extends Main
                 /** @var Customer $magentoCustomer */
                 $response = $this->syncCustomer($magentoCustomer);
                 if ($response) {
-                    $yotpoTableData = $this->prepareYotpoTableData($response, $magentoCustomerId);
-                }
-
-                if ($yotpoTableData) {
-                    $yotpoTableData['store_id'] = $this->config->getStoreId();
-                    $yotpoTableData['synced_to_yotpo'] = $currentTime;
-                    $yotpoTableData['sync_status'] = 0;
-                    if ($this->config->canUpdateCustomAttribute($yotpoTableData['response_code'])) {
-                        $yotpoTableData['sync_status'] = 1;
-                    }
+                    $yotpoTableData = $this->prepareYotpoTableData($response, $magentoCustomerId, $currentTime);
                     $this->insertOrUpdateYotpoTableData($yotpoTableData);
                 }
             }
@@ -422,5 +406,31 @@ class Processor extends Main
             // phpcs:ignore
             echo 'No customer data to process.' . PHP_EOL;
         }
+    }
+
+    /**
+     * @param array<mixed> $magentoCustomers
+     * @return array<mixed>
+     * @throws NoSuchEntityException
+     */
+    public function getYotpoSyncedResponseCodes($magentoCustomers)
+    {
+        if (!$magentoCustomers) {
+            return [];
+        }
+        $storeId = $this->config->getStoreId();
+        $customerIds = array_keys($magentoCustomers);
+        $connection = $this->getConnection();
+        $selectFromSyncTable = $connection->select()->from(
+            $this->resourceConnection->getTableName('yotpo_customers_sync'),
+            ['customer_id','response_code']
+        )->where(
+            'customer_id IN (?)',
+            $customerIds
+        )->where(
+            'store_id = \'?\'',
+            $storeId
+        );
+        return $connection->fetchPairs($selectFromSyncTable);
     }
 }
