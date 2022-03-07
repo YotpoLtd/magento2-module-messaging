@@ -97,14 +97,6 @@ class Main extends CoreCustomersProcessor
      */
     public function insertOrUpdateCustomerSyncData($customerSyncData)
     {
-        $finalData = [];
-        $finalData[] = [
-            'customer_id'        =>  $customerSyncData['customer_id'],
-            'synced_to_yotpo'    =>  $customerSyncData['synced_to_yotpo'],
-            'response_code'      =>  $customerSyncData['response_code'],
-            'store_id'           =>  $customerSyncData['store_id'],
-            'sync_status'        =>  $customerSyncData['sync_status']
-        ];
-        $this->insertOnDuplicate('yotpo_customers_sync', $finalData);
+        $this->insertOnDuplicate('yotpo_customers_sync', [$customerSyncData]);
     }
 }
