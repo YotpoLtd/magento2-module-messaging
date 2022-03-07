@@ -211,8 +211,9 @@ class Data
      */
     public function prepareBillingAddress(Quote $quote)
     {
-        $billingAddress = $quote->getData('newBillingAddress') ?: $quote->getBillingAddress();
-        if (!$billingAddress->getCountryId() && $quote->getIsVirtual()) {
+        $newBillingAddress = $quote->getData('newBillingAddress');
+        $billingAddress = $newBillingAddress ?: $quote->getBillingAddress();
+        if (!$newBillingAddress && $quote->getIsVirtual()) {
             $customer = $quote->getCustomer();
             /** @phpstan-ignore-next-line */
             $defaultCustomerBillingAddressId = $customer->getDefaultBilling();
