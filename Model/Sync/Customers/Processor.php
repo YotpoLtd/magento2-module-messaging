@@ -249,6 +249,7 @@ class Processor extends Main
                 'response_code'
             ]
         );
+
         if (!$retryCustomerIds) {
             $customerCollection->getSelect()
                 ->where('yotpo_customers_sync.sync_status is null OR  yotpo_customers_sync.sync_status = ?', 0);
