@@ -113,7 +113,7 @@ class Processor
             $method = self::PATCH_METHOD_STRING;
             $url = $this->yotpoSmsConfig->getEndpoint('checkout');
             $newCheckoutData['entityLog'] = 'checkout';
-            $syncCheckoutResult = $this->yotpoSyncMain->sync($method, $url, $newCheckoutData);
+            $syncCheckoutResult = $this->yotpoSyncMain->sync($method, $url, $newCheckoutData, 'api', true);
             if ($syncCheckoutResult->getData(self::IS_SUCCESS_MESSAGE_KEY)) {
                 $this->updateLastSyncDate();
                 $this->yotpoChekoutLogger->info('Checkout sync - success', []);
