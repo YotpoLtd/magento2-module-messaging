@@ -37,7 +37,7 @@ class CartTotalRepository
     /**
      * @var Config
      */
-    protected $yotpoSmsConfig;
+    protected $yotpoMessagingConfig;
 
     /**
      * @var UrlInterface
@@ -49,20 +49,20 @@ class CartTotalRepository
      * @param CheckoutProcessor $checkoutProcessor
      * @param CartRepositoryInterface $quoteRepository
      * @param RequestInterface $request
-     * @param Config $yotpoSmsConfig
+     * @param Config $yotpoMessagingConfig
      * @param UrlInterface $urlInterface
      */
     public function __construct(
         CheckoutProcessor $checkoutProcessor,
         CartRepositoryInterface $quoteRepository,
         RequestInterface $request,
-        Config $yotpoSmsConfig,
+        Config $yotpoMessagingConfig,
         UrlInterface $urlInterface
     ) {
         $this->checkoutProcessor = $checkoutProcessor;
         $this->quoteRepository = $quoteRepository;
         $this->request = $request;
-        $this->yotpoSmsConfig = $yotpoSmsConfig;
+        $this->yotpoMessagingConfig = $yotpoMessagingConfig;
         $this->urlInterface = $urlInterface;
     }
 
@@ -81,7 +81,7 @@ class CartTotalRepository
     ) {
         $currentUrl = $this->urlInterface->getCurrentUrl();
         $allowedUrls = ['/shipping-information','/totals'];
-        $allowedUrlsFromConfig = $this->yotpoSmsConfig->getConfig('checkout_sync_allowed_urls');
+        $allowedUrlsFromConfig = $this->yotpoMessagingConfig->getConfig('checkout_sync_allowed_urls');
         if ($allowedUrlsFromConfig) {
             $allowedUrlConfigValues = explode(',', $allowedUrlsFromConfig);
             $allowedUrlConfigValues = array_map('trim', $allowedUrlConfigValues);
@@ -103,7 +103,7 @@ class CartTotalRepository
         if (!$urlFound) {
             return $result;
         }
-        if ($this->yotpoSmsConfig->isCheckoutSyncActive()) {
+        if ($this->yotpoMessagingConfig->isCheckoutSyncActive()) {
             /** @var Quote $quote */
             $quote = $this->quoteRepository->getActive($cartId);
             $this->checkoutProcessor->process($quote);
