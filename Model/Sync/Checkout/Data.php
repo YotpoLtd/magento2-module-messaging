@@ -8,6 +8,7 @@ use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\ProductRepository;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable as ProductTypeConfigurable;
 use Magento\Customer\Api\AddressRepositoryInterface;
+use Magento\Customer\Api\Data\CustomerInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\GroupedProduct\Model\Product\Type\Grouped as ProductTypeGrouped;
@@ -90,7 +91,7 @@ class Data
 
     /**
      * Data constructor.
-     * @param MessagingDataHelper $smsHelper
+     * @param MessagingDataHelper $messagingDataHelper
      * @param CheckoutSession $checkoutSession
      * @param StoreManagerInterface $storeManager
      * @param CouponCollectionFactory $couponCollectionFactory
@@ -162,7 +163,9 @@ class Data
         if (!$billingAddressData || !$billingAddressData['country_code']) {
             $this->checkoutLogger->info(
                 __(
-                    'Failed to sync Checkout to Yotpo - Billing Address didn\'t contain valid Country ID - Checkout ID: %1, Country ID: %2',
+                    'Failed to sync Checkout to Yotpo -
+                    Billing Address didn\'t contain valid Country ID -
+                    Checkout ID: %1, Country ID: %2',
                     $quote->getId(),
                     $quote->getBillingAddress()->getCountryId()
                 )
@@ -182,7 +185,13 @@ class Data
             'token' => $quote->getId(),
             'checkout_date' => $this->messagingDataHelper->formatDate($checkoutDate),
             'landing_site_url' => $baseUrl,
-            'customer' => $this->prepareCustomer($customerId, $customerEmail, $billingAddress, $customerData, $isCustomerAcceptsSmsMarketing),
+            'customer' => $this->prepareCustomer(
+                $customerId,
+                $customerEmail,
+                $billingAddress,
+                $customerData,
+                $isCustomerAcceptsSmsMarketing
+            ),
             'billing_address' => $billingAddressData,
             'shipping_address' => $this->prepareShippingAddress($quote),
             'currency' => $quote->getCurrency() !== null ? $quote->getCurrency()->getQuoteCurrencyCode() : null,
@@ -282,7 +291,9 @@ class Data
 
                 $nonSimpleProductProductTypes = [ProductTypeGrouped::TYPE_CODE, ProductTypeGrouped::TYPE_CODE,
                     ProductTypeConfigurable::TYPE_CODE, ProductTypeBundle::TYPE_CODE, $this::GIFTCARD_STRING];
-                if (in_array($item->getProductType(), $nonSimpleProductProductTypes) && isset($lineItems[$product->getId()])) {
+                if (in_array($item->getProductType(), $nonSimpleProductProductTypes) &&
+                    isset($lineItems[$product->getId()])
+                ) {
                     $lineItems[$product->getId()]['total_price'] += $item->getData('row_total_incl_tax');
                     $lineItems[$product->getId()]['subtotal_price'] += $item->getRowTotal();
                     $lineItems[$product->getId()]['quantity'] += (integer)$item->getQty();
@@ -348,12 +359,17 @@ class Data
      * @param string $customerId
      * @param string $customerEmail
      * @param QuoteAddress $billingAddress
-     * @param array $customerData
+     * @param QuoteAddress|CustomerInterface $customerData
      * @param boolean $isCustomerAcceptsSmsMarketing
-     * @return array
+     * @return array<mixed>
      */
-    private function prepareCustomer($customerId, $customerEmail, $billingAddress, $customerData, $isCustomerAcceptsSmsMarketing)
-    {
+    private function prepareCustomer(
+        $customerId,
+        $customerEmail,
+        $billingAddress,
+        $customerData,
+        $isCustomerAcceptsSmsMarketing
+    ) {
         return [
             'external_id' => $customerId ?: $customerEmail,
             'email' => $customerEmail,

@@ -222,7 +222,10 @@ class Processor extends Main
         } catch (NoSuchEntityException | LocalizedException $e) {
             $this->yotpoSmsBumpLogger->info(
                 __(
-                    'Failed to sync Customer to Yotpo - Magento Store ID: %1, Name: %2, CustomerID: %3, Exception Message: %4',
+                    'Failed to sync Customer to Yotpo -
+                    Magento Store ID: %1,
+                    Name: %2, CustomerID: %3,
+                    Exception Message: %4',
                     $storeId,
                     $this->config->getStoreName($storeId),
                     $customerId,
@@ -249,7 +252,13 @@ class Processor extends Main
         $isCustomerAccountShared = $this->config->isCustomerAccountShared();
 
         $customerCollectionWithYotpoDataQuery =
-            $this->createCustomerCollectionWithYotpoSyncDataQuery($storeId, $retryCustomerIds, $isCustomerAccountShared, $websiteId, $batchSize);
+            $this->createCustomerCollectionWithYotpoSyncDataQuery(
+                $storeId,
+                $retryCustomerIds,
+                $isCustomerAccountShared,
+                $websiteId,
+                $batchSize
+            );
         $customerCollectionWithYotpoSyncData = $customerCollectionWithYotpoDataQuery->getItems();
 
         if (!count($customerCollectionWithYotpoSyncData)) {
@@ -271,6 +280,7 @@ class Processor extends Main
 
             foreach ($customerCollectionWithYotpoSyncData as $customerWithYotpoSyncData) {
                 $customerId = explode('-', $customerWithYotpoSyncData->getId())[0];
+                $customerId = (int) $customerId;
                 $customerWithYotpoSyncData->setId($customerId);
                 $customerSyncData = [];
                 $responseCode = $customerWithYotpoSyncData['response_code'];
@@ -297,8 +307,7 @@ class Processor extends Main
                 __(
                     'Finished Customers sync to Yotpo Cron job - Magento Store ID: %1, Name: %2',
                     $storeId,
-                    $this->config->getStoreName($storeId),
-                    $customerId
+                    $this->config->getStoreName($storeId)
                 )
             );
         }
@@ -429,9 +438,9 @@ class Processor extends Main
     }
 
     /**
-     * @param array $customerSyncData
+     * @param array<mixed> $customerSyncData
      * @param string $currentTime
-     * @return array
+     * @return array<mixed>
      */
     private function updateCustomerSyncData(array $customerSyncData, $currentTime)
     {
@@ -446,15 +455,20 @@ class Processor extends Main
     }
 
     /**
-     * @param string $storeId
-     * @param array $retryCustomerIds
+     * @param int $storeId
+     * @param array<mixed> $retryCustomerIds
      * @param bool $customerAccountShared
-     * @param string $websiteId
-     * @param integer $batchSize
+     * @param int $websiteId
+     * @param int $batchSize
      * @return mixed
      */
-    private function createCustomerCollectionWithYotpoSyncDataQuery($storeId, array $retryCustomerIds, $customerAccountShared, $websiteId, $batchSize)
-    {
+    private function createCustomerCollectionWithYotpoSyncDataQuery(
+        $storeId,
+        $retryCustomerIds,
+        $customerAccountShared,
+        $websiteId,
+        $batchSize
+    ) {
         $customerCollection = $this->customerFactory->create();
         $customerCollection->getSelect()->joinLeft(
             ['yotpo_customers_sync' => $customerCollection->getTable('yotpo_customers_sync')],
