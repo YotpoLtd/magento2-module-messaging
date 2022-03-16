@@ -75,7 +75,7 @@ class Main extends CoreCustomersProcessor
     /**
      * Prepares custom table data
      *
-     * @param array<mixed>|DataObject $response
+     * @param array<mixed>|DataObject $customerSyncToYotpoResponse
      * @param int|null $magentoCustomerId
      * @return array<mixed>
      */

@@ -105,7 +105,9 @@ class Processor
                 if (!$isProductSyncSuccess) {
                     $this->yotpoCheckoutLogger->info(
                         __(
-                            'Failed to sync Checkout to Yotpo - products sync to Yotpo failed - Store ID: %1, Products IDs: %2',
+                            'Failed to sync Checkout to Yotpo -
+                            products sync to Yotpo failed -
+                            Store ID: %1, Products IDs: %2',
                             $storeId,
                             $productIds
                         )
