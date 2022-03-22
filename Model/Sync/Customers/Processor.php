@@ -101,7 +101,7 @@ class Processor extends Main
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
-    public function process($retryCustomers = [], $storeIds = [])
+    public function process($retryCustomersIds = [], $storeIds = [])
     {
         if (!$storeIds) {
             $storeIds = $this->config->getAllStoreIds(false);
@@ -137,7 +137,7 @@ class Processor extends Main
                     $this->config->getStoreName($storeId)
                 )
             );
-            $retryCustomerIds = $retryCustomers[$storeId] ?? $retryCustomers;
+            $retryCustomerIds = $retryCustomersIds[$storeId] ?? $retryCustomersIds;
             $this->processEntities($retryCustomerIds);
             $this->stopEnvironmentEmulation();
         }
@@ -241,7 +241,7 @@ class Processor extends Main
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
-    public function processEntities($retryCustomerIds = [])
+    public function processEntities($retryCustomersIds = [])
     {
         $storeId = $this->config->getStoreId();
         $websiteId = $this->storeManager->getStore($storeId)->getWebsiteId();
@@ -252,7 +252,7 @@ class Processor extends Main
         $customerCollectionWithYotpoDataQuery =
             $this->createCustomerCollectionWithYotpoSyncDataQuery(
                 $storeId,
-                $retryCustomerIds,
+                $retryCustomersIds,
                 $isCustomerAccountShared,
                 $websiteId,
                 $batchSize
@@ -454,7 +454,7 @@ class Processor extends Main
 
     /**
      * @param int $storeId
-     * @param array<mixed> $retryCustomerIds
+     * @param array<mixed> $retryCustomersIds
      * @param bool $customerAccountShared
      * @param int $websiteId
      * @param int $batchSize
@@ -462,7 +462,7 @@ class Processor extends Main
      */
     private function createCustomerCollectionWithYotpoSyncDataQuery(
         $storeId,
-        $retryCustomerIds,
+        $retryCustomersIds,
         $customerAccountShared,
         $websiteId,
         $batchSize
@@ -478,12 +478,12 @@ class Processor extends Main
                 'response_code'
             ]
         );
-        if (!$retryCustomerIds) {
+        if (!$retryCustomersIds) {
             $customerCollection->getSelect()
                 ->where('yotpo_customers_sync.sync_status is null OR  yotpo_customers_sync.sync_status = ?', 0);
         } else {
             $customerCollection->getSelect()
-                ->where('e.entity_id in (?)', $retryCustomerIds);
+                ->where('e.entity_id in (?)', $retryCustomersIds);
         }
         if (!$customerAccountShared) {
             $customerCollection->getSelect()
