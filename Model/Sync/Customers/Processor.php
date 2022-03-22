@@ -12,7 +12,7 @@ use Magento\Customer\Model\ResourceModel\Customer\CollectionFactory as CustomerF
 use Yotpo\SmsBump\Model\Sync\Main as SmsBumpSyncMain;
 use Magento\Store\Model\App\Emulation as AppEmulation;
 use Magento\Framework\App\ResourceConnection;
-use Yotpo\SmsBump\Model\Sync\Customers\Logger as YotpoSmsBumpLogger;
+use Yotpo\SmsBump\Model\Sync\Customers\Logger as YotpoCustomersLogger;
 use Magento\Customer\Model\Customer;
 use Yotpo\SmsBump\Api\YotpoCustomersSyncRepositoryInterface;
 
@@ -37,9 +37,9 @@ class Processor extends Main
     protected $data;
 
     /**
-     * @var Logger
+     * @var YotpoCustomersLogger
      */
-    protected $yotpoSmsBumpLogger;
+    protected $yotpoCustomersLogger;
 
     /**
      * @var array <mixed>
@@ -69,7 +69,7 @@ class Processor extends Main
      * @param SmsBumpSyncMain $yotpoSyncMain
      * @param CustomerFactory $customerFactory
      * @param CustomersData $data
-     * @param Logger $yotpoSmsBumpLogger
+     * @param YotpoCustomersLogger $yotpoCustomersLogger
      * @param StoreManagerInterface $storeManager
      * @param YotpoCustomersSyncRepositoryInterface $yotpoCustomersSyncRepositoryInterface
      */
@@ -80,13 +80,13 @@ class Processor extends Main
         SmsBumpSyncMain $yotpoSyncMain,
         CustomerFactory $customerFactory,
         CustomersData $data,
-        YotpoSmsBumpLogger $yotpoSmsBumpLogger,
+        YotpoCustomersLogger $yotpoCustomersLogger,
         StoreManagerInterface $storeManager,
         YotpoCustomersSyncRepositoryInterface $yotpoCustomersSyncRepositoryInterface
     ) {
         $this->yotpoSyncMain = $yotpoSyncMain;
         $this->customerFactory = $customerFactory;
-        $this->yotpoSmsBumpLogger = $yotpoSmsBumpLogger;
+        $this->yotpoCustomersLogger = $yotpoCustomersLogger;
         $this->storeManager= $storeManager;
         $this->yotpoCustomersSyncRepositoryInterface = $yotpoCustomersSyncRepositoryInterface;
         parent::__construct($appEmulation, $resourceConnection, $yotpoSmsConfig, $data);
@@ -115,7 +115,7 @@ class Processor extends Main
             }
             $this->emulateFrontendArea($storeId);
             if (!$this->config->isCustomerSyncActive()) {
-                $this->yotpoSmsBumpLogger->info(
+                $this->yotpoCustomersLogger->info(
                     __(
                         'Customer sync is disabled for Magento Store ID: %1, Name: %2',
                         $storeId,
@@ -130,7 +130,7 @@ class Processor extends Main
                 $this->stopEnvironmentEmulation();
                 continue;
             }
-            $this->yotpoSmsBumpLogger->info(
+            $this->yotpoCustomersLogger->info(
                 __(
                     'Process customers for Magento Store ID: %1, Name: %2',
                     $storeId,
@@ -172,7 +172,7 @@ class Processor extends Main
                 continue;
             }
 
-            $this->yotpoSmsBumpLogger->info(
+            $this->yotpoCustomersLogger->info(
                 __(
                     'Starting syncing Customer to Yotpo - Magento Store ID: %1, Name: %2, Customer ID: %3',
                     $storeId,
@@ -208,7 +208,7 @@ class Processor extends Main
                 $this->updateLastSyncDate($currentTime);
                 $customerSyncData = $this->updateCustomerSyncData($customerSyncData, $currentTime);
                 $this->insertOrUpdateCustomerSyncData($customerSyncData);
-                $this->yotpoSmsBumpLogger->info(
+                $this->yotpoCustomersLogger->info(
                     __(
                         'Finished syncing Customer to Yotpo - Magento Store ID: %1, Name: %2, CustomerID: %3',
                         $storeId,
@@ -218,7 +218,7 @@ class Processor extends Main
                 );
             }
         } catch (NoSuchEntityException | LocalizedException $e) {
-            $this->yotpoSmsBumpLogger->info(
+            $this->yotpoCustomersLogger->info(
                 __(
                     'Failed to sync Customer to Yotpo -
                     Magento Store ID: %1,
@@ -260,7 +260,7 @@ class Processor extends Main
         $customerCollectionWithYotpoSyncData = $customerCollectionWithYotpoDataQuery->getItems();
 
         if (!count($customerCollectionWithYotpoSyncData)) {
-            $this->yotpoSmsBumpLogger->info(
+            $this->yotpoCustomersLogger->info(
                 __(
                     'No customers that should be synced found - Magento Store ID: %1, Name: %2',
                     $storeId,
@@ -268,7 +268,7 @@ class Processor extends Main
                 )
             );
         } else {
-            $this->yotpoSmsBumpLogger->info(
+            $this->yotpoCustomersLogger->info(
                 __(
                     'Starting Customers sync to Yotpo Cron job - Magento Store ID: %1, Name: %2',
                     $storeId,
@@ -284,7 +284,7 @@ class Processor extends Main
                 $responseCode = $customerWithYotpoSyncData['response_code'];
 
                 if (!$this->config->canResync($responseCode, [], $this->isCommandLineSync)) {
-                    $this->yotpoSmsBumpLogger->info('Customer sync cannot be done for customerId: '
+                    $this->yotpoCustomersLogger->info('Customer sync cannot be done for customerId: '
                         . $customerId . ', due to response code: ' . $responseCode, []);
                     continue;
                 }
@@ -301,7 +301,7 @@ class Processor extends Main
                 }
             }
 
-            $this->yotpoSmsBumpLogger->info(
+            $this->yotpoCustomersLogger->info(
                 __(
                     'Finished Customers sync to Yotpo Cron job - Magento Store ID: %1, Name: %2',
                     $storeId,
@@ -326,7 +326,7 @@ class Processor extends Main
     public function syncCustomer($customer, $isRealTimeSync = false, $customerAddress = null)
     {
         $customerId = $customer->getId();
-        $this->yotpoSmsBumpLogger->info(
+        $this->yotpoCustomersLogger->info(
             __(
                 'Starting syncing Customer to Yotpo - Customer ID: %1',
                 $customerId
@@ -341,7 +341,7 @@ class Processor extends Main
         }
 
         if (!$customerData) {
-            $this->yotpoSmsBumpLogger->info(
+            $this->yotpoCustomersLogger->info(
                 __(
                     'Stopped syncing Customer to Yotpo - no new data to sync - Customer ID: %1',
                     $customerId
@@ -354,7 +354,7 @@ class Processor extends Main
         $customerData['entityLog'] = 'customers';
         $response = $this->yotpoSyncMain->sync('PATCH', $url, $customerData);
         if ($response->getData('is_success')) {
-            $this->yotpoSmsBumpLogger->info(
+            $this->yotpoCustomersLogger->info(
                 __(
                     'Finished syncing Customer to Yotpo successfully - Customer ID: %1',
                     $customerId
