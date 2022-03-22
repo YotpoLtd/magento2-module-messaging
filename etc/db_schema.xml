@@ -2,16 +2,12 @@
 <schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
     <table name="yotpo_customers_sync" resource="default" engine="innodb" comment="Customers sync with Yotpo">
-        <column xsi:type="int" name="entity_id" unsigned="true" nullable="false" identity="true"
-                comment="Entity ID"/>
-        <column xsi:type="int" name="customer_id" unsigned="true" nullable="false" identity="false"
-                comment="Customer ID"/>
-        <column xsi:type="int" name="store_id" unsigned="true" nullable="false" identity="false" default="0"
-                comment="Store ID"/>
+        <column xsi:type="int" name="entity_id" unsigned="true" nullable="false" identity="true" comment="Entity ID"/>
+        <column xsi:type="int" name="customer_id" unsigned="true" nullable="false" identity="false" comment="Customer ID"/>
+        <column xsi:type="int" name="store_id" unsigned="true" nullable="false" identity="false" default="0" comment="Store ID"/>
         <column xsi:type="datetime" name="synced_to_yotpo" nullable="true" comment="Synced to Yotpo"/>
         <column xsi:type="varchar" name="response_code" nullable="true" length="5" comment="Response Code"/>
-        <column xsi:type="smallint" name="sync_status" unsigned="true" nullable="false" identity="false" default="0"
-                comment="Sync Status"/>
+        <column xsi:type="smallint" name="sync_status" unsigned="true" nullable="false" identity="false" default="0" comment="Sync Status"/>
         <constraint xsi:type="primary" referenceId="PRIMARY">
             <column name="entity_id"/>
         </constraint>
@@ -27,12 +23,9 @@
         </index>
     </table>
     <table name="yotpo_abandoned_cart" resource="default" engine="innodb" comment="Yotpo Abandoned Checkout">
-        <column xsi:type="int" name="abandoned_cart_id" unsigned="true" nullable="false" identity="true"
-                comment="Abandoned Card ID"/>
-        <column xsi:type="int" name="quote_id" padding="10" unsigned="true" nullable="false" identity="false"
-                default="0" comment="Quote ID"/>
-        <column xsi:type="smallint" name="store_id" unsigned="true" nullable="true" identity="false"
-                comment="Store ID"/>
+        <column xsi:type="int" name="abandoned_cart_id" unsigned="true" nullable="false" identity="true" comment="Abandoned Card ID"/>
+        <column xsi:type="int" name="quote_id" padding="10" unsigned="true" nullable="false" identity="false" default="0" comment="Quote ID"/>
+        <column xsi:type="smallint" name="store_id" unsigned="true" nullable="true" identity="false" comment="Store ID"/>
         <column xsi:type="varchar" name="email" nullable="true" length="255" comment="Email"/>
         <column xsi:type="varchar" name="quote_token" nullable="true" length="255" comment="Quote Token"/>
         <constraint xsi:type="primary" referenceId="PRIMARY">
