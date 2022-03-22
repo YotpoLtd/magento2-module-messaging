@@ -71,18 +71,27 @@ class CustomersScheduler extends ConfigValue
     {
         $customersCronExpressionString = $this->getData('groups/sync_settings/groups/customers_sync/fields/frequency/value');
         try {
-            /** @phpstan-ignore-next-line */
-            $this->_configValueFactory->create()->load(
-                self::YOTPO_MESSAGING_CUSTOMERS_SYNC_CRON_EXPRESSION_PATH,
-                'path'
-            )->setValue(
-                $customersCronExpressionString
-            )->setPath(
-                self::YOTPO_MESSAGING_CUSTOMERS_SYNC_CRON_EXPRESSION_PATH
-            )->save();
+            $this->configureCronCustomersSync($customersCronExpressionString);
         } catch (\Exception $exception) {
             throw new AlreadyExistsException(__('We can\'t save the cron expression.'));
         }
         return parent::afterSave();
+    }
+
+    /**
+     * @param $customersCronExpressionString
+     * @return void
+     */
+    private function configureCronCustomersSync($customersCronExpressionString)
+    {
+        /** @phpstan-ignore-next-line */
+        $this->_configValueFactory->create()->load(
+            self::YOTPO_MESSAGING_CUSTOMERS_SYNC_CRON_EXPRESSION_PATH,
+            'path'
+        )->setValue(
+            $customersCronExpressionString
+        )->setPath(
+            self::YOTPO_MESSAGING_CUSTOMERS_SYNC_CRON_EXPRESSION_PATH
+        )->save();
     }
 }
