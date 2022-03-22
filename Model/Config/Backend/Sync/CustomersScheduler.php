@@ -19,10 +19,10 @@ use Magento\Framework\Registry;
 class CustomersScheduler extends ConfigValue
 {
     /**
-     * Path of the cron string
+     * Path of the yotpo messaging customers sync cron expression string
      */
     // phpcs:ignore
-    const CRON_STRING_PATH = 'crontab/yotpo_messaging_customers_sync/jobs/yotpo_cron_messaging_customers_sync/schedule/cron_expr';
+    const YOTPO_MESSAGING_CUSTOMERS_SYNC_CRON_EXPRESSION_PATH = 'crontab/yotpo_messaging_customers_sync/jobs/yotpo_cron_messaging_customers_sync/schedule/cron_expr';
 
     /**
      * @var ValueFactory
@@ -73,12 +73,12 @@ class CustomersScheduler extends ConfigValue
         try {
             /** @phpstan-ignore-next-line */
             $this->_configValueFactory->create()->load(
-                self::CRON_STRING_PATH,
+                self::YOTPO_MESSAGING_CUSTOMERS_SYNC_CRON_EXPRESSION_PATH,
                 'path'
             )->setValue(
                 $cronExprString
             )->setPath(
-                self::CRON_STRING_PATH
+                self::YOTPO_MESSAGING_CUSTOMERS_SYNC_CRON_EXPRESSION_PATH
             )->save();
         } catch (\Exception $exception) {
             throw new AlreadyExistsException(__('We can\'t save the cron expression.'));
