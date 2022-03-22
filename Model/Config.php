@@ -27,6 +27,11 @@ class Config extends CoreConfig
     const YOTPO_CUSTOM_ATTRIBUTE_SMS_MARKETING = 'yotpo_accepts_sms_marketing';
 
     /**
+     * Custom Customer attribute name for synced to yotpo customer
+     */
+    const SYNCED_TO_YOTPO_CUSTOMER_ATTRIBUTE_NAME = 'synced_to_yotpo_customer';
+
+    /**
      * HTTP Request PATCH method string
      */
     const PATCH_METHOD_STRING = 'PATCH';
