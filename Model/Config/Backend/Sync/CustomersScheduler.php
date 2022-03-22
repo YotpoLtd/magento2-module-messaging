@@ -38,7 +38,7 @@ class CustomersScheduler extends ConfigValue
      * CustomersScheduler constructor.
      * @param Context $context
      * @param Registry $registry
-     * @param ScopeConfigInterface $config
+     * @param ScopeConfigInterface $scopeConfig
      * @param TypeListInterface $cacheTypeList
      * @param ValueFactory $configValueFactory
      * @param AbstractResource|null $resource
@@ -49,7 +49,7 @@ class CustomersScheduler extends ConfigValue
     public function __construct(
         Context $context,
         Registry $registry,
-        ScopeConfigInterface $config,
+        ScopeConfigInterface $scopeConfig,
         TypeListInterface $cacheTypeList,
         ValueFactory $configValueFactory,
         AbstractResource $resource = null,
@@ -58,7 +58,7 @@ class CustomersScheduler extends ConfigValue
     ) {
         $this->_runModelPath = '';
         $this->_configValueFactory = $configValueFactory;
-        parent::__construct($context, $registry, $config, $cacheTypeList, $resource, $resourceCollection, $data);
+        parent::__construct($context, $registry, $scopeConfig, $cacheTypeList, $resource, $resourceCollection, $data);
     }
 
     /**
