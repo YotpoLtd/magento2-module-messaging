@@ -92,6 +92,7 @@
     <type name="Yotpo\Core\Model\System\Message\CustomSystemMessage">
         <arguments>
             <argument name="customCustomerAttributeSmsMarketing" xsi:type="object">Yotpo\SmsBump\Setup\Patch\Data\CustomCustomerAttributeSmsMarketing</argument>
+            <argument name="CustomCustomerAttributeSyncedToYotpo" xsi:type="object">Yotpo\SmsBump\Setup\Patch\Data\SyncedToYotpoCustomerAttribute</argument>
         </arguments>
     </type>
 </config>
