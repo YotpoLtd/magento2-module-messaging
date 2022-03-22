@@ -69,14 +69,14 @@ class CustomersScheduler extends ConfigValue
      */
     public function afterSave()
     {
-        $cronExprString = $this->getData('groups/sync_settings/groups/customers_sync/fields/frequency/value');
+        $customersCronExpressionString = $this->getData('groups/sync_settings/groups/customers_sync/fields/frequency/value');
         try {
             /** @phpstan-ignore-next-line */
             $this->_configValueFactory->create()->load(
                 self::YOTPO_MESSAGING_CUSTOMERS_SYNC_CRON_EXPRESSION_PATH,
                 'path'
             )->setValue(
-                $cronExprString
+                $customersCronExpressionString
             )->setPath(
                 self::YOTPO_MESSAGING_CUSTOMERS_SYNC_CRON_EXPRESSION_PATH
             )->save();
