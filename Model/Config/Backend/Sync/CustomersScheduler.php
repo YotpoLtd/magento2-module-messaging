@@ -80,7 +80,7 @@ class CustomersScheduler extends ConfigValue
             )->setPath(
                 self::CRON_STRING_PATH
             )->save();
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             throw new AlreadyExistsException(__('We can\'t save the cron expression.'));
         }
         return parent::afterSave();
