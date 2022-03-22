@@ -25,6 +25,11 @@ class CustomersScheduler extends ConfigValue
     const YOTPO_MESSAGING_CUSTOMERS_SYNC_CRON_EXPRESSION_PATH = 'crontab/yotpo_messaging_customers_sync/jobs/yotpo_cron_messaging_customers_sync/schedule/cron_expr';
 
     /**
+     * Path of the yotpo messaging customers sync retry cron expression string
+     */
+    // phpcs:ignore
+    const YOTPO_MESSAGING_CUSTOMERS_SYNC_RETRY_CRON_EXPRESSION_PATH = 'crontab/yotpo_messaging_customers_sync/jobs/yotpo_cron_messaging_customers_sync_retry/schedule/cron_expr';
+    /**
      * @var ValueFactory
      */
     protected $_configValueFactory;
@@ -72,6 +77,8 @@ class CustomersScheduler extends ConfigValue
         $customersCronExpressionString = $this->getData('groups/sync_settings/groups/customers_sync/fields/frequency/value');
         try {
             $this->configureCronCustomersSync($customersCronExpressionString);
+
+            $this->configureCronCustomersSyncRetry($customersCronExpressionString);
         } catch (\Exception $exception) {
             throw new AlreadyExistsException(__('We can\'t save the cron expression.'));
         }
@@ -79,7 +86,7 @@ class CustomersScheduler extends ConfigValue
     }
 
     /**
-     * @param $customersCronExpressionString
+     * @param string $customersCronExpressionString
      * @return void
      */
     private function configureCronCustomersSync($customersCronExpressionString)
@@ -92,6 +99,23 @@ class CustomersScheduler extends ConfigValue
             $customersCronExpressionString
         )->setPath(
             self::YOTPO_MESSAGING_CUSTOMERS_SYNC_CRON_EXPRESSION_PATH
+        )->save();
+    }
+
+    /**
+     * @param string $customersCronExpressionString
+     * @return void
+     */
+    private function configureCronCustomersSyncRetry($customersCronExpressionString)
+    {
+        /** @phpstan-ignore-next-line */
+        $this->_configValueFactory->create()->load(
+            self::YOTPO_MESSAGING_CUSTOMERS_SYNC_RETRY_CRON_EXPRESSION_PATH,
+            'path'
+        )->setValue(
+            $customersCronExpressionString
+        )->setPath(
+            self::YOTPO_MESSAGING_CUSTOMERS_SYNC_RETRY_CRON_EXPRESSION_PATH
         )->save();
     }
 }
