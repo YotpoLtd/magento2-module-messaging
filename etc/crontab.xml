@@ -4,5 +4,8 @@
         <job name="yotpo_cron_messaging_customers_sync" instance="Yotpo\SmsBump\Model\Sync\Customers\Cron\CustomersSync" method="execute">
             <config_path>crontab/yotpo_messaging_customers_sync/jobs/yotpo_cron_messaging_customers_sync/schedule/cron_expr</config_path>
         </job>
+        <job name="yotpo_cron_messaging_customers_sync_retry" instance="Yotpo\SmsBump\Model\Sync\Customers\Cron\CustomersSyncRetry" method="execute">
+            <config_path>crontab/yotpo_messaging_customers_sync/jobs/yotpo_cron_messaging_customers_sync_retry/schedule/cron_expr</config_path>
+        </job>
     </group>
 </config>
