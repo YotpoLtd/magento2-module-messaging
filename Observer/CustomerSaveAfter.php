@@ -82,7 +82,7 @@ class CustomerSaveAfter implements ObserverInterface
             $this->customersProcessor->resetCustomerSyncStatus(
                 $customer->getId(),
                 $customer->getStoreId(),
-                0,
+                1,
                 true
             );
             if ($isCustomerSyncActive) {
