@@ -12,6 +12,7 @@ use Yotpo\SmsBump\Model\Config;
 use Magento\Framework\App\RequestInterface;
 use Magento\Checkout\Model\Session;
 use Magento\Framework\App\State as AppState;
+use Yotpo\SmsBump\Observer\Services\CustomersAttributesService;
 
 /**
  * Class CustomerSaveAfter
@@ -45,25 +46,33 @@ class CustomerSaveAfter implements ObserverInterface
     protected $appState;
 
     /**
+     * @var CustomersAttributesService
+     */
+    protected $customersAttributesService;
+
+    /**
      * CustomerSaveAfter constructor.
      * @param CustomersProcessor $customersProcessor
      * @param Config $yotpoSmsConfig
      * @param RequestInterface $request
      * @param Session $session
      * @param AppState $appState
+     * @param CustomersAttributesService $customersAttributesService
      */
     public function __construct(
         CustomersProcessor $customersProcessor,
         Config $yotpoSmsConfig,
         RequestInterface $request,
         Session $session,
-        AppState $appState
+        AppState $appState,
+        CustomersAttributesService $customersAttributesService
     ) {
         $this->customersProcessor = $customersProcessor;
         $this->yotpoSmsConfig = $yotpoSmsConfig;
         $this->request = $request;
         $this->session = $session;
         $this->appState = $appState;
+        $this->customersAttributesService = $customersAttributesService;
     }
 
     /**
@@ -79,12 +88,7 @@ class CustomerSaveAfter implements ObserverInterface
         $customer = $observer->getEvent()->getCustomer();
         $isCustomerSyncActive = $this->yotpoSmsConfig->isCustomerSyncActive();
         if (!$this->request->getParam('custSync')) {
-            $this->customersProcessor->resetCustomerSyncStatus(
-                $customer->getId(),
-                $customer->getStoreId(),
-                1,
-                true
-            );
+            $this->customersAttributesService->updateSyncedToYotpoCustomerAttribute($customer, false);
 
             $isCheckoutInProgress = $this->request->getParam('_checkout_in_progress', null);
             if ($isCustomerSyncActive && $isCheckoutInProgress === null) {
@@ -97,7 +101,8 @@ class CustomerSaveAfter implements ObserverInterface
                 if ($this->appState->getAreaCode() == 'frontend') {
                     /** @var Customer $customer */
                     $customer->setData('is_active_yotpo', $isActive);
-                } elseif (is_array($postValue) && $isActive = isset($postValue['is_active'])) {
+                } elseif (is_array($postValue) && isset($postValue['is_active'])) {
+                    $isActive = $postValue['is_active'];
                     /** @var Customer $customer */
                     $customer->setData('is_active_yotpo', $isActive);
                 }
