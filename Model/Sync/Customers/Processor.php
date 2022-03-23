@@ -234,39 +234,6 @@ class Processor extends Main
     }
 
     /**
-     * @param string $customerId
-     * @param int $customerStoreId
-     * @param int $syncStatus
-     * @param boolean $shouldUpdateAllStores
-     * @return void
-     * @throws NoSuchEntityException|LocalizedException
-     */
-    public function resetCustomerSyncStatus($customerId, $customerStoreId, $syncStatus, $shouldUpdateAllStores = false)
-    {
-        $customersSyncData = [];
-        $storeIds = [];
-        if (!$shouldUpdateAllStores && !$this->config->isCustomerAccountShared()) {
-            $storeIds[] = $customerStoreId;
-        } else {
-            /** @phpstan-ignore-next-line */
-            foreach ($this->config->getAllStoreIds(false) as $storeId) {
-                $storeIds[] = $storeId;
-            }
-        }
-
-        foreach ($storeIds as $storeId) {
-            $customersSyncData[] = [
-                'customer_id' => $customerId,
-                'store_id' => $storeId,
-                'sync_status' => $syncStatus,
-                'response_code' => '200'
-            ];
-        }
-
-        $this->insertOrUpdateCustomerSyncData($customersSyncData);
-    }
-
-    /**
      * @throws LocalizedException
      * @throws NoSuchEntityException
      * @return void
