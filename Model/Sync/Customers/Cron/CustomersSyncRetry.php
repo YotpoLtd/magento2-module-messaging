@@ -1,6 +1,7 @@
 <?php
 
 namespace Yotpo\SmsBump\Model\Sync\Customers\Cron;
+use Yotpo\SmsBump\Model\Sync\Customers\Services\CustomersService;
 
 /**
  * Class CustomersSyncRetry - Processes customers which failed to be synced - using cron job
@@ -8,9 +9,19 @@ namespace Yotpo\SmsBump\Model\Sync\Customers\Cron;
 class CustomersSyncRetry
 {
     /**
-     * CustomersSyncRetry constructor.
+     * @var CustomersService
      */
-    public function __construct() { }
+    protected $customersService;
+
+    /**
+     * CustomersSyncRetry constructor.
+     * @param CustomersService $customersService
+     */
+    public function __construct(
+        CustomersService $customersService
+    ) {
+        $this->customersService = $customersService;
+    }
 
     /**
      * Process customers sync
@@ -19,6 +30,6 @@ class CustomersSyncRetry
      */
     public function execute()
     {
-
+        $this->customersService->processCustomersSyncTableResync();
     }
 }
