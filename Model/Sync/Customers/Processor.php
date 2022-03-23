@@ -234,6 +234,64 @@ class Processor extends Main
     }
 
     /**
+     * @param string $customerId
+     * @param int $customerStoreId
+     * @param int $syncStatus
+     * @param boolean $shouldUpdateAllStores
+     * @return void
+     * @throws NoSuchEntityException|LocalizedException
+     */
+    public function resetCustomerSyncStatus($customerId, $customerStoreId, $syncStatus, $shouldUpdateAllStores = false)
+    {
+        $customersSyncData = [];
+        $storeIds = [];
+        if (!$shouldUpdateAllStores && !$this->config->isCustomerAccountShared()) {
+            $storeIds[] = $customerStoreId;
+        } else {
+            /** @phpstan-ignore-next-line */
+            foreach ($this->config->getAllStoreIds(false) as $storeId) {
+                $storeIds[] = $storeId;
+            }
+        }
+
+        foreach ($storeIds as $storeId) {
+            $customersSyncData[] = [
+                'customer_id' => $customerId,
+                'store_id' => $storeId,
+                'sync_status' => $syncStatus,
+                'response_code' => '200'
+            ];
+        }
+
+        $this->insertOrUpdateCustomerSyncData($customersSyncData);
+    }
+
+    /**
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
+     * @return void
+     */
+    public function retryCustomersSync()
+    {
+        $this->isCommandLineSync = true;
+        $customerIds = [];
+        $storeIds = [];
+        $customerByStore = [];
+        $items = $this->yotpoCustomersSyncRepositoryInterface->getByResponseCodes();
+        foreach ($items as $item) {
+            $customerIds[] = $item['customer_id'];
+            $storeIds[] = $item['store_id'];
+            $customerByStore[$item['store_id']][] = $item['customer_id'];
+        }
+        if ($customerIds) {
+            $this->process($customerByStore, array_unique($storeIds));
+        } else {
+            // phpcs:ignore
+            echo 'No customer data to process.' . PHP_EOL;
+        }
+    }
+
+    /**
      * Process customer entities
      *
      * @param array <mixed> $retryCustomerIds
@@ -241,7 +299,7 @@ class Processor extends Main
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
-    public function processEntities($retryCustomersIds = [])
+    private function processEntities($retryCustomersIds = [])
     {
         $storeId = $this->config->getStoreId();
         $websiteId = $this->storeManager->getStore($storeId)->getWebsiteId();
@@ -323,7 +381,7 @@ class Processor extends Main
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
-    public function syncCustomer($customer, $isRealTimeSync = false, $customerAddress = null)
+    private function syncCustomer($customer, $isRealTimeSync = false, $customerAddress = null)
     {
         $customerId = $customer->getId();
         $this->yotpoCustomersLogger->info(
@@ -372,67 +430,9 @@ class Processor extends Main
      * @return void
      * @throws NoSuchEntityException
      */
-    public function updateLastSyncDate($currentTime)
+    private function updateLastSyncDate($currentTime)
     {
         $this->config->saveConfig('customers_last_sync_time', $currentTime);
-    }
-
-    /**
-     * @param string $customerId
-     * @param int $customerStoreId
-     * @param int $syncStatus
-     * @param boolean $shouldUpdateAllStores
-     * @return void
-     * @throws NoSuchEntityException|LocalizedException
-     */
-    public function resetCustomerSyncStatus($customerId, $customerStoreId, $syncStatus, $shouldUpdateAllStores = false)
-    {
-        $customersSyncData = [];
-        $storeIds = [];
-        if (!$shouldUpdateAllStores && !$this->config->isCustomerAccountShared()) {
-            $storeIds[] = $customerStoreId;
-        } else {
-            /** @phpstan-ignore-next-line */
-            foreach ($this->config->getAllStoreIds(false) as $storeId) {
-                $storeIds[] = $storeId;
-            }
-        }
-
-        foreach ($storeIds as $storeId) {
-            $customersSyncData[] = [
-                'customer_id' => $customerId,
-                'store_id' => $storeId,
-                'sync_status' => $syncStatus,
-                'response_code' => '200'
-            ];
-        }
-
-        $this->insertOrUpdateCustomerSyncData($customersSyncData);
-    }
-
-    /**
-     * @throws LocalizedException
-     * @throws NoSuchEntityException
-     * @return void
-     */
-    public function retryCustomersSync()
-    {
-        $this->isCommandLineSync = true;
-        $customerIds = [];
-        $storeIds = [];
-        $customerByStore = [];
-        $items = $this->yotpoCustomersSyncRepositoryInterface->getByResponseCodes();
-        foreach ($items as $item) {
-            $customerIds[] = $item['customer_id'];
-            $storeIds[] = $item['store_id'];
-            $customerByStore[$item['store_id']][] = $item['customer_id'];
-        }
-        if ($customerIds) {
-            $this->process($customerByStore, array_unique($storeIds));
-        } else {
-            // phpcs:ignore
-            echo 'No customer data to process.' . PHP_EOL;
-        }
     }
 
     /**
