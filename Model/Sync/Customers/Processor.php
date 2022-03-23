@@ -371,7 +371,8 @@ class Processor extends Main
         $url = $this->config->getEndpoint('customers');
         $customerDataForSync['entityLog'] = 'customers';
         $method = $this->config::PATCH_METHOD_STRING;
-        $response = $this->yotpoSyncMain->sync($method, $url, $customerDataForSync);
+        $baseUriKey = 'api';
+        $response = $this->yotpoSyncMain->sync($method, $url, $customerDataForSync, $baseUriKey, true);
         if ($response->getData('is_success')) {
             $this->yotpoCustomersLogger->info(
                 __(
