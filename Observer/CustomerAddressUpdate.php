@@ -26,7 +26,7 @@ class CustomerAddressUpdate implements ObserverInterface
     /**
      * @var Config
      */
-    protected $yotpoSmsConfig;
+    protected $config;
 
     /**
      * @var RequestInterface
@@ -41,18 +41,18 @@ class CustomerAddressUpdate implements ObserverInterface
     /**
      * CustomerAddressUpdate constructor.
      * @param CustomersProcessor $customersProcessor
-     * @param Config $yotpoSmsConfig
+     * @param Config $config
      * @param RequestInterface $request
      * @param Session $session
      */
     public function __construct(
         CustomersProcessor $customersProcessor,
-        Config $yotpoSmsConfig,
+        Config $config,
         RequestInterface $request,
         Session $session
     ) {
         $this->customersProcessor = $customersProcessor;
-        $this->yotpoSmsConfig = $yotpoSmsConfig;
+        $this->config = $config;
         $this->request = $request;
         $this->session = $session;
     }
@@ -72,7 +72,7 @@ class CustomerAddressUpdate implements ObserverInterface
         }
         $customer = $customerAddress->getCustomer();
         $customerStoreId = $customer->getStoreId();
-        $isCustomerSyncActive = $this->yotpoSmsConfig->isCustomerSyncActive($customerStoreId);
+        $isCustomerSyncActive = $this->config->isCustomerSyncActive($customerStoreId);
 
         if (!$this->request->getParam('custSync')) {
             $this->customersProcessor->resetCustomerSyncStatus(
