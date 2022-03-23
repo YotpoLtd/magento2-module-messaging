@@ -71,14 +71,13 @@ class CustomerAddressUpdate implements ObserverInterface
             $this->session->unsDelegateGuestCustomer();
         }
         $customer = $customerAddress->getCustomer();
-        $isCustomerSyncActive = $this->yotpoSmsConfig->isCustomerSyncActive(
-            $customerAddress->getCustomer()->getStoreId()
-        );
+        $customerStoreId = $customer->getStoreId();
+        $isCustomerSyncActive = $this->yotpoSmsConfig->isCustomerSyncActive($customerStoreId);
 
         if (!$this->request->getParam('custSync')) {
             $this->customersProcessor->resetCustomerSyncStatus(
                 $customer->getId(),
-                $customer->getStoreId(),
+                $customerStoreId,
                 1,
                 true
             );
