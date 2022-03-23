@@ -85,27 +85,25 @@ class CustomerSaveAfter implements ObserverInterface
                 1,
                 true
             );
-            if ($isCustomerSyncActive) {
+
+            $isCheckoutInProgress = $this->request->getParam('_checkout_in_progress', null);
+            if ($isCustomerSyncActive && $isCheckoutInProgress === null) {
                 $isActive = 1;
                 /** @phpstan-ignore-next-line */
                 $this->request->setParam('custSync', true);//to avoid multiple calls for a single save.
-                $isCheckoutInProgress = $this->request->getParam('_checkout_in_progress', null);
-                if ($isCheckoutInProgress === null) {
-                    if ($this->appState->getAreaCode() == 'frontend') {
-                        /** @var Customer $customer */
-                        $customer->setData('is_active_yotpo', $isActive);
-                    } else {
-                        /** @phpstan-ignore-next-line */
-                        $postValue = $this->request->getPost('customer', null);
-                        if (is_array($postValue)
-                            && isset($postValue['is_active'])) {
-                            $isActive = $postValue['is_active'];
-                        }
-                        /** @var Customer $customer */
-                        $customer->setData('is_active_yotpo', $isActive);
-                    }
-                    $this->customersProcessor->processCustomer($customer);
+                /** @phpstan-ignore-next-line */
+                $postValue = $this->request->getPost('customer', null);
+
+                if ($this->appState->getAreaCode() == 'frontend') {
+                    /** @var Customer $customer */
+                    $customer->setData('is_active_yotpo', $isActive);
+                } elseif (is_array($postValue) && isset($postValue['is_active'])) {
+                    $isActive = $postValue['is_active'];
+                    /** @var Customer $customer */
+                    $customer->setData('is_active_yotpo', $isActive);
                 }
+
+                $this->customersProcessor->processCustomer($customer);
             }
         }
     }
