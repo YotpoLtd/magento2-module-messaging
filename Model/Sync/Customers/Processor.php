@@ -111,38 +111,57 @@ class Processor extends Main
         }
         /** @phpstan-ignore-next-line */
         foreach ($storeIds as $storeId) {
-            if ($this->isCommandLineSync) {
-                // phpcs:ignore
-                echo 'Customers process started for store - ' .
-                    $this->config->getStoreName($storeId) . PHP_EOL;
-            }
-            $this->emulateFrontendArea($storeId);
-            if (!$this->config->isCustomerSyncActive()) {
+            try {
+                if ($this->isCommandLineSync) {
+                    // phpcs:ignore
+                    echo 'Customers process started for store - ' .
+                        $this->config->getStoreName($storeId) . PHP_EOL;
+                }
+                $this->emulateFrontendArea($storeId);
+                if (!$this->config->isCustomerSyncActive()) {
+                    $this->yotpoCustomersLogger->info(
+                        __(
+                            'Customer sync is disabled for - Magento Store ID: %1, Magento Store Name: %2',
+                            $storeId,
+                            $this->config->getStoreName($storeId)
+                        )
+                    );
+                    if ($this->isCommandLineSync) {
+                        // phpcs:ignore
+                        echo 'Customer sync is disabled for store - ' .
+                            $this->config->getStoreName($storeId) . PHP_EOL;
+                    }
+                    $this->stopEnvironmentEmulation();
+                    continue;
+                }
                 $this->yotpoCustomersLogger->info(
                     __(
-                        'Customer sync is disabled for Magento Store ID: %1, Name: %2',
+                        'Starting process customers for - Magento Store ID: %1, Magento Store Name: %2',
                         $storeId,
                         $this->config->getStoreName($storeId)
                     )
                 );
-                if ($this->isCommandLineSync) {
-                    // phpcs:ignore
-                    echo 'Customer sync is disabled for store - ' .
-                        $this->config->getStoreName($storeId) . PHP_EOL;
-                }
+                $retryCustomersIdsToSync = $this->isCommandLineSync ? $retryCustomersIds[$storeId] : $retryCustomersIds;
+                $this->processEntities($retryCustomersIdsToSync);
+            } catch (Exception $exception) {
+                $this->yotpoCustomersLogger->info(
+                    __(
+                        'Failed to process Customers for - Magento Store ID: %1, Magento Store Name: %2, Reason: %3',
+                        $storeId,
+                        $this->config->getStoreName($storeId)
+                    )
+                );
+            } finally {
                 $this->stopEnvironmentEmulation();
-                continue;
             }
+
             $this->yotpoCustomersLogger->info(
                 __(
-                    'Process customers for Magento Store ID: %1, Name: %2',
+                    'Finished process Customers for - Magento Store ID: %1, Magento Store Name: %2',
                     $storeId,
                     $this->config->getStoreName($storeId)
                 )
             );
-            $retryCustomersIdsToSync = $this->isCommandLineSync ? $retryCustomersIds[$storeId] : $retryCustomersIds;
-            $this->processEntities($retryCustomersIdsToSync);
-            $this->stopEnvironmentEmulation();
         }
         $this->stopEnvironmentEmulation();
     }
