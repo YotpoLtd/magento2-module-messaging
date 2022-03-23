@@ -201,8 +201,8 @@ class Processor extends Main
         $storeId = $this->config->getStoreId();
         try {
             $this->resetCustomerSyncStatus($customerId, $storeId, 0);
-
-            $customerSyncToYotpoResponse = $this->syncCustomer($customer, true, $customerAddress);
+            $customerDataForSync = $this->prepareCustomerDataForSync($customerId, $customer, true, $customerAddress);
+            $customerSyncToYotpoResponse = $this->syncCustomer($customer, $customerDataForSync);
             if ($customerSyncToYotpoResponse) {
                 $customerSyncData = $this->createCustomerSyncData($customerSyncToYotpoResponse, $customerId);
                 $this->updateLastSyncDate($currentTime);
@@ -315,7 +315,8 @@ class Processor extends Main
                 }
 
                 /** @var Customer $customerWithYotpoSyncData */
-                $response = $this->syncCustomer($customerWithYotpoSyncData);
+                $customerDataForSync = $this->prepareCustomerDataForSync($customerId, $customerWithYotpoSyncData, false);
+                $response = $this->syncCustomer($customerWithYotpoSyncData, $customerDataForSync);
                 if ($response) {
                     $customerSyncData = $this->createCustomerSyncData($response, $customerId);
                 }
@@ -340,15 +341,13 @@ class Processor extends Main
 
     /**
      * Calls customer sync api
-     *
      * @param Customer $customer
-     * @param bool $isRealTimeSync
-     * @param null|mixed $customerAddress
+     * @param null|mixed $customerDataForSync
      * @return array<mixed>|DataObject
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
-    private function syncCustomer($customer, $isRealTimeSync = false, $customerAddress = null)
+    private function syncCustomer($customer, $customerDataForSync = null)
     {
         $customerId = $customer->getId();
         $this->yotpoCustomersLogger->info(
@@ -358,14 +357,7 @@ class Processor extends Main
             )
         );
 
-        if (isset($this->customerDataPrepared[$customerId])) {
-            $customerData = $this->customerDataPrepared[$customerId];
-        } else {
-            $customerData = $this->data->prepareData($customer, $isRealTimeSync, $customerAddress);
-            $this->customerDataPrepared[$customerId] = $customerData;
-        }
-
-        if (!$customerData) {
+        if (!$customerDataForSync) {
             $this->yotpoCustomersLogger->info(
                 __(
                     'Stopped syncing Customer to Yotpo - no new data to sync - Customer ID: %1',
@@ -376,8 +368,8 @@ class Processor extends Main
         }
 
         $url = $this->config->getEndpoint('customers');
-        $customerData['entityLog'] = 'customers';
-        $response = $this->yotpoSyncMain->sync('PATCH', $url, $customerData);
+        $customerDataForSync['entityLog'] = 'customers';
+        $response = $this->yotpoSyncMain->sync('PATCH', $url, $customerDataForSync);
         if ($response->getData('is_success')) {
             $this->yotpoCustomersLogger->info(
                 __(
@@ -458,5 +450,23 @@ class Processor extends Main
         }
         $customerCollection->getSelect()->limit($batchSize);
         return $customerCollection;
+    }
+
+    /**
+     * @param string $customerId
+     * @param Customer $customer
+     * @param boolean $isRealTimeSync
+     * @param mixed|null $customerAddress
+     * @return mixed
+     */
+    private function prepareCustomerDataForSync($customerId, Customer $customer, $isRealTimeSync, $customerAddress = null)
+    {
+        if (isset($this->customerDataPrepared[$customerId])) {
+            return $this->customerDataPrepared[$customerId];
+        } else {
+            $customerData = $this->data->prepareData($customer, $isRealTimeSync, $customerAddress);
+            $this->customerDataPrepared[$customerId] = $customerData;
+            return $customerData;
+        }
     }
 }
