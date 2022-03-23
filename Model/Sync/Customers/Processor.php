@@ -249,35 +249,50 @@ class Processor extends Main
      */
     public function processCustomer($customer, $customerAddress = null)
     {
-        $isCustomerAccountShared = $this->config->isCustomerAccountShared();
-        /** @phpstan-ignore-next-line */
-        foreach ($this->config->getAllStoreIds(false) as $storeId) {
-            $this->emulateFrontendArea($storeId);
+        $storeId = $customer->getStoreId();
+        $customerId = $customer->getId();
 
-            if (!$this->config->isCustomerSyncActive()) {
-                $this->stopEnvironmentEmulation();
-                continue;
-            }
-
-            if (!$isCustomerAccountShared &&
-                $this->storeManager->getStore($storeId)->getWebsiteId() != $customer->getWebsiteId()
-            ) {
-                $this->stopEnvironmentEmulation();
-                continue;
-            }
-
+        try {
+            $isCustomerAccountShared = $this->config->isCustomerAccountShared();
             $this->yotpoCustomersLogger->info(
                 __(
-                    'Starting syncing Customer to Yotpo - Magento Store ID: %1, Name: %2, Customer ID: %3',
+                    'Start syncing Customer to Yotpo - Magento Store ID: %1, Magento Store Name: %2, Customer ID: %3',
                     $storeId,
                     $this->config->getStoreName($storeId),
                     $customer->getId()
                 )
             );
-            $this->processSingleEntity($customer, $customerAddress);
-            $this->stopEnvironmentEmulation();
+
+            if ($isCustomerAccountShared) {
+                $storeIdsEligibleForSync = $this->getEligibleStoresForSync();
+                $this->syncSharedStoresCustomer($customer, $storeIdsEligibleForSync, true, $customerAddress);
+            } else {
+                /** @var Customer $customer */
+                $this->syncCustomer($customer, $storeId, true, $customerAddress);
+            }
+
+            $syncedToYotpoCustomerAttributeCode = $this->yotpoCoreSyncData->getAttributeId($this->config::SYNCED_TO_YOTPO_CUSTOMER_ATTRIBUTE_NAME);
+            $this->insertOrUpdateCustomerAttribute($customerId, $syncedToYotpoCustomerAttributeCode);
+
+            $this->yotpoCustomersLogger->info(
+                __(
+                    'Finish syncing Customer to Yotpo - Magento Store ID: %1, Magento Store Name: %2, Customer ID: %3',
+                    $storeId,
+                    $this->config->getStoreName($storeId),
+                    $customer->getId()
+                )
+            );
+        } catch (Exception $exception) {
+            $this->yotpoCustomersLogger->info(
+                __(
+                    'Failed to sync Customer to Yotpo - Magento Store ID: %1, Magento Store Name: %2, Customer ID: %3, Exception Message: %4',
+                    $storeId,
+                    $this->config->getStoreName($storeId),
+                    $customerId,
+                    $exception->getMessage()
+                )
+            );
         }
-        $this->stopEnvironmentEmulation();
     }
 
     /**
