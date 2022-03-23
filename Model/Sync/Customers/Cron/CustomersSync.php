@@ -33,7 +33,7 @@ class CustomersSync
      * @throws NoSuchEntityException
      * @throws LocalizedException
      */
-    public function processCustomers()
+    public function execute()
     {
         $this->customersProcessor->process();
     }
