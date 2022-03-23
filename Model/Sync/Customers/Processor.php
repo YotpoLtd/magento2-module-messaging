@@ -120,8 +120,7 @@ class Processor extends Main
                         'Customer sync is disabled for Magento Store ID: %1, Name: %2',
                         $storeId,
                         $this->config->getStoreName($storeId)
-                    ),
-                    []
+                    )
                 );
                 if ($this->isCommandLineSync) {
                     // phpcs:ignore
@@ -136,8 +135,7 @@ class Processor extends Main
                     'Process customers for Magento Store ID: %1, Name: %2',
                     $storeId,
                     $this->config->getStoreName($storeId)
-                ),
-                []
+                )
             );
             $retryCustomerIds = $retryCustomers[$storeId] ?? $retryCustomers;
             $this->processEntities($retryCustomerIds);
