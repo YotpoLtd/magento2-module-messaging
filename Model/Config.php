@@ -32,6 +32,16 @@ class Config extends CoreConfig
     const SYNCED_TO_YOTPO_CUSTOMER_ATTRIBUTE_NAME = 'synced_to_yotpo_customer';
 
     /**
+     * Customer entity int table name
+     */
+    const CUSTOMER_ENTITY_INT_TABLE_NAME = 'customer_entity_int';
+
+    /**
+     * Yotpo customers sync table name
+     */
+    const YOTPO_CUSTOMERS_SYNC_TABLE_NAME = 'yotpo_customers_sync';
+
+    /**
      * HTTP Request PATCH method string
      */
     const PATCH_METHOD_STRING = 'PATCH';
