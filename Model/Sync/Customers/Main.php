@@ -107,6 +107,30 @@ class Main extends CoreCustomersProcessor
     }
 
     /**
+     * @return array<string>
+     */
+    public function getCustomersIdsForCustomersThatShouldBeRetriedForSync()
+    {
+        $storeId = $this->config->getStoreId();
+        $connection = $this->resourceConnection->getConnection();
+        $shouldRetryCustomersQuery = $connection->select()->from(
+            [$this->resourceConnection->getTableName($this->config::YOTPO_CUSTOMERS_SYNC_TABLE_NAME)],
+            ['customer_id']
+        )->where(
+            'store_id = ?',
+            $storeId
+        )->where(
+            'should_retry = ?',
+            1
+        )->limit(
+            $this->customersSyncBatchSize
+        );
+
+        $customersIdsMapForSync = $connection->fetchAssoc($shouldRetryCustomersQuery, 'customer_id');
+        return array_keys($customersIdsMapForSync);
+    }
+
+    /**
      * Prepares Customer sync table data
      * @param DataObject $customerSyncToYotpoResponse
      * @param int $magentoCustomerId
