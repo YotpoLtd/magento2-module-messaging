@@ -296,49 +296,6 @@ class Processor extends Main
     }
 
     /**
-     * Process single customer entity
-     *
-     * @param Customer $customer
-     * @param null|mixed $customerAddress
-     * @return void
-     * @throws NoSuchEntityException
-     */
-    public function processSingleEntity($customer, $customerAddress = null)
-    {
-        $customerId = $customer->getId();
-        $storeId = $this->config->getStoreId();
-        try {
-            $this->resetCustomerSyncStatus($customerId, $storeId);
-            $customerDataForSync = $this->prepareCustomerDataForSync($customer, $customerId, true, $customerAddress);
-            $customerSyncToYotpoResponse = $this->executeCustomerSyncRequest($customer, $customerDataForSync);
-            if ($customerSyncToYotpoResponse) {
-                $currentTime = date('Y-m-d H:i:s');
-                $customerSyncData = $this->createCustomerSyncData($customerSyncToYotpoResponse, $customerId, $storeId);
-                $this->updateLastSyncDate($currentTime);
-                $this->insertOrUpdateCustomerSyncData($customerSyncData);
-                $this->yotpoCustomersLogger->info(
-                    __(
-                        'Finished syncing Customer to Yotpo - Magento Store ID: %1, Name: %2, CustomerID: %3',
-                        $storeId,
-                        $this->config->getStoreName($storeId),
-                        $customerId
-                    )
-                );
-            }
-        } catch (NoSuchEntityException | LocalizedException $e) {
-            $this->yotpoCustomersLogger->info(
-                __(
-                    'Failed to sync Customer to Yotpo - Magento Store ID: %1, Name: %2, CustomerID: %3, Exception Message: %4',
-                    $storeId,
-                    $this->config->getStoreName($storeId),
-                    $customerId,
-                    $e->getMessage()
-                )
-            );
-        }
-    }
-
-    /**
      * @throws LocalizedException
      * @throws NoSuchEntityException
      * @return void

@@ -155,39 +155,6 @@ class Main extends CoreCustomersProcessor
     }
 
     /**
-     * @param string $customerId
-     * @param int $customerStoreId
-     * @param int $shouldRetry
-     * @param boolean $shouldUpdateAllStores
-     * @return void
-     * @throws NoSuchEntityException|LocalizedException
-     */
-    public function resetCustomerSyncStatus($customerId, $customerStoreId, $shouldRetry = 1, $shouldUpdateAllStores = false)
-    {
-        $customersSyncData = [];
-        $storeIds = [];
-        if (!$shouldUpdateAllStores && !$this->config->isCustomerAccountShared()) {
-            $storeIds[] = $customerStoreId;
-        } else {
-            /** @phpstan-ignore-next-line */
-            foreach ($this->config->getAllStoreIds(false) as $storeId) {
-                $storeIds[] = $storeId;
-            }
-        }
-
-        foreach ($storeIds as $storeId) {
-            $customersSyncData[] = [
-                'customer_id' => $customerId,
-                'store_id' => $storeId,
-                'should_retry' => $shouldRetry,
-                'response_code' => '200'
-            ];
-        }
-
-        $this->insertOrUpdateCustomerSyncData($customersSyncData);
-    }
-
-    /**
      * Inserts or updates custom table data
      *
      * @param array $customerSyncData
