@@ -12,7 +12,7 @@ use Yotpo\SmsBump\Model\Config;
 use Magento\Framework\App\RequestInterface;
 use Magento\Checkout\Model\Session;
 use Magento\Framework\App\State as AppState;
-use Yotpo\SmsBump\Observer\Services\CustomersAttributesService;
+use Yotpo\SmsBump\Model\Sync\Customers\Services\CustomersAttributesService;
 
 /**
  * Class CustomerSaveAfter
