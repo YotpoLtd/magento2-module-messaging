@@ -27,11 +27,16 @@
         <crontab>
             <yotpo_messaging_customers_sync>
                 <jobs>
-                    <yotpo_cron_messaging_customers_sync>
+                    <yotpo_cron_messaging_customers_backfill_sync>
                         <schedule>
                             <cron_expr>*/2 * * * *</cron_expr>
                         </schedule>
-                    </yotpo_cron_messaging_customers_sync>
+                    </yotpo_cron_messaging_customers_backfill_sync>
+                    <yotpo_cron_messaging_customers_retry_sync>
+                        <schedule>
+                            <cron_expr>*/2 * * * *</cron_expr>
+                        </schedule>
+                    </yotpo_cron_messaging_customers_retry_sync>
                 </jobs>
             </yotpo_messaging_customers_sync>
         </crontab>

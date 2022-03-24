@@ -76,13 +76,9 @@ class CustomerAddressUpdate implements ObserverInterface
         );
 
         if (!$this->request->getParam('custSync')) {
-            $this->customersProcessor->resetCustomerSyncStatus(
-                $customer->getId(),
-                $customer->getStoreId(),
-                0,
-                true
+            $this->customersProcessor->resetCustomerSyncAttributeStatus(
+                $customer->getId()
             );
-
             $customerAddress = $customerAddress->getDefaultBilling() ? $customerAddress : null;
             if ($isCustomerSyncActive && $customerAddress) {
                     /** @phpstan-ignore-next-line */

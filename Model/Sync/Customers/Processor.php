@@ -7,6 +7,7 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Store\Model\StoreManagerInterface;
 use Yotpo\SmsBump\Model\Config;
+use Yotpo\SmsBump\Model\ResourceModel\YotpoCustomersSync\CollectionFactory as YotpoCustomersSyncCollectionFactory;
 use Yotpo\SmsBump\Model\Sync\Customers\Data as CustomersData;
 use Magento\Customer\Model\ResourceModel\Customer\CollectionFactory as CustomerFactory;
 use Yotpo\SmsBump\Model\Sync\Main as SmsBumpSyncMain;
@@ -15,6 +16,7 @@ use Magento\Framework\App\ResourceConnection;
 use Yotpo\SmsBump\Model\Sync\Customers\Logger as YotpoSmsBumpLogger;
 use Magento\Customer\Model\Customer;
 use Yotpo\SmsBump\Api\YotpoCustomersSyncRepositoryInterface;
+use Magento\Cron\Model\ResourceModel\Schedule\CollectionFactory as CronCollectionFactory;
 
 /**
  * Class Processor - Process customers sync
@@ -62,6 +64,26 @@ class Processor extends Main
     protected $yotpoCustomersSyncRepositoryInterface;
 
     /**
+     * @var array <int>
+     */
+    protected $customerSyncEnabledStores = [];
+
+    /**
+     * @var array <mixed>
+     */
+    protected $customersSyncedByStore = [];
+
+    /**
+     * @var bool
+     */
+    protected $customerRetrySync = false;
+
+    /**
+     * @var YotpoCustomersSyncCollectionFactory
+     */
+    protected $yotpoCustomersSyncCollectionFactory;
+
+    /**
      * Processor constructor.
      * @param AppEmulation $appEmulation
      * @param ResourceConnection $resourceConnection
@@ -72,6 +94,8 @@ class Processor extends Main
      * @param Logger $yotpoSmsBumpLogger
      * @param StoreManagerInterface $storeManager
      * @param YotpoCustomersSyncRepositoryInterface $yotpoCustomersSyncRepositoryInterface
+     * @param CronCollectionFactory $cronCollectionFactory
+     * @param YotpoCustomersSyncCollectionFactory $yotpoCustomersSyncCollectionFactory
      */
     public function __construct(
         AppEmulation $appEmulation,
@@ -82,14 +106,61 @@ class Processor extends Main
         CustomersData $data,
         YotpoSmsBumpLogger $yotpoSmsBumpLogger,
         StoreManagerInterface $storeManager,
-        YotpoCustomersSyncRepositoryInterface $yotpoCustomersSyncRepositoryInterface
+        YotpoCustomersSyncRepositoryInterface $yotpoCustomersSyncRepositoryInterface,
+        CronCollectionFactory $cronCollectionFactory,
+        YotpoCustomersSyncCollectionFactory $yotpoCustomersSyncCollectionFactory
     ) {
         $this->yotpoSyncMain = $yotpoSyncMain;
         $this->customerFactory = $customerFactory;
         $this->yotpoSmsBumpLogger = $yotpoSmsBumpLogger;
         $this->storeManager= $storeManager;
         $this->yotpoCustomersSyncRepositoryInterface = $yotpoCustomersSyncRepositoryInterface;
-        parent::__construct($appEmulation, $resourceConnection, $yotpoSmsConfig, $data);
+        $this->yotpoCustomersSyncCollectionFactory = $yotpoCustomersSyncCollectionFactory;
+        parent::__construct($appEmulation, $resourceConnection, $yotpoSmsConfig, $data, $cronCollectionFactory);
+    }
+
+    /**
+     * @return void
+     * @throws NoSuchEntityException
+     * @throws LocalizedException
+     */
+    public function processBackFillSync()
+    {
+        $this->setCustomerRetrySync(false);
+        $jobCode = Config::YOTPO_CRON_JOB_CODE_CUSTOMERS_RETRY_SYNC;
+        $isCustomerRetrySyncIsRunning = $this->checkCustomerSyncCronIsRunning($jobCode);
+        if ($isCustomerRetrySyncIsRunning) {
+            $this->yotpoSmsBumpLogger->info(
+                __(
+                    'Customer backfill sync is skipped because customer retry sync job is already running'
+                ),
+                []
+            );
+            return;
+        }
+        $this->process();
+    }
+
+    /**
+     * @return void
+     * @throws NoSuchEntityException
+     * @throws LocalizedException
+     */
+    public function processRetrySync()
+    {
+        $this->setCustomerRetrySync(true);
+        $jobCode = Config::YOTPO_CRON_JOB_CODE_CUSTOMERS_BACKFILL_SYNC;
+        $isCustomerBackFillSyncIsRunning = $this->checkCustomerSyncCronIsRunning($jobCode);
+        if ($isCustomerBackFillSyncIsRunning) {
+            $this->yotpoSmsBumpLogger->info(
+                __(
+                    'Customer retry sync is skipped because customer backfill sync job is already running'
+                ),
+                []
+            );
+            return;
+        }
+        $this->process();
     }
 
     /**
@@ -106,6 +177,7 @@ class Processor extends Main
         if (!$storeIds) {
             $storeIds = $this->config->getAllStoreIds(false);
         }
+        $this->setCustomerSyncEnabledStores();
         /** @phpstan-ignore-next-line */
         foreach ($storeIds as $storeId) {
             if ($this->isCommandLineSync) {
@@ -157,6 +229,7 @@ class Processor extends Main
      */
     public function processCustomer($customer, $customerAddress = null)
     {
+        $this->setCustomerSyncEnabledStores();
         $isCustomerAccountShared = $this->config->isCustomerAccountShared();
         /** @phpstan-ignore-next-line */
         foreach ($this->config->getAllStoreIds(false) as $storeId) {
@@ -195,49 +268,17 @@ class Processor extends Main
      * @param null|mixed $customerAddress
      * @return void
      * @throws NoSuchEntityException
+     * @throws LocalizedException
      */
     public function processSingleEntity($customer, $customerAddress = null)
     {
-        $customerId = $customer->getId();
         $currentTime = date('Y-m-d H:i:s');
-        $storeId = $this->config->getStoreId();
-        try {
-            $this->resetCustomerSyncStatus($customerId, $storeId, 0);
-
-            $customerSyncToYotpoResponse = $this->syncCustomer($customer, true, $customerAddress);
-            if ($customerSyncToYotpoResponse) {
-                $customerSyncData = $this->createCustomerSyncData($customerSyncToYotpoResponse, $customerId);
-                $this->updateLastSyncDate($currentTime);
-                $customerSyncData = $this->updateCustomerSyncData($customerSyncData, $currentTime);
-                $this->insertOrUpdateCustomerSyncData($customerSyncData);
-                $this->yotpoSmsBumpLogger->info(
-                    __(
-                        'Finished syncing Customer to Yotpo - Magento Store ID: %1, Name: %2, CustomerID: %3',
-                        $storeId,
-                        $this->config->getStoreName($storeId),
-                        $customerId
-                    )
-                );
-            }
-        } catch (NoSuchEntityException | LocalizedException $e) {
-            $this->yotpoSmsBumpLogger->info(
-                __(
-                    'Failed to sync Customer to Yotpo -
-                    Magento Store ID: %1,
-                    Name: %2, CustomerID: %3,
-                    Exception Message: %4',
-                    $storeId,
-                    $this->config->getStoreName($storeId),
-                    $customerId,
-                    $e->getMessage()
-                )
-            );
-        }
+        $this->doCustomerSyncActions($customer, $currentTime, true, $customerAddress);
+        $this->updateLastSyncDate($currentTime);
     }
 
     /**
      * Process customer entities
-     *
      * @param array <mixed> $retryCustomerIds
      * @return void
      * @throws LocalizedException
@@ -250,21 +291,19 @@ class Processor extends Main
         $currentTime = date('Y-m-d H:i:s');
         $batchSize = $this->config->getConfig('customers_sync_limit');
         $isCustomerAccountShared = $this->config->isCustomerAccountShared();
+        if ($this->isCustomerRetrySync()) {
+            $processLabel = 'retry sync';
+        } else {
+            $processLabel = 'backfill sync';
+        }
 
-        $customerCollectionWithYotpoDataQuery =
-            $this->createCustomerCollectionWithYotpoSyncDataQuery(
-                $storeId,
-                $retryCustomerIds,
-                $isCustomerAccountShared,
-                $websiteId,
-                $batchSize
-            );
-        $customerCollectionWithYotpoSyncData = $customerCollectionWithYotpoDataQuery->getItems();
+        $customerCollectionData =
+            $this->createCustomerCollection($retryCustomerIds, $isCustomerAccountShared, $websiteId, $batchSize);
 
-        if (!count($customerCollectionWithYotpoSyncData)) {
+        if (!count($customerCollectionData)) {
             $this->yotpoSmsBumpLogger->info(
                 __(
-                    'No customers that should be synced found - Magento Store ID: %1, Name: %2',
+                    'No customers that should be found for ' . $processLabel .'- Magento Store ID: %1, Name: %2',
                     $storeId,
                     $this->config->getStoreName($storeId)
                 )
@@ -272,40 +311,19 @@ class Processor extends Main
         } else {
             $this->yotpoSmsBumpLogger->info(
                 __(
-                    'Starting Customers sync to Yotpo Cron job - Magento Store ID: %1, Name: %2',
+                    'Starting Customers ' . $processLabel . ' to Yotpo Cron job - Magento Store ID: %1, Name: %2',
                     $storeId,
                     $this->config->getStoreName($storeId)
                 )
             );
 
-            foreach ($customerCollectionWithYotpoSyncData as $customerWithYotpoSyncData) {
-                $customerId = explode('-', $customerWithYotpoSyncData->getId())[0];
-                $customerId = (int) $customerId;
-                $customerWithYotpoSyncData->setId($customerId);
-                $customerSyncData = [];
-                $responseCode = $customerWithYotpoSyncData['response_code'];
-
-                if (!$this->config->canResync($responseCode, [], $this->isCommandLineSync)) {
-                    $this->yotpoSmsBumpLogger->info('Customer sync cannot be done for customerId: '
-                        . $customerId . ', due to response code: ' . $responseCode, []);
-                    continue;
-                }
-
-                /** @var Customer $customerWithYotpoSyncData */
-                $response = $this->syncCustomer($customerWithYotpoSyncData);
-                if ($response) {
-                    $customerSyncData = $this->createCustomerSyncData($response, $customerId);
-                }
-
-                if ($customerSyncData) {
-                    $customerSyncData = $this->updateCustomerSyncData($customerSyncData, $currentTime);
-                    $this->insertOrUpdateCustomerSyncData($customerSyncData);
-                }
+            foreach ($customerCollectionData as $customerData) {
+                $this->doCustomerSyncActions($customerData, $currentTime);
             }
 
             $this->yotpoSmsBumpLogger->info(
                 __(
-                    'Finished Customers sync to Yotpo Cron job - Magento Store ID: %1, Name: %2',
+                    'Finished Customers ' . $processLabel . ' to Yotpo Cron job - Magento Store ID: %1, Name: %2',
                     $storeId,
                     $this->config->getStoreName($storeId)
                 )
@@ -315,6 +333,42 @@ class Processor extends Main
         $this->updateLastSyncDate($currentTime);
     }
 
+    /**
+     * @param Customer $customer
+     * @param string $currentTime
+     * @param bool $isRealTimeSync
+     * @param null|mixed $customerAddress
+     * @return void
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
+     */
+    public function doCustomerSyncActions($customer, $currentTime, $isRealTimeSync = false, $customerAddress = null)
+    {
+        $customerSyncData = [];
+        $exception = false;
+        $customerId = $customer->getId();
+        $storeId = $this->config->getStoreId();
+        $isCustomerAccountShared = $this->config->isCustomerAccountShared();
+        try {
+            $response = $this->syncCustomer($customer);
+            if ($response) {
+                $customerSyncData = $this->createCustomerSyncData($response, $customerId);
+                $this->updateCustomersSyncedByStoreData($customerId, $storeId, $response);
+                $this->updateCustomerSyncStatusAttribute($customerId, $storeId, $isCustomerAccountShared);
+            }
+        } catch (NoSuchEntityException | LocalizedException $e) {
+            $this->writeToLogWithException($customerId, $e->getMessage());
+            $exception = true;
+            $customerSyncData = $this->createCustomerSyncDataOnException($customerId);
+        }
+        if ($customerSyncData) {
+            $customerSyncData = $this->updateCustomerSyncData($customerSyncData, $currentTime);
+            if ($exception) {
+                $customerSyncData['should_retry'] = $this->isCustomerRetrySync() ? 0 : 1;
+            }
+            $this->insertOrUpdateCustomerSyncData($customerSyncData);
+        }
+    }
     /**
      * Calls customer sync api
      *
@@ -341,7 +395,6 @@ class Processor extends Main
             $customerData = $this->data->prepareData($customer, $isRealTimeSync, $customerAddress);
             $this->customerDataPrepared[$customerId] = $customerData;
         }
-
         if (!$customerData) {
             $this->yotpoSmsBumpLogger->info(
                 __(
@@ -380,36 +433,12 @@ class Processor extends Main
     }
 
     /**
-     * @param string $customerId
-     * @param int $customerStoreId
-     * @param int $syncStatus
-     * @param boolean $shouldUpdateAllStores
+     * @param int $customerId
      * @return void
-     * @throws NoSuchEntityException|LocalizedException
      */
-    public function resetCustomerSyncStatus($customerId, $customerStoreId, $syncStatus, $shouldUpdateAllStores = false)
+    public function resetCustomerSyncAttributeStatus($customerId)
     {
-        $customersSyncData = [];
-        $storeIds = [];
-        if (!$shouldUpdateAllStores && !$this->config->isCustomerAccountShared()) {
-            $storeIds[] = $customerStoreId;
-        } else {
-            /** @phpstan-ignore-next-line */
-            foreach ($this->config->getAllStoreIds(false) as $storeId) {
-                $storeIds[] = $storeId;
-            }
-        }
-
-        foreach ($storeIds as $storeId) {
-            $customersSyncData[] = [
-                'customer_id' => $customerId,
-                'store_id' => $storeId,
-                'sync_status' => $syncStatus,
-                'response_code' => '200'
-            ];
-        }
-
-        $this->insertOrUpdateCustomerSyncData($customersSyncData);
+        $this->insertOrUpdateCustomerSyncAttributeStatus($customerId, 0);
     }
 
     /**
@@ -446,52 +475,181 @@ class Processor extends Main
     {
         $customerSyncData['store_id'] = $this->config->getStoreId();
         $customerSyncData['synced_to_yotpo'] = $currentTime;
-        $customerSyncData['sync_status'] = 0;
-        if ($this->config->canUpdateCustomAttribute($customerSyncData['response_code'])) {
-            $customerSyncData['sync_status'] = 1;
-        }
-
+        $customerSyncData['should_retry'] = (int) $this->config->shouldRetryCustomer(
+            $customerSyncData['response_code']
+        );
         return $customerSyncData;
     }
 
     /**
-     * @param int $storeId
      * @param array<mixed> $retryCustomerIds
      * @param bool $customerAccountShared
-     * @param int $websiteId
-     * @param int $batchSize
-     * @return mixed
+     * @param string|int|null $websiteId
+     * @param integer $batchSize
+     * @return array<mixed>
      */
-    private function createCustomerCollectionWithYotpoSyncDataQuery(
-        $storeId,
-        $retryCustomerIds,
-        $customerAccountShared,
-        $websiteId,
-        $batchSize
-    ) {
+    private function createCustomerCollection(array $retryCustomerIds, $customerAccountShared, $websiteId, $batchSize)
+    {
+        $storeId = $this->config->getStoreId();
+
+        if ($this->isCustomerRetrySync()) {
+            $retryCustomerIds = $this->getCustomerIdsToRetry($batchSize);
+            if (!$retryCustomerIds) {
+                $this->yotpoSmsBumpLogger->info(
+                    __(
+                        'There are no customer records left to retry - Magento Store ID: %1, Name: %2',
+                        $storeId,
+                        $this->config->getStoreName($storeId)
+                    )
+                );
+                return [];
+            }
+        }
+        $attributeCode = Config::YOTPO_CUSTOM_ATTRIBUTE_SYNCED_TO_YOTPO_CUSTOMER;
         $customerCollection = $this->customerFactory->create();
-        $customerCollection->getSelect()->joinLeft(
-            ['yotpo_customers_sync' => $customerCollection->getTable('yotpo_customers_sync')],
-            'e.entity_id = yotpo_customers_sync.customer_id
-            AND (yotpo_customers_sync.store_id is null OR yotpo_customers_sync.store_id = \'' . $storeId . '\')',
-            [
-                'store_id',
-                'sync_status',
-                'response_code'
-            ]
-        );
         if (!$retryCustomerIds) {
-            $customerCollection->getSelect()
-                ->where('yotpo_customers_sync.sync_status is null OR  yotpo_customers_sync.sync_status = ?', 0);
+            $customerCollection->addAttributeToFilter(
+                [
+                    ['attribute' => $attributeCode, 'null' => true],
+                    ['attribute' => $attributeCode, 'eq' => '0'],
+                ]
+            );
         } else {
-            $customerCollection->getSelect()
-                ->where('e.entity_id in (?)', $retryCustomerIds);
+            $customerCollection->addFieldToFilter('entity_id', ['in' => $retryCustomerIds]);
         }
         if (!$customerAccountShared) {
-            $customerCollection->getSelect()
-                ->where('e.website_id = ? ', $websiteId);
+            $customerCollection->addFieldToFilter('website_id', $websiteId);
         }
         $customerCollection->getSelect()->limit($batchSize);
-        return $customerCollection;
+        return $customerCollection->getItems();
+    }
+
+    /**
+     * @throws NoSuchEntityException
+     * @throws LocalizedException
+     * @return void
+     */
+    public function setCustomerSyncEnabledStores()
+    {
+        if ($this->customerSyncEnabledStores) {
+            return;
+        }
+        $storeIds = $this->config->getAllStoreIds(false);
+        if (!$storeIds) {
+            return;
+        }
+        foreach ($storeIds as $storeId) {
+            if ($this->config->isCustomerSyncActive($storeId)) {
+                $this->customerSyncEnabledStores[] = $storeId;
+            }
+        }
+    }
+
+    /**
+     * @param int $customerId
+     * @param int $storeId
+     * @param array<mixed>|DataObject $apiResponse
+     * @return void
+     */
+    public function updateCustomersSyncedByStoreData($customerId, $storeId, $apiResponse)
+    {
+        if (!$apiResponse) {
+            return;
+        }
+        $successFullResponseCodes = [Config::SUCCESS_RESPONSE_CODE, Config::CREATED_STATUS_CODE];
+        if (is_object($apiResponse) &&
+            in_array($apiResponse->getStatus(), $successFullResponseCodes)
+        ) {
+            $this->customersSyncedByStore[$customerId][] = $storeId;
+        }
+    }
+
+    /**
+     * @param int $customerId
+     * @param int $storeId
+     * @param boolean $isCustomerAccountShared
+     * @return void
+     */
+    public function updateCustomerSyncStatusAttribute($customerId, $storeId, $isCustomerAccountShared)
+    {
+        if ($isCustomerAccountShared) {
+            $storesToCheck = $this->customerSyncEnabledStores;
+        } else {
+            $storesToCheck = [$storeId];
+        }
+        if (!$storesToCheck) {
+            return;
+        }
+
+        $customerSyncedByStoresSoFar = $this->customersSyncedByStore[$customerId] ?? [];
+        $customersPendingToSyncByStores = array_diff($storesToCheck, $customerSyncedByStoresSoFar);
+        if (!$customersPendingToSyncByStores) {
+            $this->insertOrUpdateCustomerSyncAttributeStatus($customerId, 1);
+            $this->yotpoSmsBumpLogger->info(
+                __(
+                    'Updated customer sync attribute value as 1 - Customer ID: %1',
+                    $customerId
+                )
+            );
+        }
+    }
+
+    /**
+     * collect customer records that needs a retry
+     * @param int $batchSize
+     * @return array<mixed>
+     * @throws NoSuchEntityException
+     */
+    public function getCustomerIdsToRetry($batchSize)
+    {
+        $storeId = $this->config->getStoreId();
+        $customers = $this->yotpoCustomersSyncCollectionFactory->create();
+        $customers
+            ->addFieldToFilter('should_retry', '1')
+            ->addFieldToFilter('store_id', "$storeId")
+            ->addFieldToSelect('customer_id');
+        $customers->getSelect()->limit($batchSize);
+        return $customers->getColumnValues('customer_id');
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCustomerRetrySync()
+    {
+        return $this->customerRetrySync;
+    }
+
+    /**
+     * @param bool $flag
+     * @return void
+     */
+    public function setCustomerRetrySync($flag)
+    {
+        $this->customerRetrySync = $flag;
+    }
+
+    /**
+     * @param int $customerId
+     * @param string $exceptionMessage
+     * @return void
+     * @throws NoSuchEntityException
+     */
+    protected function writeToLogWithException($customerId, $exceptionMessage)
+    {
+        $storeId = $this->config->getStoreId();
+        $storeName = $this->config->getStoreName($storeId);
+        $this->yotpoSmsBumpLogger->info(
+            __(
+                'Failed to sync Customer to Yotpo -
+                            Magento Store ID: %1,
+                            Name: %2, CustomerID: %3,
+                            Exception Message: %4',
+                $storeId,
+                $storeName,
+                $customerId,
+                $exceptionMessage
+            )
+        );
     }
 }

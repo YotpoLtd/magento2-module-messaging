@@ -7,9 +7,9 @@ use Magento\Framework\Exception\NoSuchEntityException;
 use Yotpo\SmsBump\Model\Sync\Customers\Processor as CustomersProcessor;
 
 /**
- * Class CustomersSync - Process customers using cron job
+ * Class BackFillSync - Process customers backfill sync using cron job
  */
-class CustomersSync
+class BackFillSync
 {
     /**
      * @var CustomersProcessor
@@ -33,8 +33,8 @@ class CustomersSync
      * @throws NoSuchEntityException
      * @throws LocalizedException
      */
-    public function processCustomers()
+    public function processBackFillSync()
     {
-        $this->customersProcessor->process();
+        $this->customersProcessor->processBackFillSync();
     }
 }

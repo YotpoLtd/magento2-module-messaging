@@ -27,6 +27,14 @@ class Config extends CoreConfig
     const YOTPO_CUSTOM_ATTRIBUTE_SMS_MARKETING = 'yotpo_accepts_sms_marketing';
 
     /**
+     * Custom attribute code to flag a customer data is pending to be synced
+     */
+    const YOTPO_CUSTOM_ATTRIBUTE_SYNCED_TO_YOTPO_CUSTOMER = 'synced_to_yotpo_customer';
+
+    const YOTPO_CRON_JOB_CODE_CUSTOMERS_BACKFILL_SYNC = 'yotpo_cron_messaging_customers_backfill_sync';
+    const YOTPO_CRON_JOB_CODE_CUSTOMERS_RETRY_SYNC = 'yotpo_cron_messaging_customers_retry_sync';
+
+    /**
      * HTTP Request PATCH method string
      */
     const PATCH_METHOD_STRING = 'PATCH';
@@ -185,5 +193,20 @@ class Config extends CoreConfig
     {
         $config = $this->getConfig('customer_account_shared');
         return !$config || $config == \Magento\Customer\Model\Config\Share::SHARE_GLOBAL;
+    }
+
+    /**
+     * @param string $responseCode
+     * @return bool
+     */
+    public function shouldRetryCustomer($responseCode)
+    {
+        if (in_array($responseCode, $this->successfulResponseCodes)) {
+            return false;
+        }
+        if ($this->canResync($responseCode)) {
+            return true;
+        }
+        return false;
     }
 }

@@ -79,11 +79,8 @@ class CustomerSaveAfter implements ObserverInterface
         $customer = $observer->getEvent()->getCustomer();
         $isCustomerSyncActive = $this->yotpoSmsConfig->isCustomerSyncActive();
         if (!$this->request->getParam('custSync')) {
-            $this->customersProcessor->resetCustomerSyncStatus(
-                $customer->getId(),
-                $customer->getStoreId(),
-                0,
-                true
+            $this->customersProcessor->resetCustomerSyncAttributeStatus(
+                $customer->getId()
             );
             if ($isCustomerSyncActive) {
                 $isActive = 1;

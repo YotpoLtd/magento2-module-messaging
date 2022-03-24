@@ -3,8 +3,10 @@
 namespace Yotpo\SmsBump\Model\Sync\Data;
 
 use Magento\Customer\Api\CustomerRepositoryInterface;
+use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Yotpo\Core\Model\Sync\Data\Main;
 use Yotpo\SmsBump\Model\Config;
 use Magento\Quote\Model\Quote\Address as QuoteAddress;
 use Magento\Customer\Model\Address as CustomerAddress;
@@ -13,7 +15,7 @@ use Yotpo\SmsBump\Helper\Data as MessagingDataHelper;
 /**
  * Class AbstractData for common methods
  */
-class AbstractData
+class AbstractData extends Main
 {
     /**
      * @var CustomerRepositoryInterface
@@ -39,8 +41,10 @@ class AbstractData
     public function __construct(
         CustomerRepositoryInterface $customerRepository,
         MessagingDataHelper $messagingDataHelper,
-        Config $config
+        Config $config,
+        ResourceConnection $resourceConnection
     ) {
+        parent::__construct($resourceConnection);
         $this->customerRepository = $customerRepository;
         $this->messagingDataHelper = $messagingDataHelper;
         $this->config = $config;

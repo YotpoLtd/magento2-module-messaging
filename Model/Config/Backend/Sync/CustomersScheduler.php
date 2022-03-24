@@ -19,20 +19,22 @@ use Magento\Framework\Registry;
 class CustomersScheduler extends ConfigValue
 {
     /**
-     * Path of the cron string
+     * @var string[]
      */
-    // phpcs:ignore
-    const CRON_STRING_PATH = 'crontab/yotpo_messaging_customers_sync/jobs/yotpo_cron_messaging_customers_sync/schedule/cron_expr';
+    protected $cronJobPaths = [
+        'crontab/yotpo_messaging_customers_sync/jobs/yotpo_cron_messaging_customers_backfill_sync/schedule/cron_expr',
+        'crontab/yotpo_messaging_customers_sync/jobs/yotpo_cron_messaging_customers_retry_sync/schedule/cron_expr',
+    ];
 
     /**
      * @var ValueFactory
      */
-    protected $_configValueFactory;
+    protected $configValueFactory;
 
     /**
      * @var string
      */
-    protected $_runModelPath;
+    protected $runModelPath;
 
     /**
      * CustomersScheduler constructor.
@@ -56,8 +58,8 @@ class CustomersScheduler extends ConfigValue
         AbstractDb $resourceCollection = null,
         array $data = []
     ) {
-        $this->_runModelPath = '';
-        $this->_configValueFactory = $configValueFactory;
+        $this->runModelPath = '';
+        $this->configValueFactory = $configValueFactory;
         parent::__construct($context, $registry, $config, $cacheTypeList, $resource, $resourceCollection, $data);
     }
 
@@ -70,18 +72,20 @@ class CustomersScheduler extends ConfigValue
     public function afterSave()
     {
         $cronExprString = $this->getData('groups/sync_settings/groups/customers_sync/fields/frequency/value');
-        try {
-            /** @phpstan-ignore-next-line */
-            $this->_configValueFactory->create()->load(
-                self::CRON_STRING_PATH,
-                'path'
-            )->setValue(
-                $cronExprString
-            )->setPath(
-                self::CRON_STRING_PATH
-            )->save();
-        } catch (\Exception $e) {
-            throw new AlreadyExistsException(__('We can\'t save the cron expression.'));
+        foreach ($this->cronJobPaths as $path) {
+            try {
+                /** @phpstan-ignore-next-line */
+                $this->configValueFactory->create()->load(
+                    $path,
+                    'path'
+                )->setValue(
+                    $cronExprString
+                )->setPath(
+                    $path
+                )->save();
+            } catch (\Exception $e) {
+                throw new AlreadyExistsException(__('We can\'t save the cron expression.'));
+            }
         }
         return parent::afterSave();
     }

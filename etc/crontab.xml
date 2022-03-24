@@ -1,8 +1,13 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
     <group id="yotpo_messaging_customers_sync">
-        <job name="yotpo_cron_messaging_customers_sync" instance="Yotpo\SmsBump\Model\Sync\Customers\Cron\CustomersSync" method="processCustomers">
-            <config_path>crontab/yotpo_messaging_customers_sync/jobs/yotpo_cron_messaging_customers_sync/schedule/cron_expr</config_path>
+        <job name="yotpo_cron_messaging_customers_backfill_sync" instance="Yotpo\SmsBump\Model\Sync\Customers\Cron\BackFillSync"
+             method="processBackFillSync">
+            <config_path>crontab/yotpo_messaging_customers_sync/jobs/yotpo_cron_messaging_customers_backfill_sync/schedule/cron_expr</config_path>
+        </job>
+        <job name="yotpo_cron_messaging_customers_retry_sync" instance="Yotpo\SmsBump\Model\Sync\Customers\Cron\RetrySync"
+             method="processRetrySync">
+            <config_path>crontab/yotpo_messaging_customers_sync/jobs/yotpo_cron_messaging_customers_retry_sync/schedule/cron_expr</config_path>
         </job>
     </group>
 </config>

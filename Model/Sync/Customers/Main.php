@@ -8,6 +8,7 @@ use Magento\Store\Model\App\Emulation as AppEmulation;
 use Magento\Framework\App\ResourceConnection;
 use Yotpo\SmsBump\Model\Config;
 use Yotpo\Core\Model\Sync\Customers\Processor as CoreCustomersProcessor;
+use Magento\Cron\Model\ResourceModel\Schedule\CollectionFactory as CronCollectionFactory;
 
 /**
  * Class Main - Manage Customers sync
@@ -30,21 +31,29 @@ class Main extends CoreCustomersProcessor
     protected $resourceConnection;
 
     /**
+     * @var CronCollectionFactory
+     */
+    protected $cronCollectionFactory;
+
+    /**
      * Main constructor.
      * @param AppEmulation $appEmulation
      * @param ResourceConnection $resourceConnection
      * @param Config $config
      * @param Data $data
+     * @param CronCollectionFactory $cronCollectionFactory
      */
     public function __construct(
         AppEmulation $appEmulation,
         ResourceConnection $resourceConnection,
         Config $config,
-        Data $data
+        Data $data,
+        CronCollectionFactory $cronCollectionFactory
     ) {
         $this->config =  $config;
         $this->data   =  $data;
         $this->resourceConnection = $resourceConnection;
+        $this->cronCollectionFactory = $cronCollectionFactory;
         parent::__construct($appEmulation, $resourceConnection);
     }
 
@@ -90,6 +99,19 @@ class Main extends CoreCustomersProcessor
     }
 
     /**
+     * @param int $magentoCustomerId
+     * @return array<mixed>
+     */
+    public function createCustomerSyncDataOnException($magentoCustomerId)
+    {
+        $customerSyncData = [
+            'response_code' =>  '',
+            'customer_id'   =>  $magentoCustomerId
+        ];
+        return $customerSyncData;
+    }
+
+    /**
      * Inserts or updates custom table data
      *
      * @param array<mixed> $customerSyncData
@@ -98,5 +120,42 @@ class Main extends CoreCustomersProcessor
     public function insertOrUpdateCustomerSyncData($customerSyncData)
     {
         $this->insertOnDuplicate('yotpo_customers_sync', [$customerSyncData]);
+    }
+
+    /**
+     * @param int $customerId
+     * @param int $syncStatus
+     * @return void
+     */
+    public function insertOrUpdateCustomerSyncAttributeStatus($customerId, $syncStatus)
+    {
+        $attributeCode = Config::YOTPO_CUSTOM_ATTRIBUTE_SYNCED_TO_YOTPO_CUSTOMER;
+        $attributeId = $this->data->getAttributeId($attributeCode);
+        $attributeDataToUpdate = [
+            [
+                'entity_id' => $customerId,
+                'attribute_id' => $attributeId,
+                'value' => $syncStatus
+            ]
+        ];
+        $this->insertOnDuplicate('customer_entity_int', $attributeDataToUpdate);
+    }
+
+    /**
+     * @param string $jobCode
+     * @return bool
+     */
+    public function checkCustomerSyncCronIsRunning($jobCode)
+    {
+        try {
+            $cronCollection = $this->cronCollectionFactory->create();
+            $cronCollection->addFieldToFilter('status', \Magento\Cron\Model\Schedule::STATUS_RUNNING);
+            $cronCollection->addFieldToFilter('job_code', $jobCode);
+            $cronScheduleItems = $cronCollection->getItems();
+            $customersRetryCronIsRunning = (bool) count($cronScheduleItems);
+        } catch (\Exception $e) {
+            $customersRetryCronIsRunning = false;
+        }
+        return $customersRetryCronIsRunning;
     }
 }

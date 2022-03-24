@@ -3,4 +3,7 @@
     <event name="admin_system_config_changed_section_yotpo_core">
         <observer name="yotpo_smsbump_admin_system_config_changed_section_yotpo" instance="Yotpo\SmsBump\Observer\Config\Save" />
     </event>
+    <event name="admin_system_config_changed_section_customer">
+        <observer name="yotpo_smsbump_admin_system_config_changed_section_customer" instance="Yotpo\SmsBump\Observer\Config\Customer\Save" />
+    </event>
 </config>
