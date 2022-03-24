@@ -83,4 +83,42 @@ class CustomersAttributesService extends AbstractJobs
             $attributeValue
         );
     }
+
+    /**
+     * @return void
+     */
+    public function resetCustomersSyncedToYotpoAttribute()
+    {
+        try {
+            $connection = $this->resourceConnection->getConnection();
+            $syncedToYotpoCustomerAttributeCode = $this->yotpoCoreSyncData->getAttributeId($this->config::SYNCED_TO_YOTPO_CUSTOMER_ATTRIBUTE_NAME);
+            $customerEntityIntTableName = $this->config::CUSTOMER_ENTITY_INT_TABLE_NAME;
+            $sqlUpdateLimit = $this->config->getUpdateSqlLimit();
+            $customersThatWereProcesssedQuery = $connection->select()->from(
+                [ $this->resourceConnection->getTableName($customerEntityIntTableName) ],
+                ['value_id']
+            )->where(
+                'attribute_id = ?',
+                $syncedToYotpoCustomerAttributeCode
+            )->where(
+                'value = ?',
+                1
+            )->limit(
+                $sqlUpdateLimit
+            );
+
+            while(count($rowsToUpdate = $connection->fetchAssoc($customersThatWereProcesssedQuery, 'value_id'))) {
+                $connection->update(
+                    $customerEntityIntTableName,
+                    [ 'value' => 0 ],
+                    [ 'value_id IN (?) ' => $rowsToUpdate ]
+                );
+            }
+        } catch (\Exception $exception) {
+            $this->currentResetCustomersSyncAttempts++;
+            if (!($this->currentResetCustomersSyncAttempts == $this::MAXIMUM_RESET_CUSTOMERS_SYNC_RETRIES_ATTEMPTS)) {
+                $this->resetCustomersSyncedToYotpoAttribute();
+            }
+        }
+    }
 }
