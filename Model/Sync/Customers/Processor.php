@@ -201,8 +201,8 @@ class Processor extends Main
             $storesIdsEligibleForSync = $this->getEligibleStoresForSync();
             $syncedToYotpoCustomerAttributeCode = $this->yotpoCoreSyncData->getAttributeId($this->config::SYNCED_TO_YOTPO_CUSTOMER_ATTRIBUTE_NAME);
             foreach ($customersCollection as $customer) {
+                $customerId = $customer->getId();
                 try {
-                    $customerId = $customer->getId();
                     if ($isCustomerAccountShared) {
                         $this->syncSharedStoresCustomer($customer, $storesIdsEligibleForSync);
                     } else {
@@ -216,9 +216,10 @@ class Processor extends Main
                 } catch (Exception $exception) {
                     $this->yotpoCustomersLogger->info(
                         __(
-                            'Failed to sync customer to Yotpo - Magento Store ID: %1, Magento Store Name: %2, Reason: %3',
+                            'Failed to sync customer to Yotpo - Magento Store ID: %1, Magento Store Name: %2, Customer ID: %3 Exception Message: %4',
                             $storeId,
                             $this->config->getStoreName($storeId),
+                            $customerId,
                             $exception->getMessage()
                         )
                     );
