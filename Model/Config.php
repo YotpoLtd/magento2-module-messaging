@@ -60,7 +60,6 @@ class Config extends CoreConfig
      */
     protected $smsBumpConfig = [
         'checkout_sync_active' => ['path' => 'yotpo_core/sync_settings/checkout_sync/enable'],
-        'checkout_sync_allowed_urls' => ['path' => 'yotpo_core/sync_settings/checkout_sync/allowed_urls'],
         'checkout_last_sync_time' => ['path' =>
                                         'yotpo_core/sync_settings/checkout_sync/last_sync_time',
                                         'read_from_db' => true
