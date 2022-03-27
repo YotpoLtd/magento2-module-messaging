@@ -214,6 +214,9 @@ class Processor extends Main
                         $this->insertOrUpdateCustomerAttribute($customerId, $syncedToYotpoCustomerAttributeCode);
                     }
                 } catch (Exception $exception) {
+                    $this->insertOrUpdateCustomerAttribute($customerId, $syncedToYotpoCustomerAttributeCode);
+                    $customerSyncData = $this->createServerErrorCustomerSyncData($customerId, $storeId);
+                    $this->insertOrUpdateCustomerSyncData($customerSyncData);
                     $this->yotpoCustomersLogger->info(
                         __(
                             'Failed to sync customer to Yotpo - Magento Store ID: %1, Magento Store Name: %2, Customer ID: %3 Exception Message: %4',
@@ -272,8 +275,7 @@ class Processor extends Main
                 $this->syncCustomer($customer, $storeId, true, $customerAddress);
             }
 
-            $syncedToYotpoCustomerAttributeCode = $this->yotpoCoreSyncData->getAttributeId($this->config::SYNCED_TO_YOTPO_CUSTOMER_ATTRIBUTE_NAME);
-            $this->insertOrUpdateCustomerAttribute($customerId, $syncedToYotpoCustomerAttributeCode);
+            $this->updateSyncedToYotpoCustomerAttributeAsSynced($customerId);
 
             $this->yotpoCustomersLogger->info(
                 __(
@@ -284,6 +286,9 @@ class Processor extends Main
                 )
             );
         } catch (Exception $exception) {
+            $this->updateSyncedToYotpoCustomerAttributeAsSynced($customerId);
+            $customerSyncData = $this->createServerErrorCustomerSyncData($customerId, $storeId);
+            $this->insertOrUpdateCustomerSyncData($customerSyncData);
             $this->yotpoCustomersLogger->info(
                 __(
                     'Failed to sync Customer to Yotpo - Magento Store ID: %1, Magento Store Name: %2, Customer ID: %3, Exception Message: %4',
@@ -451,5 +456,14 @@ class Processor extends Main
     private function updateLastSyncDate($currentTime)
     {
         $this->config->saveConfig('customers_last_sync_time', $currentTime);
+    }
+
+    /**
+     * @param string $customerId
+     */
+    private function updateSyncedToYotpoCustomerAttributeAsSynced($customerId)
+    {
+        $syncedToYotpoCustomerAttributeCode = $this->yotpoCoreSyncData->getAttributeId($this->config::SYNCED_TO_YOTPO_CUSTOMER_ATTRIBUTE_NAME);
+        $this->insertOrUpdateCustomerAttribute($customerId, $syncedToYotpoCustomerAttributeCode);
     }
 }
