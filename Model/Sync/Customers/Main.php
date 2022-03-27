@@ -155,6 +155,29 @@ class Main extends CoreCustomersProcessor
     }
 
     /**
+     * Creates failed customer sync table data
+     * @param int $magentoCustomerId
+     * @param string $storeId
+     * @return array
+     */
+    public function createServerErrorCustomerSyncData($magentoCustomerId, $storeId)
+    {
+        $currentTime = date('Y-m-d H:i:s');
+        $statusCode = '500';
+        $shouldRetry = false;
+        $customerSyncData = [
+            /** @phpstan-ignore-next-line */
+            'customer_id' => $magentoCustomerId,
+            'response_code' => $statusCode,
+            'should_retry' => $shouldRetry,
+            'store_id' => $storeId,
+            'synced_to_yotpo' => $currentTime
+        ];
+
+        return $customerSyncData;
+    }
+
+    /**
      * Inserts or updates custom table data
      *
      * @param array $customerSyncData
