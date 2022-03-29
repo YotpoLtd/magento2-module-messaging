@@ -97,19 +97,22 @@ class Processor
             if (!$newCheckoutData) {
                 return;
             }
-            $productIds = $this->checkoutData->getLineItemsIds();
-            if ($productIds) {
-                $visibleItems = $quote->getAllVisibleItems();
+
+            $visibleItems = $quote->getAllVisibleItems();
+            if ($visibleItems) {
+                $productIds = array_map(function ($item) {
+                    return $item->getProductId();
+                }, $visibleItems);
+
                 $storeId = $quote->getStoreId();
-                $isProductSyncSuccess = $this->catalogProcessor->syncProducts($productIds, $visibleItems, $storeId);
+                $isProductSyncSuccess = $this->catalogProcessor->syncProducts($productIds, $storeId);
                 if (!$isProductSyncSuccess) {
                     $this->yotpoCheckoutLogger->info(
                         __(
-                            'Failed to sync Checkout to Yotpo -
-                            products sync to Yotpo failed -
-                            Store ID: %1, Products IDs: %2',
+                            'Failed to sync Checkout to Yotpo - products sync to Yotpo failed - Store ID: %1, Products IDs: %2, Checkout ID: %3',
                             $storeId,
-                            $productIds
+                            $productIds,
+                            $quote->getId()
                         )
                     );
                     return;
