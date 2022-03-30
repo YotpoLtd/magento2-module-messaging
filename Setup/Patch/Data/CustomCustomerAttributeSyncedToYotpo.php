@@ -2,6 +2,7 @@
 
 namespace Yotpo\SmsBump\Setup\Patch\Data;
 
+use Yotpo\Core\Model\CustomCustomerAttributeSyncedToYotpo as CoreCustomCustomerAttributeSyncedToYotpo;
 use Magento\Customer\Model\Customer;
 use Magento\Customer\Setup\CustomerSetupFactory;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
@@ -9,7 +10,7 @@ use Magento\Framework\Setup\Patch\DataPatchInterface;
 use Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface;
 use Yotpo\SmsBump\Model\Config as MessagingConfig;
 
-class CustomCustomerAttributeSyncedToYotpo implements DataPatchInterface
+class CustomCustomerAttributeSyncedToYotpo extends CoreCustomCustomerAttributeSyncedToYotpo implements DataPatchInterface
 {
     const CUSTOMER_SETUP_FACTORY_SETUP_KEY = 'setup';
 
