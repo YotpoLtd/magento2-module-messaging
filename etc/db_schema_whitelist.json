@@ -6,11 +6,11 @@
             "store_id": true,
             "synced_to_yotpo": true,
             "response_code": true,
-            "sync_status": true
+            "should_retry": true
         },
         "index": {
             "YOTPO_CUSTOMERS_SYNC_ENTITY_ID": true,
-            "YOTPO_CUSTOMERS_SYNC_SYNC_STATUS": true
+            "YOTPO_CUSTOMERS_SYNC_STORE_ID_SHOULD_RETRY": true
         },
         "constraint": {
             "PRIMARY": true,

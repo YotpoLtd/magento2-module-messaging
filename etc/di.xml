@@ -60,9 +60,9 @@
             <argument name="filesystem" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
         </arguments>
     </type>
-    <type name="Magento\Quote\Model\Cart\CartTotalRepository">
-        <plugin name="yotpo_smsbump_quote_model_cart_carttotalrepository_plugin"
-                type="Yotpo\SmsBump\Plugin\Quote\Model\Cart\CartTotalRepository" />
+    <type name="Magento\Quote\Model\Quote">
+        <plugin name="yotpo_smsbump_quote_model_quote"
+                type="Yotpo\SmsBump\Plugin\Quote\Model\Quote"/>
     </type>
     <type name="Magento\Checkout\Controller\Account\DelegateCreate">
         <plugin name="yotpo_smsbump_account_delegate_create"
@@ -92,6 +92,7 @@
     <type name="Yotpo\Core\Model\System\Message\CustomSystemMessage">
         <arguments>
             <argument name="customCustomerAttributeSmsMarketing" xsi:type="object">Yotpo\SmsBump\Setup\Patch\Data\CustomCustomerAttributeSmsMarketing</argument>
+            <argument name="customCustomerAttributeSyncedToYotpo" xsi:type="object">Yotpo\SmsBump\Setup\Patch\Data\CustomCustomerAttributeSyncedToYotpo</argument>
         </arguments>
     </type>
     <type name="Yotpo\Core\Model\Sync\Reset">

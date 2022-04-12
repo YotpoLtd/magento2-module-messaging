@@ -8,13 +8,15 @@ use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\ProductRepository;
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable as ProductTypeConfigurable;
 use Magento\Customer\Api\AddressRepositoryInterface;
+use Magento\Customer\Api\Data\CustomerInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\GroupedProduct\Model\Product\Type\Grouped as ProductTypeGrouped;
+use Magento\Quote\Model\Quote\Address as QuoteAddress;
 use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\Quote\Item;
 use Magento\SalesRule\Model\ResourceModel\Coupon\CollectionFactory as CouponCollectionFactory;
-use Yotpo\SmsBump\Helper\Data as SMSHelper;
+use Yotpo\SmsBump\Helper\Data as MessagingDataHelper;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Store\Model\StoreManagerInterface;
 use Yotpo\SmsBump\Model\Sync\Data\AbstractData;
@@ -26,10 +28,11 @@ use Yotpo\SmsBump\Model\AbandonedCart\Data as AbandonedCartData;
 class Data
 {
     const ABANDONED_URL = 'yotpo_messaging/abandonedcart/loadcart/yotpoQuoteToken/';
+    const GIFTCARD_STRING = 'giftcard';
     /**
-     * @var SMSHelper
+     * @var MessagingDataHelper
      */
-    protected $smsHelper;
+    protected $messagingDataHelper;
 
     /**
      * @var CheckoutSession
@@ -88,7 +91,7 @@ class Data
 
     /**
      * Data constructor.
-     * @param SMSHelper $smsHelper
+     * @param MessagingDataHelper $messagingDataHelper
      * @param CheckoutSession $checkoutSession
      * @param StoreManagerInterface $storeManager
      * @param CouponCollectionFactory $couponCollectionFactory
@@ -99,7 +102,7 @@ class Data
      * @param AbandonedCartData $abandonedCartData
      */
     public function __construct(
-        SMSHelper $smsHelper,
+        MessagingDataHelper $messagingDataHelper,
         CheckoutSession $checkoutSession,
         StoreManagerInterface $storeManager,
         CouponCollectionFactory $couponCollectionFactory,
@@ -109,7 +112,7 @@ class Data
         AddressRepositoryInterface $customerAddressRepository,
         AbandonedCartData $abandonedCartData
     ) {
-        $this->smsHelper = $smsHelper;
+        $this->messagingDataHelper = $messagingDataHelper;
         $this->checkoutSession = $checkoutSession;
         $this->storeManager = $storeManager;
         $this->couponCollectionFactory = $couponCollectionFactory;
@@ -142,6 +145,12 @@ class Data
             }
         }
         if (!$customerId && !$customerEmail) {
+            $this->checkoutLogger->info(
+                __(
+                    'Did not sync Checkout to Yotpo - Checkout event without address data - Checkout ID: %1',
+                    $quote->getId()
+                )
+            );
             return [];
         }
 
@@ -150,48 +159,62 @@ class Data
             $quoteToken = $this->abandonedCartData->updateAbandonedCartDataAndReturnToken($quote, $customerEmail);
         }
 
-        $billingAddressData = $this->prepareAddress($quote, 'billing');
+        $billingAddressData = $this->prepareBillingAddress($quote);
         if (!$billingAddressData || !$billingAddressData['country_code']) {
+            $this->checkoutLogger->info(
+                __(
+                    'Failed to sync Checkout to Yotpo -
+                    Billing Address didn\'t contain valid Country ID -
+                    Checkout ID: %1, Country ID: %2',
+                    $quote->getId(),
+                    $quote->getBillingAddress()->getCountryId()
+                )
+            );
             return [];
         }
+
         $baseUrl = $this->storeManager->getStore()->getBaseUrl();
         $checkoutDate = $quote->getUpdatedAt() ?: $quote->getCreatedAt();
         if (!$quote->getCustomerIsGuest() && $quote->getCustomerId()) {
-            $customAttributeValue = $this->abstractData->getSmsMarketingCustomAttributeValue($customerId);
+            $isCustomerAcceptsSmsMarketing = $this->abstractData->getSmsMarketingCustomAttributeValue($customerId);
         } else {
-            $customAttributeValue = (bool) $this->checkoutSession->getYotpoSmsMarketing();
+            $isCustomerAcceptsSmsMarketing = (bool) $this->checkoutSession->getYotpoSmsMarketing();
         }
-        $data = [
+
+        $checkoutData = [
             'token' => $quote->getId(),
-            'checkout_date' => $this->smsHelper->formatDate($checkoutDate),
+            'checkout_date' => $this->messagingDataHelper->formatDate($checkoutDate),
             'landing_site_url' => $baseUrl,
-            'customer' => [
-                'external_id' => $customerId ?: $customerEmail,
-                'email' => $customerEmail,
-                'phone_number' => $billingAddress->getTelephone() ? $this->smsHelper->formatPhoneNumber(
-                    $billingAddress->getTelephone(),
-                    $billingAddress->getCountryId()
-                ) : null,
-                'first_name' => $customerData->getFirstname(),
-                'last_name' => $customerData->getLastname(),
-                'accepts_sms_marketing' => $customAttributeValue
-            ],
+            'customer' => $this->prepareCustomer(
+                $customerId,
+                $customerEmail,
+                $billingAddress,
+                $customerData,
+                $isCustomerAcceptsSmsMarketing
+            ),
             'billing_address' => $billingAddressData,
-            'shipping_address' => $this->prepareAddress($quote, 'shipping'),
+            'shipping_address' => $this->prepareShippingAddress($quote),
             'currency' => $quote->getCurrency() !== null ? $quote->getCurrency()->getQuoteCurrencyCode() : null,
             'line_items' => array_values($this->prepareLineItems($quote)),
             'abandoned_checkout_url' =>
                 $this->storeManager->getStore()->getBaseUrl() . self::ABANDONED_URL . $quoteToken
         ];
         $dataBeforeChange = $this->getDataBeforeChange();
-        $newData = $data;
-        unset($newData['checkout_date']);
-        $newData = json_encode($newData);
-        if ($dataBeforeChange == $newData) {
+        $newCheckoutData = $checkoutData;
+        unset($newCheckoutData['checkout_date']);
+        $newCheckoutData = json_encode($newCheckoutData);
+        if ($dataBeforeChange == $newCheckoutData) {
+            $this->checkoutLogger->info(
+                __(
+                    'Did not sync Checkout to Yotpo - No new data was found - Checkout ID: %1',
+                    $quote->getId()
+                )
+            );
             return [];//no change in quote data
         }
-        $this->checkoutSession->setYotpoCheckoutData($newData);
-        return ['checkout' => $data];
+
+        $this->checkoutSession->setYotpoCheckoutData($newCheckoutData);
+        return ['checkout' => $checkoutData];
     }
 
     /**
@@ -204,28 +227,38 @@ class Data
     }
 
     /**
-     * Prepare address data
+     * Prepare billing address data
      * @param Quote $quote
-     * @param string $type
      * @return array<mixed>
      * @throws LocalizedException
      */
-    public function prepareAddress(Quote $quote, string $type)
+    public function prepareBillingAddress(Quote $quote)
     {
-        if ($type == 'billing') {
-            $address = $quote->getData('newBillingAddress') ?: $quote->getBillingAddress();
-            if (!$address->getCountryId() && $quote->getIsVirtual()) {
-                $customer = $quote->getCustomer();
-                /** @phpstan-ignore-next-line */
-                $customerAddressId = $customer->getDefaultBilling();
-                if ($customerAddressId) {
-                    $address = $this->customerAddressRepository->getById($customerAddressId);
-                }
+        $newBillingAddress = $quote->getData('newBillingAddress');
+        $billingAddress = $newBillingAddress ?: $quote->getBillingAddress();
+        if (!$newBillingAddress && $quote->getIsVirtual()) {
+            $customer = $quote->getCustomer();
+            /** @phpstan-ignore-next-line */
+            $defaultCustomerBillingAddressId = $customer->getDefaultBilling();
+            if ($defaultCustomerBillingAddressId) {
+                $billingAddress = $this->customerAddressRepository->getById($defaultCustomerBillingAddressId);
             }
-        } else {
-            $address = $quote->getShippingAddress();
         }
-        return $this->abstractData->prepareAddressData($address);
+
+        return $this->abstractData->prepareAddressData($billingAddress);
+    }
+
+    /**
+     * Prepare shipping address data
+     * @param Quote $quote
+     * @return array<mixed>
+     * @throws LocalizedException
+     */
+    public function prepareShippingAddress(Quote $quote)
+    {
+        $shippingAddress = $quote->getShippingAddress();
+
+        return $this->abstractData->prepareAddressData($shippingAddress);
     }
 
     /**
@@ -250,40 +283,39 @@ class Data
         }
         try {
             foreach ($quote->getAllVisibleItems() as $item) {
-                try {
-                    $itemRuleIds = explode(',', $item->getAppliedRuleIds());
-                    if ($ruleId != null || !in_array($ruleId, $itemRuleIds)) {
-                        $couponCode = null;
-                    }
-                    $product = $this->prepareProductObject($item);
-                    if (($item->getProductType() === ProductTypeGrouped::TYPE_CODE
-                            || $item->getProductType() === ProductTypeConfigurable::TYPE_CODE
-                            || $item->getProductType() === ProductTypeBundle::TYPE_CODE
-                            || $item->getProductType() === 'giftcard')
-                        && (isset($lineItems[$product->getId()]))) {
-                        $lineItems[$product->getId()]['total_price'] +=
-                            $item->getData('row_total_incl_tax');
-                        $lineItems[$product->getId()]['subtotal_price'] += $item->getRowTotal();
-                        $lineItems[$product->getId()]['quantity'] += $item->getQty() * 1;
-                    } else {
-                        $this->lineItemsProductIds[] = $product->getId();
-                        $lineItems[$product->getId()] = [
-                            'external_product_id' => $product->getId(),
-                            'quantity' => $item->getQty() * 1,
-                            'total_price' => $item->getData('row_total_incl_tax'),
-                            'subtotal_price' => $item->getRowTotal(),
-                            'coupon_code' => $couponCode
-                        ];
-                    }
-                } catch (\Exception $e) {
-                    $this->checkoutLogger->info('Checkout sync::prepareLineItems() - exception: ' .
-                        $e->getMessage(), []);
+                $itemRuleIds = explode(',', $item->getAppliedRuleIds());
+                if ($ruleId != null || !in_array($ruleId, $itemRuleIds)) {
+                    $couponCode = null;
                 }
+                $product = $this->prepareProductObject($item);
 
+                $nonSimpleProductProductTypes = [ProductTypeGrouped::TYPE_CODE, ProductTypeGrouped::TYPE_CODE,
+                    ProductTypeConfigurable::TYPE_CODE, ProductTypeBundle::TYPE_CODE, $this::GIFTCARD_STRING];
+                if (in_array($item->getProductType(), $nonSimpleProductProductTypes) &&
+                    isset($lineItems[$product->getId()])
+                ) {
+                    $lineItems[$product->getId()]['total_price'] += $item->getData('row_total_incl_tax');
+                    $lineItems[$product->getId()]['subtotal_price'] += $item->getRowTotal();
+                    $lineItems[$product->getId()]['quantity'] += (integer)$item->getQty();
+                } else {
+                    $this->lineItemsProductIds[] = $product->getId();
+                    $lineItems[$product->getId()] = [
+                        'external_product_id' => $product->getId(),
+                        'quantity' => (integer)$item->getQty(),
+                        'total_price' => $item->getData('row_total_incl_tax'),
+                        'subtotal_price' => $item->getRowTotal(),
+                        'coupon_code' => $couponCode
+                    ];
+                }
             }
         } catch (\Exception $e) {
-            $this->checkoutLogger->info('Checkout sync::prepareLineItems() - exception: ' .
-                $e->getMessage(), []);
+            $this->checkoutLogger->info(
+                __(
+                    'Failed to sync Checkout when preparing line items for sync - Checkout ID: %1, Error Message: %2',
+                    $quote->getId(),
+                    $e->getMessage()
+                )
+            );
         }
         return $lineItems;
     }
@@ -321,5 +353,30 @@ class Data
             $product = $quoteItem->getProduct();
         }
         return $product;
+    }
+
+    /**
+     * @param string $customerId
+     * @param string $customerEmail
+     * @param QuoteAddress $billingAddress
+     * @param QuoteAddress|CustomerInterface $customerData
+     * @param boolean $isCustomerAcceptsSmsMarketing
+     * @return array<mixed>
+     */
+    private function prepareCustomer(
+        $customerId,
+        $customerEmail,
+        $billingAddress,
+        $customerData,
+        $isCustomerAcceptsSmsMarketing
+    ) {
+        return [
+            'external_id' => $customerId ?: $customerEmail,
+            'email' => $customerEmail,
+            'phone_number' => $this->abstractData->preparePhoneNumber($billingAddress),
+            'first_name' => $customerData->getFirstname(),
+            'last_name' => $customerData->getLastname(),
+            'accepts_sms_marketing' => $isCustomerAcceptsSmsMarketing
+        ];
     }
 }
