@@ -2,6 +2,8 @@
 
 namespace Yotpo\SmsBump\Model\Sync\Reset;
 
+use Yotpo\SmsBump\Model\Config as YotpoCustomersConfig;
+
 class Customers extends \Yotpo\Core\Model\Sync\Reset\Customers
 {
     const CUSTOMERS_SYNC_TABLE = 'yotpo_customers_sync';
@@ -34,13 +36,28 @@ class Customers extends \Yotpo\Core\Model\Sync\Reset\Customers
 
     /**
      * @param int $storeId
-     * @param boolean $skipSyncTables
+     * @param boolean $clearSyncTables
      * @return void
      * @throws \Zend_Db_Statement_Exception
      */
-    public function resetSync($storeId, $skipSyncTables = false)
+    public function resetSync($storeId, $clearSyncTables = true)
     {
         parent::resetSync($storeId);
+        $this->resetCustomerSyncAttributes();
         $this->setResetInProgressConfig($storeId, '0');
+    }
+
+    /**
+     * @return void
+     */
+    private function resetCustomerSyncAttributes()
+    {
+        $dataSet = [
+            [
+                'table_name' => 'customer_entity_int',
+                'attribute_code' => YotpoCustomersConfig::SYNCED_TO_YOTPO_CUSTOMER_ATTRIBUTE_NAME
+            ]
+        ];
+        $this->updateEntityAttributeTableData($dataSet, 0);
     }
 }

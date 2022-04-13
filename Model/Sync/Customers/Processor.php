@@ -118,7 +118,9 @@ class Processor extends Main
                         $this->config->getStoreName($storeId) . PHP_EOL;
                 }
                 $this->emulateFrontendArea($storeId);
+                $syncShouldProgress = true;
                 if (!$this->config->isCustomerSyncActive()) {
+                    $syncShouldProgress = false;
                     $this->yotpoCustomersLogger->info(
                         __(
                             'Customer sync is disabled for - Magento Store ID: %1, Magento Store Name: %2',
@@ -131,9 +133,23 @@ class Processor extends Main
                         echo 'Customer sync is disabled for store - ' .
                             $this->config->getStoreName($storeId) . PHP_EOL;
                     }
+
+                }
+                if ($this->config->isSyncResetInProgress($storeId, 'customer')) {
+                    $syncShouldProgress = false;
+                    $this->yotpoCustomersLogger->info(
+                        __(
+                            'Customer sync is skipped because sync reset is in progress - Magento Store ID: %1, Name: %2',
+                            $storeId,
+                            $this->config->getStoreName($storeId)
+                        )
+                    );
+                }
+                if (!$syncShouldProgress) {
                     $this->stopEnvironmentEmulation();
                     continue;
                 }
+
                 $this->yotpoCustomersLogger->info(
                     __(
                         'Starting process customers for - Magento Store ID: %1, Magento Store Name: %2',
@@ -357,8 +373,8 @@ class Processor extends Main
     private function executeCustomerSyncRequest($customer, $customerDataForSync = null)
     {
         $storeId = $this->config->getStoreId();
-        if ($this->config->syncResetInProgress($storeId, 'customer')) {
-            $this->yotpoSmsBumpLogger->info(
+        if ($this->config->isSyncResetInProgress($storeId, 'customer')) {
+            $this->yotpoCustomersLogger->info(
                 __(
                     'Customer sync is skipped because sync reset is in progress - Magento Store ID: %1, Name: %2',
                     $storeId,
