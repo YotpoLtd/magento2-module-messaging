@@ -52,12 +52,10 @@ class Customers extends \Yotpo\Core\Model\Sync\Reset\Customers
      */
     private function resetCustomerSyncAttributes()
     {
-        $dataSet = [
-            [
-                'table_name' => 'customer_entity_int',
-                'attribute_code' => YotpoCustomersConfig::SYNCED_TO_YOTPO_CUSTOMER_ATTRIBUTE_NAME
-            ]
-        ];
-        $this->updateEntityAttributeTableData($dataSet, 0);
+        $this->updateEntityAttributeTableData(
+            0,
+            YotpoCustomersConfig::SYNCED_TO_YOTPO_CUSTOMER_ATTRIBUTE_NAME,
+            'customer_entity_int'
+        );
     }
 }
