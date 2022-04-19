@@ -4,4 +4,12 @@
         <plugin name="yotpo_smsbump_guest_email_save"
                 type="Yotpo\SmsBump\Plugin\Customer\Model\AccountManagement"/>
     </type>
+    <type name="Magento\Quote\Model\ShippingAddressManagement">
+        <plugin name="yotpo_smsbump_quote_shipping_address_management"
+                type="Yotpo\SmsBump\Plugin\Quote\Model\ShippingAddressManagement"/>
+    </type>
+    <type name="Magento\Quote\Model\BillingAddressManagement">
+        <plugin name="yotpo_smsbump_quote_billing_address_management"
+                type="Yotpo\SmsBump\Plugin\Quote\Model\BillingAddressManagement"/>
+    </type>
 </config>

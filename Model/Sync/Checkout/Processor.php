@@ -7,10 +7,10 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Quote\Model\Quote;
 use Yotpo\SmsBump\Model\Sync\Main;
-use Yotpo\SmsBump\Model\Config;
+use Yotpo\SmsBump\Model\Config as YotpoMessagingConfig;
 use Yotpo\SmsBump\Model\Sync\Checkout\Data as CheckoutData;
 use Yotpo\SmsBump\Model\Sync\Checkout\Logger as YotpoCheckoutLogger;
-use Yotpo\SmsBump\Helper\Data as SMSHelper;
+use Yotpo\SmsBump\Helper\Data as MessagingDataHelper;
 use Yotpo\Core\Model\Sync\Catalog\Processor as CatalogProcessor;
 
 /**
@@ -25,9 +25,9 @@ class Processor
     protected $yotpoSyncMain;
 
     /**
-     * @var Config
+     * @var YotpoMessagingConfig
      */
-    protected $yotpoSmsConfig;
+    protected $yotpoMessagingConfig;
 
     /**
      * @var Data
@@ -37,46 +37,45 @@ class Processor
     /**
      * @var Logger
      */
-    protected $yotpoChekoutLogger;
+    protected $yotpoCheckoutLogger;
 
     /**
-     * @var SMSHelper
+     * @var MessagingDataHelper
      */
-    protected $smsHelper;
+    protected $messagingDataHelper;
 
     /**
      * @var CatalogProcessor
      */
     protected $catalogProcessor;
 
-    const PATCH_METHOD_STRING = 'PATCH';
-    const IS_SUCCESS_MESSAGE_KEY = 'is_success';
-    const STATUS_CODE_KEY = 'status';
-    const RESPONSE_KEY = 'response';
-    const REASON_KEY = 'reason';
+    const SYNC_RESULT_IS_SUCCESS_KEY = 'is_success';
+    const SYNC_RESULT_STATUS_CODE_KEY = 'status';
+    const SYNC_RESULT_RESPONSE_KEY = 'response';
+    const SYNC_RESULT_REASON_KEY = 'reason';
 
     /**
      * Processor constructor.
      * @param Main $yotpoSyncMain
-     * @param Config $yotpoSmsConfig
+     * @param YotpoMessagingConfig $yotpoMessagingConfig
      * @param Data $checkoutData
-     * @param Logger $yotpoChekoutLogger
-     * @param SMSHelper $smsHelper
+     * @param Logger $yotpoCheckoutLogger
+     * @param MessagingDataHelper $messagingDataHelper
      * @param CatalogProcessor $catalogProcessor
      */
     public function __construct(
         Main $yotpoSyncMain,
-        Config $yotpoSmsConfig,
+        YotpoMessagingConfig $yotpoMessagingConfig,
         CheckoutData $checkoutData,
-        YotpoCheckoutLogger $yotpoChekoutLogger,
-        SMSHelper $smsHelper,
+        YotpoCheckoutLogger $yotpoCheckoutLogger,
+        MessagingDataHelper $messagingDataHelper,
         CatalogProcessor $catalogProcessor
     ) {
         $this->yotpoSyncMain = $yotpoSyncMain;
-        $this->yotpoSmsConfig = $yotpoSmsConfig;
+        $this->yotpoMessagingConfig = $yotpoMessagingConfig;
         $this->checkoutData = $checkoutData;
-        $this->yotpoChekoutLogger = $yotpoChekoutLogger;
-        $this->smsHelper = $smsHelper;
+        $this->yotpoCheckoutLogger = $yotpoCheckoutLogger;
+        $this->messagingDataHelper = $messagingDataHelper;
         $this->catalogProcessor = $catalogProcessor;
     }
 
@@ -90,13 +89,12 @@ class Processor
      */
     public function process(Quote $quote)
     {
-        $isCheckoutSyncEnabled = $this->yotpoSmsConfig->isCheckoutSyncActive();
+        $isCheckoutSyncEnabled = $this->yotpoMessagingConfig->isCheckoutSyncActive();
         if ($isCheckoutSyncEnabled) {
             $newCheckoutData = $this->checkoutData->prepareData($quote);
-            $this->yotpoChekoutLogger->info('Checkout sync - data prepared', []);
+            $this->yotpoCheckoutLogger->info('Checkout sync to Yotpo - finished preparing checkout data for sync');
 
             if (!$newCheckoutData) {
-                $this->yotpoChekoutLogger->info('Checkout sync - no new data to sync', []);
                 return;
             }
             $productIds = $this->checkoutData->getLineItemsIds();
@@ -105,18 +103,26 @@ class Processor
                 $storeId = $quote->getStoreId();
                 $isProductSyncSuccess = $this->catalogProcessor->syncProducts($productIds, $visibleItems, $storeId);
                 if (!$isProductSyncSuccess) {
-                    $this->yotpoChekoutLogger->info('Products sync failed in checkout', []);
+                    $this->yotpoCheckoutLogger->info(
+                        __(
+                            'Failed to sync Checkout to Yotpo -
+                            products sync to Yotpo failed -
+                            Store ID: %1, Products IDs: %2',
+                            $storeId,
+                            $productIds
+                        )
+                    );
                     return;
                 }
             }
 
-            $method = self::PATCH_METHOD_STRING;
-            $url = $this->yotpoSmsConfig->getEndpoint('checkout');
+            $method = $this->yotpoMessagingConfig::PATCH_METHOD_STRING;
+            $url = $this->yotpoMessagingConfig->getEndpoint('checkout');
             $newCheckoutData['entityLog'] = 'checkout';
-            $syncCheckoutResult = $this->yotpoSyncMain->sync($method, $url, $newCheckoutData);
-            if ($syncCheckoutResult->getData(self::IS_SUCCESS_MESSAGE_KEY)) {
+            $syncCheckoutResult = $this->yotpoSyncMain->sync($method, $url, $newCheckoutData, 'api', true);
+            if ($syncCheckoutResult->getData(self::SYNC_RESULT_IS_SUCCESS_KEY)) {
                 $this->updateLastSyncDate();
-                $this->yotpoChekoutLogger->info('Checkout sync - success', []);
+                $this->yotpoCheckoutLogger->info('Checkout sync to Yotpo - finished successfully');
             } else {
                 $this->logCheckoutSyncFailure($syncCheckoutResult);
             }
@@ -131,7 +137,7 @@ class Processor
      */
     public function updateLastSyncDate()
     {
-        $this->yotpoSmsConfig->saveConfig('checkout_last_sync_time', date('Y-m-d H:i:s'));
+        $this->yotpoMessagingConfig->saveConfig('checkout_last_sync_time', date('Y-m-d H:i:s'));
     }
 
     /**
@@ -140,10 +146,17 @@ class Processor
      */
     private function logCheckoutSyncFailure($syncResult)
     {
-        $statusCode = $syncResult->getData(self::STATUS_CODE_KEY);
-        $failureReason = $syncResult->getData(self::REASON_KEY);
-        $innerResponse = $syncResult->getData(self::RESPONSE_KEY);
+        $statusCode = $syncResult->getData(self::SYNC_RESULT_STATUS_CODE_KEY);
+        $failureReason = $syncResult->getData(self::SYNC_RESULT_REASON_KEY);
+        $innerResponse = $syncResult->getData(self::SYNC_RESULT_RESPONSE_KEY);
 
-        $this->yotpoChekoutLogger->info('Checkout sync - failed', [$statusCode, $failureReason, $innerResponse]);
+        $this->yotpoCheckoutLogger->info(
+            __(
+                'Failed to sync Checkout to Yotpo - Status Code: %1, Failure Reason: %2, Response: %3',
+                $statusCode,
+                $failureReason,
+                $innerResponse
+            )
+        );
     }
 }

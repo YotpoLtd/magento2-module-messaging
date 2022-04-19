@@ -149,16 +149,24 @@ class LoadCart implements ActionInterface
             return $this->resultRedirectFactory->create()->setPath('/');
         }
 
-        $customerSessionCustomerId = $this->customerSession->getId();
-        if ($customerSessionCustomerId) {
-            $this->customerSession->logoutCustomer();
+        $customerSessionCustomer = $this->customerSession->getCustomer();
+        $isLoggedInCustomerDifferent = false;
+        if ($customerSessionCustomer) {
+            $customerEmail = $customerSessionCustomer->getEmail();
+            $abandonedQuoteCustomerEmail = $abandonedQuote->getCustomer()->getEmail();
+            if ($customerEmail !== $abandonedQuoteCustomerEmail) {
+                $isLoggedInCustomerDifferent = true;
+                $this->customerSession->logoutCustomer();
+            }
         }
 
         /** @phpstan-ignore-next-line */
         if ($abandonedQuote->getCustomerId()) {
             $this->yotpoSmsBumpSession->start();
             $this->yotpoSmsBumpSession->setData('yotpoQuoteToken', $abandonedCartQuoteId);
-            return $this->resultRedirectFactory->create()->setPath('customer/account/login');
+            if ($isLoggedInCustomerDifferent) {
+                return $this->resultRedirectFactory->create()->setPath('customer/account/login');
+            }
         }
 
         $isValidQuote = $this->abandonedCartData->setQuoteData($abandonedCartQuoteId);

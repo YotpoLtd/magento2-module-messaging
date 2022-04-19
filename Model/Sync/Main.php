@@ -31,10 +31,11 @@ class Main
      * @param string $url
      * @param array<mixed> $data
      * @param string $baseUrlKey
+     * @param bool $shouldRetry
      * @return DataObject
      * @throws NoSuchEntityException
      */
-    public function sync($method, $url, array $data = [], $baseUrlKey = 'api'): DataObject
+    public function sync($method, $url, array $data = [], $baseUrlKey = 'api', $shouldRetry = false): DataObject
     {
         if (array_key_exists('entityLog', $data)) {
             $logHandler = '';
@@ -53,6 +54,6 @@ class Main
             }
             $data['entityLog'] = $logHandler;
         }
-        return $this->yotpoCoreApiRequest->send($method, $url, $data, $baseUrlKey);
+        return $this->yotpoCoreApiRequest->send($method, $url, $data, $baseUrlKey, $shouldRetry);
     }
 }

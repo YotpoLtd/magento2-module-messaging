@@ -32,6 +32,11 @@
                             <cron_expr>*/2 * * * *</cron_expr>
                         </schedule>
                     </yotpo_cron_messaging_customers_sync>
+                    <yotpo_cron_messaging_customers_sync_retry>
+                        <schedule>
+                            <cron_expr>*/2 * * * *</cron_expr>
+                        </schedule>
+                    </yotpo_cron_messaging_customers_sync_retry>
                 </jobs>
             </yotpo_messaging_customers_sync>
         </crontab>

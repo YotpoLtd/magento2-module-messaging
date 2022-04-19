@@ -14,6 +14,7 @@ use Magento\Quote\Api\Data\AddressInterface;
 use Magento\Quote\Model\Quote;
 use Magento\Ui\Component\Form\Element\Multiline;
 use Yotpo\SmsBump\Model\Session as YotpoSmsBumpSession;
+use Yotpo\SmsBump\Model\Sync\Checkout\Processor as CheckoutProcessor;
 
 /**
  * Check if guest customer registration is executed.
@@ -41,20 +42,29 @@ class DefaultConfigProviderPlugin
     private $addressMetadata;
 
     /**
+     * @var CheckoutProcessor
+     */
+    protected $checkoutProcessor;
+
+    /**
+     * @method __construct
      * @param CheckoutSession $checkoutSession
      * @param ResourceConnection $resourceConnection
-     * @param YotpoSmsBumpSession $yotpoSmsBumpSession
+     * @param YotpoSmsbumpSession $yotpoSmsBumpSession
+     * @param CheckoutProcessor $checkoutProcessor
      * @param AddressMetadataInterface $addressMetadata
      */
     public function __construct(
         CheckoutSession $checkoutSession,
         ResourceConnection $resourceConnection,
         YotpoSmsbumpSession $yotpoSmsBumpSession,
+        CheckoutProcessor $checkoutProcessor,
         AddressMetadataInterface $addressMetadata
     ) {
         $this->checkoutSession = $checkoutSession;
         $this->resourceConnection = $resourceConnection;
         $this->yotpoSmsBumpSession = $yotpoSmsBumpSession;
+        $this->checkoutProcessor = $checkoutProcessor;
         /** @phpstan-ignore-next-line */
         $this->addressMetadata = $addressMetadata ?: ObjectManager::getInstance()->get(AddressMetadataInterface::class);
     }
@@ -70,7 +80,10 @@ class DefaultConfigProviderPlugin
     {
         $yotpoAbandonedQuoteId = $this->yotpoSmsBumpSession->getData('yotpoQuoteToken');
         $quote = $this->checkoutSession->getQuote();
-        $email = $quote->getShippingAddress()->getEmail();
+        $billingAddress = $quote->getBillingAddress();
+        $shippingAddress = $quote->getShippingAddress();
+        $email = $shippingAddress ? $shippingAddress->getEmail() : null;
+
         if (!$email) {
             $items = $this->getAbandonedCartData($quote);
             if ($items) {
@@ -80,14 +93,19 @@ class DefaultConfigProviderPlugin
             }
         }
         if ($email && (!$result['isCustomerLoggedIn'] || $yotpoAbandonedQuoteId)) {
-            $shippingAddressFromData = $this->getAddressFromData($quote->getShippingAddress());
-            $billingAddressFromData = $this->getAddressFromData($quote->getBillingAddress());
+            $shippingAddressFromData = $this->getAddressFromData($shippingAddress);
+            $billingAddressFromData = $this->getAddressFromData($billingAddress);
             $result['shippingAddressFromData'] = $shippingAddressFromData;
             if ($shippingAddressFromData != $billingAddressFromData) {
                 $result['billingAddressFromData'] = $billingAddressFromData;
             }
             $result['validatedEmailValue'] = $email;
         }
+
+        if ($billingAddress && $billingAddress->getCountryId()) {
+            $this->checkoutProcessor->process($quote);
+        }
+
         return $result;
     }
 

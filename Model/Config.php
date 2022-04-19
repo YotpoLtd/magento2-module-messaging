@@ -27,6 +27,26 @@ class Config extends CoreConfig
     const YOTPO_CUSTOM_ATTRIBUTE_SMS_MARKETING = 'yotpo_accepts_sms_marketing';
 
     /**
+     * Custom Customer attribute name for synced to yotpo customer
+     */
+    const SYNCED_TO_YOTPO_CUSTOMER_ATTRIBUTE_NAME = 'synced_to_yotpo_customer';
+
+    /**
+     * Customer entity int table name
+     */
+    const CUSTOMER_ENTITY_INT_TABLE_NAME = 'customer_entity_int';
+
+    /**
+     * Yotpo customers sync table name
+     */
+    const YOTPO_CUSTOMERS_SYNC_TABLE_NAME = 'yotpo_customers_sync';
+
+    /**
+     * HTTP Request PATCH method string
+     */
+    const PATCH_METHOD_STRING = 'PATCH';
+
+    /**
      * @var string[]
      */
     protected $endPoints = [
@@ -40,7 +60,6 @@ class Config extends CoreConfig
      */
     protected $smsBumpConfig = [
         'checkout_sync_active' => ['path' => 'yotpo_core/sync_settings/checkout_sync/enable'],
-        'checkout_sync_allowed_urls' => ['path' => 'yotpo_core/sync_settings/checkout_sync/allowed_urls'],
         'checkout_last_sync_time' => ['path' =>
                                         'yotpo_core/sync_settings/checkout_sync/last_sync_time',
                                         'read_from_db' => true
