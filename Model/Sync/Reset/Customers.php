@@ -52,8 +52,7 @@ class Customers extends \Yotpo\Core\Model\Sync\Reset\Customers
      */
     private function resetCustomerSyncAttributes()
     {
-        $this->updateEntityAttributeTableData(
-            0,
+        $this->updateEntityAttributeTableDataWithoutStoreId(
             YotpoCustomersConfig::SYNCED_TO_YOTPO_CUSTOMER_ATTRIBUTE_NAME,
             'customer_entity_int'
         );
