@@ -151,13 +151,11 @@ class LoadCart implements ActionInterface
 
         $customerSessionCustomer = $this->customerSession->getCustomer();
         $isLoggedInCustomerDifferent = false;
-        if ($customerSessionCustomer) {
-            $customerEmail = $customerSessionCustomer->getEmail();
-            $abandonedQuoteCustomerEmail = $abandonedQuote->getCustomer()->getEmail();
-            if ($customerEmail !== $abandonedQuoteCustomerEmail) {
-                $isLoggedInCustomerDifferent = true;
-                $this->customerSession->logoutCustomer();
-            }
+        $customerEmail = $customerSessionCustomer->getEmail();
+        $abandonedQuoteCustomerEmail = $abandonedQuote->getCustomer()->getEmail();
+        if ($customerEmail !== $abandonedQuoteCustomerEmail) {
+            $isLoggedInCustomerDifferent = true;
+            $this->customerSession->logoutCustomer();
         }
 
         /** @phpstan-ignore-next-line */

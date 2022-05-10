@@ -59,8 +59,7 @@ class CustomersService extends AbstractJobs
     /**
      * Retry processing failed customers
      * @return void
-     * @throws LocalizedException
-     * @throws NoSuchEntityException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function processCustomersSyncTableResync()
     {
@@ -88,7 +87,8 @@ class CustomersService extends AbstractJobs
                         $this->config->getStoreName($storeId)
                     )
                 );
-                $customersIdsForSync = $this->customersProcessorMain->getCustomersIdsForCustomersThatShouldBeRetriedForSync();
+                $customersIdsForSync =
+                    $this->customersProcessorMain->getCustomersIdsForCustomersThatShouldBeRetriedForSync();
                 $this->processFailedCustomerEntities($customersIdsForSync);
 
                 $this->yotpoCustomersLogger->info(
@@ -98,10 +98,11 @@ class CustomersService extends AbstractJobs
                         $this->config->getStoreName($storeId)
                     )
                 );
-            } catch (Exception $exception) {
+            } catch (\Exception $exception) {
                 $this->yotpoCustomersLogger->info(
                     __(
-                        'Failed to process Customers retry sync for - Magento Store ID: %1, Magento Store Name: %2, Reason: %3',
+                        'Failed to process Customers retry sync for - Magento Store ID: %1,
+                        Magento Store Name: %2, Reason: %3',
                         $storeId,
                         $this->config->getStoreName($storeId),
                         $exception->getMessage()
@@ -114,11 +115,10 @@ class CustomersService extends AbstractJobs
     }
 
     /**
-     * Process customer entities
-     * @param array $customersIdsForResync
+     * @param array<mixed> $customersIdsForResync
      * @return void
-     * @throws LocalizedException
-     * @throws NoSuchEntityException
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     private function processFailedCustomerEntities($customersIdsForResync)
     {

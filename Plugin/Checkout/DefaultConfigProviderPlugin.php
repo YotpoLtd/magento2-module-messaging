@@ -47,7 +47,6 @@ class DefaultConfigProviderPlugin
     protected $checkoutProcessor;
 
     /**
-     * @method __construct
      * @param CheckoutSession $checkoutSession
      * @param ResourceConnection $resourceConnection
      * @param YotpoSmsbumpSession $yotpoSmsBumpSession
@@ -82,7 +81,7 @@ class DefaultConfigProviderPlugin
         $quote = $this->checkoutSession->getQuote();
         $billingAddress = $quote->getBillingAddress();
         $shippingAddress = $quote->getShippingAddress();
-        $email = $shippingAddress ? $shippingAddress->getEmail() : null;
+        $email = $shippingAddress->getEmail();
 
         if (!$email) {
             $items = $this->getAbandonedCartData($quote);
@@ -102,7 +101,7 @@ class DefaultConfigProviderPlugin
             $result['validatedEmailValue'] = $email;
         }
 
-        if ($billingAddress && $billingAddress->getCountryId()) {
+        if ($billingAddress->getCountryId()) {
             $this->checkoutProcessor->process($quote);
         }
 

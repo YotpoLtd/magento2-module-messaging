@@ -10,7 +10,8 @@ use Magento\Framework\Setup\Patch\DataPatchInterface;
 use Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface;
 use Yotpo\SmsBump\Model\Config as MessagingConfig;
 
-class CustomCustomerAttributeSyncedToYotpo extends CoreCustomCustomerAttributeSyncedToYotpo implements DataPatchInterface
+class CustomCustomerAttributeSyncedToYotpo extends CoreCustomCustomerAttributeSyncedToYotpo implements
+    DataPatchInterface
 {
     const CUSTOMER_SETUP_FACTORY_SETUP_KEY = 'setup';
 
@@ -49,14 +50,20 @@ class CustomCustomerAttributeSyncedToYotpo extends CoreCustomCustomerAttributeSy
      */
     public function apply()
     {
-        $customerSetup = $this->customerSetupFactory->create([ $this::CUSTOMER_SETUP_FACTORY_SETUP_KEY => $this->moduleDataSetup ]);
-        $customerSetup->addAttribute(Customer::ENTITY, $this->messagingConfig::SYNCED_TO_YOTPO_CUSTOMER_ATTRIBUTE_NAME, [
-            'type' => 'int',
-            'label' => 'Synced to Yotpo Customer',
-            'required' => false,
-            'visible' => false,
-            'user_defined' => false
-        ]);
+        $customerSetup =
+            $this->customerSetupFactory->create([$this::CUSTOMER_SETUP_FACTORY_SETUP_KEY => $this->moduleDataSetup ]);
+        $customerSetup->addAttribute(
+            Customer::ENTITY,
+            $this->messagingConfig::SYNCED_TO_YOTPO_CUSTOMER_ATTRIBUTE_NAME,
+            [
+                'type' => 'int',
+                'label' => 'Synced to Yotpo Customer',
+                'required' => false,
+                'visible' => false,
+                'user_defined' => false
+            ]
+        );
+        return $this;
     }
 
     /**

@@ -2,7 +2,6 @@
 
 namespace Yotpo\SmsBump\Model\Sync\Customers;
 
-use Magento\Framework\DataObject;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Store\Model\App\Emulation as AppEmulation;
 use Magento\Customer\Model\ResourceModel\Customer\CollectionFactory as CustomerFactory;
@@ -19,6 +18,7 @@ class Main extends CoreCustomersProcessor
     /**
      * Customers sync limit config key
      */
+    // phpcs:ignore
     const CUSTOMERS_SYNC_LIMIT_CONFIG_KEY = 'customers_sync_limit';
 
     /**
@@ -48,6 +48,7 @@ class Main extends CoreCustomersProcessor
 
     /**
      * Customer sync batch size retrieved from configuration
+     * @var mixed|string
      */
     protected $customersSyncBatchSize;
 
@@ -78,7 +79,7 @@ class Main extends CoreCustomersProcessor
     }
 
     /**
-     * @param array $retryCustomersIds
+     * @param array<mixed>|null $retryCustomersIds
      * @param int $storeId
      * @return mixed
      */
@@ -96,7 +97,7 @@ class Main extends CoreCustomersProcessor
         $syncedToYotpoCustomerAttributeName = $this->config::SYNCED_TO_YOTPO_CUSTOMER_ATTRIBUTE_NAME;
         $customersCollectionQuery
             ->addFieldToFilter('store_id', $storeId)
-            ->addAttributeToFilter([
+            ->addFieldToFilter([
                 [ 'attribute' => $syncedToYotpoCustomerAttributeName, 'null' => true ],
                 [ 'attribute' => $syncedToYotpoCustomerAttributeName, 'eq' => 0 ]
             ])
@@ -132,10 +133,10 @@ class Main extends CoreCustomersProcessor
 
     /**
      * Prepares Customer sync table data
-     * @param DataObject $customerSyncToYotpoResponse
+     * @param mixed $customerSyncToYotpoResponse
      * @param int $magentoCustomerId
-     * @param string $storeId
-     * @return array
+     * @param int $storeId
+     * @return array<mixed>
      */
     public function createCustomerSyncData($customerSyncToYotpoResponse, $magentoCustomerId, $storeId)
     {
@@ -143,7 +144,6 @@ class Main extends CoreCustomersProcessor
         $statusCode = $customerSyncToYotpoResponse->getData('status');
         $shouldRetry = $this->config->isNetworkRetriableResponse($statusCode);
         $customerSyncData = [
-            /** @phpstan-ignore-next-line */
             'customer_id' => $magentoCustomerId,
             'response_code' => $statusCode,
             'should_retry' => $shouldRetry,
@@ -157,8 +157,8 @@ class Main extends CoreCustomersProcessor
     /**
      * Creates failed customer sync table data
      * @param int $magentoCustomerId
-     * @param string $storeId
-     * @return array
+     * @param string|int $storeId
+     * @return array<mixed>
      */
     public function createServerErrorCustomerSyncData($magentoCustomerId, $storeId)
     {
@@ -166,7 +166,6 @@ class Main extends CoreCustomersProcessor
         $statusCode = '500';
         $shouldRetry = false;
         $customerSyncData = [
-            /** @phpstan-ignore-next-line */
             'customer_id' => $magentoCustomerId,
             'response_code' => $statusCode,
             'should_retry' => $shouldRetry,
@@ -180,7 +179,7 @@ class Main extends CoreCustomersProcessor
     /**
      * Inserts or updates custom table data
      *
-     * @param array $customerSyncData
+     * @param array<mixed> $customerSyncData
      * @return void
      */
     public function insertOrUpdateCustomerSyncData($customerSyncData)
@@ -189,18 +188,18 @@ class Main extends CoreCustomersProcessor
     }
 
     /**
-     * @param int $customerId
+     * @param mixed $customerId
      * @param string $attributeCode
-     * @param boolean $isSynced
+     * @param int $isSynced
      * @return void
      * @throws NoSuchEntityException
      */
-    public function insertOrUpdateCustomerAttribute($customerId, $attributeCode, $isSynced = true)
+    public function insertOrUpdateCustomerAttribute($customerId, $attributeCode, $isSynced = 0)
     {
         $customerEntityIntData = [
             'attribute_id' => $attributeCode,
             'entity_id' => $customerId,
-            'value' => $isSynced
+            'value' => (int) $isSynced
         ];
 
         $this->insertOnDuplicate($this->config::CUSTOMER_ENTITY_INT_TABLE_NAME, [$customerEntityIntData]);

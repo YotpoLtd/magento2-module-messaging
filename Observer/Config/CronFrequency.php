@@ -29,7 +29,10 @@ class CronFrequency extends YotpoCoreCronFrequency
      * @var array <mixed>
      */
     protected $cronFrequency = [
-        'customers_sync_frequency' => ['config_path' => '','job_code' => 'yotpo_cron_messaging_customers_sync,yotpo_cron_messaging_customers_sync_retry']
+        'customers_sync_frequency' => [
+            'config_path' => '',
+            'job_code' => 'yotpo_cron_messaging_customers_sync,yotpo_cron_messaging_customers_sync_retry'
+        ]
     ];
 
     /**

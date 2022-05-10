@@ -16,9 +16,6 @@ use Yotpo\SmsBump\Model\Config;
  */
 class CustomersAttributesService extends AbstractJobs
 {
-    /**
-     * Maximum reset customers sync retries attempts
-     */
     const MAXIMUM_RESET_CUSTOMERS_SYNC_RETRIES_ATTEMPTS = 3;
 
     /**
@@ -43,6 +40,7 @@ class CustomersAttributesService extends AbstractJobs
 
     /**
      * Saves the reset customers sync attempts for retrying rest
+     * @var int
      */
     protected $currentResetCustomersSyncAttempts;
 
@@ -71,12 +69,14 @@ class CustomersAttributesService extends AbstractJobs
 
     /**
      * @param Customer $customer
-     * @param boolean $attributeValue
+     * @param int $attributeValue
      * @return void
      */
     public function updateSyncedToYotpoCustomerAttribute($customer, $attributeValue)
     {
-        $syncedToYotpoCustomerAttributeCode = $this->yotpoCoreSyncData->getAttributeId($this->config::SYNCED_TO_YOTPO_CUSTOMER_ATTRIBUTE_NAME);
+        $syncedToYotpoCustomerAttributeCode = $this->yotpoCoreSyncData->getAttributeId(
+            $this->config::SYNCED_TO_YOTPO_CUSTOMER_ATTRIBUTE_NAME
+        );
         $this->customersMain->insertOrUpdateCustomerAttribute(
             $customer->getId(),
             $syncedToYotpoCustomerAttributeCode,
@@ -91,7 +91,9 @@ class CustomersAttributesService extends AbstractJobs
     {
         try {
             $connection = $this->resourceConnection->getConnection();
-            $syncedToYotpoCustomerAttributeCode = $this->yotpoCoreSyncData->getAttributeId($this->config::SYNCED_TO_YOTPO_CUSTOMER_ATTRIBUTE_NAME);
+            $syncedToYotpoCustomerAttributeCode = $this->yotpoCoreSyncData->getAttributeId(
+                $this->config::SYNCED_TO_YOTPO_CUSTOMER_ATTRIBUTE_NAME
+            );
             $customerEntityIntTableName = $this->config::CUSTOMER_ENTITY_INT_TABLE_NAME;
             $sqlUpdateLimit = $this->config->getUpdateSqlLimit();
             $customersThatWereProcesssedQuery = $connection->select()->from(
@@ -107,7 +109,7 @@ class CustomersAttributesService extends AbstractJobs
                 $sqlUpdateLimit
             );
 
-            while(count($rowsToUpdate = $connection->fetchAssoc($customersThatWereProcesssedQuery, 'value_id'))) {
+            while (count($rowsToUpdate = $connection->fetchAssoc($customersThatWereProcesssedQuery, 'value_id'))) {
                 $connection->update(
                     $customerEntityIntTableName,
                     [ 'value' => 0 ],

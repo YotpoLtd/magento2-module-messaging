@@ -88,7 +88,7 @@ class CustomerSaveAfter implements ObserverInterface
         $customer = $observer->getEvent()->getCustomer();
         $isCustomerSyncActive = $this->yotpoSmsConfig->isCustomerSyncActive();
         if (!$this->request->getParam('custSync')) {
-            $this->customersAttributesService->updateSyncedToYotpoCustomerAttribute($customer, false);
+            $this->customersAttributesService->updateSyncedToYotpoCustomerAttribute($customer, 0);
 
             $isCheckoutInProgress = $this->request->getParam('_checkout_in_progress', null);
             if ($isCustomerSyncActive && $isCheckoutInProgress === null) {
