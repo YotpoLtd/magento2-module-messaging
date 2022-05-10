@@ -74,7 +74,9 @@ class CustomersScheduler extends ConfigValue
      */
     public function afterSave()
     {
-        $customersCronExpressionString = $this->getData('groups/sync_settings/groups/customers_sync/fields/frequency/value');
+        $customersCronExpressionString = $this->getData(
+            'groups/sync_settings/groups/customers_sync/fields/frequency/value'
+        );
         try {
             $this->configureCronCustomersSync($customersCronExpressionString);
 

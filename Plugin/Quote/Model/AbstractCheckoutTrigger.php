@@ -7,7 +7,6 @@ use Magento\Framework\Registry;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Yotpo\SmsBump\Model\Config;
 use Magento\Quote\Model\Quote as QuoteModel;
-use Magento\Quote\Api\Data\AddressInterface;
 
 /**
  * Class AbstractCheckoutTrigger
@@ -36,7 +35,6 @@ class AbstractCheckoutTrigger
     protected $yotpoMessagingConfig;
 
     /**
-     * @method __construct
      * @param CheckoutProcessor $checkoutProcessor
      * @param Registry $registry
      * @param CartRepositoryInterface $quoteRepository
@@ -55,8 +53,8 @@ class AbstractCheckoutTrigger
     }
 
     /**
-     * @method checkoutSync
      * @param QuoteModel $quote
+     * @return void
      */
     protected function checkoutSync(QuoteModel $quote)
     {

@@ -12,7 +12,6 @@ use Magento\Quote\Api\Data\AddressInterface;
 class Quote extends AbstractCheckoutTrigger
 {
     /**
-     * @method afterSetBillingAddress
      * @param QuoteModel $quote
      * @param QuoteModel $result
      * @param AddressInterface $address
@@ -21,7 +20,7 @@ class Quote extends AbstractCheckoutTrigger
     public function afterSetBillingAddress(QuoteModel $quote, $result, AddressInterface $address = null)
     {
         $this->checkoutSync($quote);
-        if (!$this->registry->registry('yotpo_smsbump_quote_set_billing_address_plugin')){
+        if (!$this->registry->registry('yotpo_smsbump_quote_set_billing_address_plugin')) {
             $this->registry->register('yotpo_smsbump_quote_set_billing_address_plugin', 1);
         }
 
@@ -29,7 +28,6 @@ class Quote extends AbstractCheckoutTrigger
     }
 
     /**
-     * @method afterSetShippingAddress
      * @param QuoteModel $quote
      * @param QuoteModel $result
      * @param AddressInterface $address
@@ -38,7 +36,7 @@ class Quote extends AbstractCheckoutTrigger
     public function afterSetShippingAddress(QuoteModel $quote, $result, AddressInterface $address = null)
     {
         $this->checkoutSync($quote);
-        if (!$this->registry->registry('yotpo_smsbump_quote_set_shipping_address_plugin')){
+        if (!$this->registry->registry('yotpo_smsbump_quote_set_shipping_address_plugin')) {
             $this->registry->register('yotpo_smsbump_quote_set_shipping_address_plugin', 1);
         }
 
@@ -46,7 +44,6 @@ class Quote extends AbstractCheckoutTrigger
     }
 
     /**
-     * @method afterSave
      * @param QuoteModel $quote
      * @param QuoteModel $result
      * @return QuoteModel

@@ -18,16 +18,19 @@ class CustomerConfigSave implements ObserverInterface
     const CUSTOMER_ACCOUNT_SHARE_CONFIG_PATH = 'customer/account_share/scope';
 
     /**
-     * @param Config $config
+     * @var Config
      */
     protected $config;
+
+    /**
+     * @var CustomersAttributesService
+     */
+    protected $customersAttributesService;
 
     /**
      * @param Config $config
      * @param CustomersAttributesService $customersAttributesService
      */
-    protected $customersAttributesService;
-
     public function __construct(
         Config $config,
         CustomersAttributesService $customersAttributesService
@@ -42,7 +45,8 @@ class CustomerConfigSave implements ObserverInterface
      */
     public function execute(Observer $observer)
     {
-        $isCustomerAccountShareSettingChangedToEnabled = $this->checkCustomerAccountShareSettingChangedToEnabled($observer);
+        $isCustomerAccountShareSettingChangedToEnabled =
+            $this->checkCustomerAccountShareSettingChangedToEnabled($observer);
         if (!$isCustomerAccountShareSettingChangedToEnabled) {
             return;
         }

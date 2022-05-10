@@ -1,6 +1,7 @@
 <?php
 
 namespace Yotpo\SmsBump\Model\Sync\Customers\Cron;
+
 use Yotpo\SmsBump\Model\Sync\Customers\Services\CustomersService;
 
 /**
