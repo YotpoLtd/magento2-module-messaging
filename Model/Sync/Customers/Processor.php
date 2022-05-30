@@ -255,7 +255,7 @@ class Processor extends Main
     {
         $storeId = $customer->getStoreId();
         $storeId = $this->config->getStoreId();
-        if ($this->config->syncResetInProgress($storeId, 'customer')) {
+        if ($this->config->isSyncResetInProgress($storeId, 'customer')) {
             $this->yotpoSmsBumpLogger->info(
                 __(
                     'Customer sync is skipped because sync reset is in progress - Magento Store ID: %1, Name: %2',
