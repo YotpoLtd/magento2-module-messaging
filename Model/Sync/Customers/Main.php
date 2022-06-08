@@ -126,7 +126,7 @@ class Main extends CoreCustomersProcessor
             $this->customersSyncBatchSize
         );
 
-        $customersIdsMapForSync = $connection->fetchAssoc($shouldRetryCustomersQuery, 'customer_id');
+        $customersIdsMapForSync = $connection->fetchAssoc($shouldRetryCustomersQuery);
         return array_keys($customersIdsMapForSync);
     }
 

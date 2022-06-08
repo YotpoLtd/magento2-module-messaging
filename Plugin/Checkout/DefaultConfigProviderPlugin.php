@@ -126,7 +126,7 @@ class DefaultConfigProviderPlugin
             'store_id = ?',
             $quote->getStoreId()
         );
-        return $connection->fetchAssoc($select, []);
+        return $connection->fetchAssoc($select);
     }
 
     /**

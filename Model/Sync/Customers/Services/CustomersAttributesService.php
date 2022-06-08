@@ -107,7 +107,7 @@ class CustomersAttributesService extends AbstractJobs
                 $sqlUpdateLimit
             );
 
-            while(count($rowsToUpdate = $connection->fetchAssoc($customersThatWereProcesssedQuery, 'value_id'))) {
+            while(count($rowsToUpdate = $connection->fetchAssoc($customersThatWereProcesssedQuery))) {
                 $connection->update(
                     $customerEntityIntTableName,
                     [ 'value' => 0 ],
