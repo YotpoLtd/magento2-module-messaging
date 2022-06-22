@@ -61,6 +61,10 @@ class AbstractCheckoutTrigger
     protected function checkoutSync(QuoteModel $quote)
     {
         if ($this->yotpoMessagingConfig->isCheckoutSyncActive()) {
+            if (!$quote->getId()) {
+                return;
+            }
+
             $billingAddress = $quote->getBillingAddress();
             if (!$billingAddress->getCountryId()) {
                 return;
