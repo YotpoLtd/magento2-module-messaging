@@ -130,23 +130,27 @@ class LoadCart implements ActionInterface
      */
     public function execute()
     {
+        $resultPage = $this->resultRedirectFactory->create();
+        $originRequestParams = $this->request->getParams();
+        $redirectionRequestParamsArray = ['_query' => $originRequestParams];
+
         $yotpoQuoteToken = $this->request->getParam('yotpoQuoteToken', null);
         if ($yotpoQuoteToken === null) {
             $this->messageManager->addErrorMessage(self::NO_ACTIVE_QUOTE);
-            return $this->resultRedirectFactory->create()->setPath('/');
+            return $resultPage->setPath('/', $redirectionRequestParamsArray);
         }
 
         $abandonedCartQuoteId = (int)$this->abandonedCartData->getQuoteId($yotpoQuoteToken);
         if (!$abandonedCartQuoteId) {
             $this->messageManager->addErrorMessage(self::NO_ACTIVE_QUOTE);
-            return $this->resultRedirectFactory->create()->setPath('/');
+            return $resultPage->setPath('/', $redirectionRequestParamsArray);
         }
 
         $abandonedQuote = $this->quoteRepository->get($abandonedCartQuoteId);
         /** @phpstan-ignore-next-line */
         if (!$abandonedQuote || !$abandonedQuote->getId() || !$abandonedQuote->getIsActive()) {
             $this->messageManager->addErrorMessage(self::NO_ACTIVE_QUOTE);
-            return $this->resultRedirectFactory->create()->setPath('/');
+            return $resultPage->setPath('/', $redirectionRequestParamsArray);
         }
 
         $customerSessionCustomer = $this->customerSession->getCustomer();
@@ -165,17 +169,17 @@ class LoadCart implements ActionInterface
             $this->yotpoSmsBumpSession->start();
             $this->yotpoSmsBumpSession->setData('yotpoQuoteToken', $abandonedCartQuoteId);
             if ($isLoggedInCustomerDifferent) {
-                return $this->resultRedirectFactory->create()->setPath('customer/account/login');
+                return $resultPage->setPath('customer/account/login', $redirectionRequestParamsArray);
             }
         }
 
         $isValidQuote = $this->abandonedCartData->setQuoteData($abandonedCartQuoteId);
         if (!$isValidQuote) {
-            return $this->resultRedirectFactory->create()->setPath('/');
+            return $resultPage->setPath('/', $redirectionRequestParamsArray);
         }
 
         $this->checkoutSession->setQuoteId($abandonedCartQuoteId);
-        $resultPage = $this->resultRedirectFactory->create()->setPath('checkout/cart');
+        $resultPage->setPath('checkout/cart', $redirectionRequestParamsArray);
         $resultPage->setHeader('Yotpo-Abandoned-Cart', 'true');
         return $resultPage;
     }
