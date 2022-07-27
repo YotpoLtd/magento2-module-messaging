@@ -187,7 +187,7 @@ class Config extends CoreConfig
      */
     public function isCustomAttributeModuleExists(): bool
     {
-        return $this->moduleManager->isEnabled('Magento_CustomerCustomAttributes');
+        return true;
     }
 
     /**
