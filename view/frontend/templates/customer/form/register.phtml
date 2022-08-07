@@ -169,6 +169,11 @@ use Magento\Customer\Block\Form\Register;
             </div>
         </div>
     </fieldset>
+
+    <fieldset class="fieldset additional_info">
+        <?= $block->getChildHtml('form_additional_info') ?>
+    </fieldset>
+
     <div class="actions-toolbar">
         <div class="primary">
             <button type="submit" class="action submit primary" title="<?= $block->escapeHtmlAttr(__('Create an Account')) ?>"><span><?= $block->escapeHtml(__('Create an Account')) ?></span></button>
