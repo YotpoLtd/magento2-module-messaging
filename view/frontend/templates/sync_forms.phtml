@@ -18,7 +18,7 @@ $escaper = $escaper ?? $block;
     <?php foreach ($responseData as $data):?>
         <script>
             require(['<?= $escaper->escapeHtml($data['script_source'])?>'],
-                function(<?= 'smsbumb'.$escaper->escapeHtml($data['form_id']) ?>) {
+                function(<?= 'SMSBumpForm_'.$escaper->escapeHtml($data['form_id']) ?>) {
             });
         </script>
     <?php endforeach; ?>
