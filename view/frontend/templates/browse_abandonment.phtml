@@ -1,0 +1,16 @@
+<?php
+/**
+ * @var Yotpo\SmsBump\Block\BrowseAbandonment $block
+ */
+?>
+
+<?php if (!($block->isAppKeyAndSecretSet() && $block->isPageTypeEligibleForBrowseAbandonmentEvent())) {
+    return;
+}
+?>
+
+<script>
+    require(['https://d18eg7dreypte5.cloudfront.net/browse-abandonment/browse_abandonment_magento.js'])
+    window.wtba = window.wtba || [];
+    window.wtba.push(<?= $block->getBrowseAbandonmentEventInfo() ?>);
+</script>
