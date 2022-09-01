@@ -4,6 +4,7 @@
         <policy id="script-src">
             <values>
                 <value id="sync-forms" type="host">dhv2ziothpgrr.cloudfront.net</value>
+                <value id="sync-forms-subscription" type="host">*.smsbump.com</value>
                 <value id="browse-abandonment" type="host">d18eg7dreypte5.cloudfront.net</value>
             </values>
         </policy>
