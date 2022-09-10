@@ -5,6 +5,7 @@
             <values>
                 <value id="sync-forms" type="host">dhv2ziothpgrr.cloudfront.net</value>
                 <value id="sync-forms-subscription" type="host">*.smsbump.com</value>
+                <value id="sync-forms-impressions" type="host">7kgd3hs1oh.execute-api.us-east-1.amazonaws.com</value>
                 <value id="browse-abandonment" type="host">d18eg7dreypte5.cloudfront.net</value>
             </values>
         </policy>
@@ -12,6 +13,7 @@
             <values>
                 <value id="sync-forms" type="host">dhv2ziothpgrr.cloudfront.net</value>
                 <value id="sync-forms-subscription" type="host">*.smsbump.com</value>
+                <value id="sync-forms-impressions" type="host">7kgd3hs1oh.execute-api.us-east-1.amazonaws.com</value>
             </values>
         </policy>
         <policy id="img-src">
