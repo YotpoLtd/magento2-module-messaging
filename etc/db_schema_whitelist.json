@@ -17,11 +17,6 @@
             "YOTPO_CUSTOMERS_SYNC_CUSTOMER_ID_STORE_ID": true
         }
     },
-    "sales_order": {
-        "column": {
-            "yotpo_accepts_sms_marketing": true
-        }
-    },
     "yotpo_abandoned_cart": {
         "column": {
             "abandoned_cart_id": true,
