@@ -43,7 +43,4 @@
             <column name="quote_id"/>
         </index>
     </table>
-    <table name="sales_order" resource="sales" engine="innodb" comment="Sales Flat Order">
-        <column xsi:type="int" name="yotpo_accepts_sms_marketing" nullable="true" comment="Accepts SMS Marketing" default="0"/>
-    </table>
 </schema>
