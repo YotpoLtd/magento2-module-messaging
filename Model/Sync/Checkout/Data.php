@@ -283,7 +283,12 @@ class Data
         }
         try {
             foreach ($quote->getAllVisibleItems() as $item) {
-                $itemRuleIds = explode(',', $item->getAppliedRuleIds());
+                $appliedRuleIds = $item->getAppliedRuleIds();
+                $itemRuleIds = [];
+                if ($appliedRuleIds !== null) {
+                    $itemRuleIds = explode(',', $appliedRuleIds);
+                }
+
                 if ($ruleId != null || !in_array($ruleId, $itemRuleIds)) {
                     $couponCode = null;
                 }
