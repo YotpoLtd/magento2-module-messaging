@@ -178,7 +178,7 @@ class Data
         if (!$quote->getCustomerIsGuest() && $quote->getCustomerId()) {
             $isCustomerAcceptsSmsMarketing = $this->abstractData->getSmsMarketingCustomAttributeValue($customerId);
         } else {
-            $isCustomerAcceptsSmsMarketing = (bool) $this->checkoutSession->getYotpoSmsMarketing();
+            $isCustomerAcceptsSmsMarketing = $this->getIsAcceptsSmsMarketingForGuestCheckout();
         }
 
         $checkoutData = [
@@ -355,6 +355,15 @@ class Data
         return $product;
     }
 
+    private function getIsAcceptsSmsMarketingForGuestCheckout() {
+        $isCustomerAcceptsSmsMarketing = $this->checkoutSession->getYotpoSmsMarketing();
+        if ($isCustomerAcceptsSmsMarketing === null) {
+            return null;
+        }
+
+        return (bool) $this->checkoutSession->getYotpoSmsMarketing();
+    }
+
     /**
      * @param string $customerId
      * @param string $customerEmail
@@ -370,13 +379,18 @@ class Data
         $customerData,
         $isCustomerAcceptsSmsMarketing
     ) {
-        return [
+        $customerObject = [
             'external_id' => $customerId ?: $customerEmail,
             'email' => $customerEmail,
             'phone_number' => $this->abstractData->preparePhoneNumber($billingAddress),
             'first_name' => $customerData->getFirstname(),
             'last_name' => $customerData->getLastname(),
-            'accepts_sms_marketing' => $isCustomerAcceptsSmsMarketing
         ];
+
+        if ($isCustomerAcceptsSmsMarketing !== null) {
+            $customerObject['accepts_sms_marketing'] = $isCustomerAcceptsSmsMarketing;
+        }
+
+        return $customerObject;
     }
 }
