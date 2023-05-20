@@ -175,8 +175,8 @@ use Magento\Customer\Block\Widget\Taxvat;
         },
         "*": {
             "Magento_CustomerCustomAttributes/validation": {
-                "ignore": <?= (int) ($_dob->isEnabled() || $userDefinedAttributes->hasUserDefinedAttributes()) ?>,
-                "hasUserDefinedAttributes": <?= (int) $userDefinedAttributes->hasUserDefinedAttributes() ?>,
+                "ignore": <?= (int) ($_dob->isEnabled() || ($userDefinedAttributes && $userDefinedAttributes->hasUserDefinedAttributes())) ?>,
+                "hasUserDefinedAttributes": <?= (int) ($userDefinedAttributes && $userDefinedAttributes->hasUserDefinedAttributes()) ?>,
                 "isDobEnabled": <?= (int) $_dob->isEnabled() ?>,
                 "mixins": [
                     "Magento_CustomerCustomAttributes/error-placement",
