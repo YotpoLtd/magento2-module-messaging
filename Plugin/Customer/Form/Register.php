@@ -29,6 +29,10 @@ class Register
      */
     public function beforeToHtml(CustomerRegister $subject)
     {
+        if (!$this->config->isEnabled()) {
+            return;
+        }
+
         $template = $this->config->isCustomAttributeModuleExists() ?
             'Yotpo_SmsBump::customer/form/register-ee.phtml' : 'Yotpo_SmsBump::customer/form/register.phtml';
         $subject->setTemplate($template);
