@@ -13,4 +13,8 @@
     require(['https://d18eg7dreypte5.cloudfront.net/browse-abandonment/browse_abandonment_magento.js'])
     window.wtba = window.wtba || [];
     window.wtba.push(<?= $block->getBrowseAbandonmentEventInfo() ?>);
+
+    <?php if ($block->hasBehaviourEventInfo()) : ?>
+    window.wtba.push(<?= $block->flushBehaviourEventInfo() ?>);
+    <?php endif; ?>
 </script>

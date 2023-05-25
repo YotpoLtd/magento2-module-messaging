@@ -100,4 +100,17 @@
             <argument name="customersReset" xsi:type="object">Yotpo\SmsBump\Model\Sync\Reset\Customers</argument>
         </arguments>
     </type>
+    <type name="Yotpo\SmsBump\Observer\SalesQuoteProductAddAfter">
+        <arguments>
+            <argument name="session" xsi:type="object">Yotpo\SmsBump\Model\Session</argument>
+        </arguments>
+    </type>
+    <type name="Yotpo\SmsBump\Model\Logger\Main">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="system" xsi:type="object">Yotpo\SmsBump\Model\Logger\Handler</item>
+            </argument>
+        </arguments>
+    </type>
 </config>
+

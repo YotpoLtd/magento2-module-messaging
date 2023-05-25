@@ -1,6 +1,8 @@
 <?php
+
 namespace Yotpo\SmsBump\Block;
 
+use Magento\Catalog\Api\ProductRepositoryInterface\Proxy as ProductRepository;
 use Magento\Framework\Registry;
 use Magento\Framework\View\Element\Template\Context;
 use Yotpo\SmsBump\Model\Config as YotpoConfig;
@@ -8,6 +10,7 @@ use Magento\Framework\View\Element\Template;
 use Magento\Customer\Model\Session as CustomerModelSession;
 use Magento\Framework\App\Request\Http as HttpRequest;
 use Magento\Checkout\Model\SessionFactory as CheckoutSessionFactory;
+use Yotpo\SmsBump\Model\Session;
 
 /**
  * Class BrowseAbandonment - Block file for Browse Abandonment script injection
@@ -107,6 +110,10 @@ class BrowseAbandonment extends Template
      */
     private $checkoutSessionFactory;
 
+    private ProductRepository $productRepository;
+
+    private Session $yotpoMessagingSession;
+
     /**
      * BrowseAbandonment constructor.
      * @param Context $context
@@ -118,19 +125,22 @@ class BrowseAbandonment extends Template
      * @param array<mixed> $templateData
      */
     public function __construct(
-        Context $context,
-        YotpoConfig $yotpoConfig,
-        Registry $coreRegistry,
-        CustomerModelSession $customerModelSession,
-        HttpRequest $httpRequest,
+        Context                $context,
+        YotpoConfig            $yotpoConfig,
+        Registry               $coreRegistry,
+        CustomerModelSession   $customerModelSession,
+        HttpRequest            $httpRequest,
         CheckoutSessionFactory $checkoutSessionFactory,
-        array $templateData = []
-    ) {
+        Session                $yotpoMessagingSession,
+        array                  $templateData = []
+    )
+    {
         $this->yotpoConfig = $yotpoConfig;
         $this->coreRegistry = $coreRegistry;
         $this->customerModelSession = $customerModelSession;
         $this->httpRequest = $httpRequest;
         $this->checkoutSessionFactory = $checkoutSessionFactory;
+        $this->yotpoMessagingSession = $yotpoMessagingSession;
         parent::__construct($context, $templateData);
     }
 
@@ -288,5 +298,30 @@ class BrowseAbandonment extends Template
     {
         $checkoutSession = $this->checkoutSessionFactory->create();
         return $checkoutSession->getLastRealOrder()->getIncrementId();
+    }
+
+    /**
+     * Conditional template tag
+     *
+     * @return bool
+     */
+    public function hasBehaviourEventInfo(): bool
+    {
+        return $this->yotpoMessagingSession->hasProductsAddedToCart();
+    }
+
+    /**
+     * Template getter for behaviour events (like "product_added_to_cart") stored in session.
+     * Session data is cleared on read.
+     *
+     * @return string Comma-separated list of JSON objects
+     */
+    public function flushBehaviourEventInfo(): string
+    {
+        $sources = array_merge(
+            (array) $this->yotpoMessagingSession->getData('products_added_to_cart', true),
+        );
+
+        return implode(', ', array_map('json_encode', $sources));
     }
 }
