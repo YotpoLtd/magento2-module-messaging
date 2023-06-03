@@ -334,8 +334,8 @@ $directoryHelper = $block->getData('directoryHelper');
     {
         "*": {
             "Magento_CustomerCustomAttributes/validation": {
-                "ignore": <?= (int) ($_dob->isEnabled() || $customerAttributes->hasUserDefinedAttributes()) ?>,
-                "hasUserDefinedAttributes": <?= (int) $customerAttributes->hasUserDefinedAttributes() ?>,
+                "ignore": <?= (int) ($_dob->isEnabled() || ($customerAttributes && $customerAttributes->hasUserDefinedAttributes())) ?>,
+                "hasUserDefinedAttributes": <?= (int) ($customerAttributes && $customerAttributes->hasUserDefinedAttributes()) ?>,
                 "isDobEnabled": <?= (int) $_dob->isEnabled() ?>,
                 "disableAutoComplete": true,
                 "mixins": [

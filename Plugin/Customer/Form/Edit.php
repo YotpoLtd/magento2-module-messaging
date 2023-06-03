@@ -29,6 +29,10 @@ class Edit
      */
     public function beforeToHtml(CustomerFormEdit $subject)
     {
+        if (!$this->config->isEnabled()) {
+            return;
+        }
+
         $template = $this->config->isCustomAttributeModuleExists() ?
             'Yotpo_SmsBump::customer/form/edit-ee.phtml' : 'Yotpo_SmsBump::customer/form/edit.phtml';
         $subject->setTemplate($template);
