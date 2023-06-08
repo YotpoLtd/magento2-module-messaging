@@ -102,4 +102,9 @@
             <argument name="customersReset" xsi:type="object">Yotpo\SmsBump\Model\Sync\Reset\Customers</argument>
         </arguments>
     </type>
+    <type name="Yotpo\SmsBump\Observer\SalesQuoteProductAddAfter">
+        <arguments>
+            <argument name="session" xsi:type="object">Yotpo\SmsBump\Model\Session</argument>
+        </arguments>
+    </type>
 </config>
