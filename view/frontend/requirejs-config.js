@@ -6,5 +6,8 @@ var config = {
             smsMarketingShipping: 'Yotpo_SmsBump/js/view/shipping/smsMarketing',
             removeLocalStorage:'Yotpo_SmsBump/js/removeLocalStorage'
         }
-    }
+    },
+    paths: {
+        YotpoSMS: 'https://d18eg7dreypte5.cloudfront.net/browse-abandonment/v2/magento',
+    },
 };

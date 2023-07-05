@@ -5,7 +5,6 @@ use Magento\Framework\Registry;
 use Magento\Framework\View\Element\Template\Context;
 use Yotpo\SmsBump\Model\Config as YotpoConfig;
 use Magento\Framework\View\Element\Template;
-use Magento\Customer\Model\Session as CustomerModelSession;
 use Magento\Framework\App\Request\Http as HttpRequest;
 use Magento\Checkout\Model\SessionFactory as CheckoutSessionFactory;
 
@@ -93,11 +92,6 @@ class BrowseAbandonment extends Template
     private $coreRegistry;
 
     /**
-     * @var CustomerModelSession
-     */
-    private $customerModelSession;
-
-    /**
      * @var HttpRequest
      */
     private $httpRequest;
@@ -112,23 +106,20 @@ class BrowseAbandonment extends Template
      * @param Context $context
      * @param YotpoConfig $yotpoConfig
      * @param Registry $coreRegistry
-     * @param CustomerModelSession $customerModelSession
      * @param HttpRequest $httpRequest
      * @param CheckoutSessionFactory $checkoutSessionFactory
      * @param array<mixed> $templateData
      */
     public function __construct(
-        Context $context,
-        YotpoConfig $yotpoConfig,
-        Registry $coreRegistry,
-        CustomerModelSession $customerModelSession,
-        HttpRequest $httpRequest,
+        Context                $context,
+        YotpoConfig            $yotpoConfig,
+        Registry               $coreRegistry,
+        HttpRequest            $httpRequest,
         CheckoutSessionFactory $checkoutSessionFactory,
         array $templateData = []
     ) {
         $this->yotpoConfig = $yotpoConfig;
         $this->coreRegistry = $coreRegistry;
-        $this->customerModelSession = $customerModelSession;
         $this->httpRequest = $httpRequest;
         $this->checkoutSessionFactory = $checkoutSessionFactory;
         parent::__construct($context, $templateData);
@@ -179,16 +170,10 @@ class BrowseAbandonment extends Template
     private function getBrowseAbandonmentEventInfoData($browseAbandonmentPageType) {
         $browseAbandonmentInfoData = [];
         $browseAbandonmentInfoData['type'] = $browseAbandonmentPageType;
-        $browseAbandonmentInfoData['store_id'] = $this->getStoreId();
 
         $browseAbandonmentEligiblePageTypeEntityId = $this->getIdByBrowseAbandonmentPageType($browseAbandonmentPageType);
         if ($browseAbandonmentEligiblePageTypeEntityId) {
             $browseAbandonmentInfoData['id'] = $browseAbandonmentEligiblePageTypeEntityId;
-        }
-
-        $customerIdInSession = $this->getCustomerIdInSession();
-        if ($customerIdInSession) {
-            $browseAbandonmentInfoData['customer_id'] = $customerIdInSession;
         }
 
         if ($browseAbandonmentPageType === self::BROWSE_ABANDONMENT_ORDER_CREATED_PAGE_TYPE_NAME) {
@@ -223,7 +208,7 @@ class BrowseAbandonment extends Template
      *
      * @return string
      */
-    private function getStoreId()
+    public function getStoreId()
     {
         return $this->yotpoConfig->getAppKey();
     }
@@ -268,15 +253,6 @@ class BrowseAbandonment extends Template
     private function getCategoryId() {
         $category = $this->coreRegistry->registry('current_category');
         return $category->getId();
-    }
-
-    /**
-     * Get customer ID in current session
-     *
-     * @return int
-     */
-    private function getCustomerIdInSession() {
-        return $this->customerModelSession->getCustomer()->getId();
     }
 
     /**

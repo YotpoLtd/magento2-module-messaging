@@ -4,13 +4,21 @@
  */
 ?>
 
-<?php if (!($block->isAppKeyAndSecretSet() && $block->isPageTypeEligibleForBrowseAbandonmentEvent())) {
+<?php if (!($block->isAppKeyAndSecretSet())) {
     return;
 }
 ?>
+<script type="text/x-magento-init">
+    {
+        "*": {
+           "YotpoSMS": { "store_id": "<?= $block->getStoreId() ?>" }
+        }
+    }
+</script>
 
 <script>
-    require(['https://d18eg7dreypte5.cloudfront.net/browse-abandonment/browse_abandonment_magento.js'])
     window.wtba = window.wtba || [];
+    <?php if ($block->isPageTypeEligibleForBrowseAbandonmentEvent()): ?>
     window.wtba.push(<?= $block->getBrowseAbandonmentEventInfo() ?>);
+    <?php endif; ?>
 </script>
