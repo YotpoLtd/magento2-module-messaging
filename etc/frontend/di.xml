@@ -7,6 +7,12 @@
             </argument>
         </arguments>
     </type>
+    <type name="Yotpo\SmsBump\CustomerData\CustomerBehaviour">
+        <arguments>
+            <argument name="currentCustomer" xsi:type="object">Magento\Customer\Helper\Session\CurrentCustomer</argument>
+            <argument name="session" xsi:type="object">Yotpo\SmsBump\Model\Session</argument>
+        </arguments>
+    </type>
     <type name="Magento\Checkout\Model\CompositeConfigProvider">
         <arguments>
             <argument name="configProviders" xsi:type="array">
