@@ -59,6 +59,31 @@ define(
                 return '';
             },
 
+            getGuestCustomerEmail: function () {
+                if ($('#customer-email') && $('#customer-email').val()) {
+                    return $('#customer-email').val();
+                }
+
+                return null;
+            },
+
+            getRegisteredCustomerEmail: function () {
+                if (window.checkoutConfig.customerData.length === 0 || !window.checkoutConfig.customerData.email) {
+                    return null;
+                }
+
+                return window.checkoutConfig.customerData.email;
+            },
+
+            getCustomerEmail: function () {
+                var guestCustomerEmail = this.getGuestCustomerEmail()
+                if (guestCustomerEmail) {
+                    return guestCustomerEmail;
+                }
+
+                return this.getRegisteredCustomerEmail();
+            },
+
             updateCustomerAttribute: function () {
                 var linkUrl = url.build('yotpo_messaging/smsmarketing/savecustomerattribute');
                 var customDiv = $('#yotpo_accepts_sms_marketing');
@@ -68,10 +93,8 @@ define(
                 }
                 isCheckboxSelected = isCheckboxSelected ? 1 : 0;
                 var checkoutStep = this.getCheckoutStep();
-                var customerEmail = '';
-                if ($('#customer-email') && $('#customer-email').val()) {
-                    customerEmail = $('#customer-email').val();
-                }
+                var customerEmail = this.getCustomerEmail() || '';
+
                 fullScreenLoader.startLoader();
                 $.ajax({
                     url: linkUrl,
