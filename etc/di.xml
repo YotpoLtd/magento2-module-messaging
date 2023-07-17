@@ -84,6 +84,8 @@
                 type="Yotpo\SmsBump\Model\Attribute\Data\Checkbox" />
     <preference for="Yotpo\SmsBump\Api\YotpoCustomersSyncRepositoryInterface"
                 type="Yotpo\SmsBump\Model\YotpoCustomersSyncRepository" />
+    <preference for="Yotpo\Core\Model\Sync\Customers\Processor"
+                type="Yotpo\SmsBump\Model\Sync\Customers\Processor" />
     <type name="Yotpo\Core\Console\Command\RetryYotpoSync">
         <arguments>
             <argument name="customersProcessor" xsi:type="object">Yotpo\SmsBump\Model\Sync\Customers\Processor</argument>
@@ -98,6 +100,16 @@
     <type name="Yotpo\Core\Model\Sync\Reset">
         <arguments>
             <argument name="customersReset" xsi:type="object">Yotpo\SmsBump\Model\Sync\Reset\Customers</argument>
+        </arguments>
+    </type>
+    <type name="Yotpo\SmsBump\Observer\SalesQuoteProductAddAfter">
+        <arguments>
+            <argument name="session" xsi:type="object">Yotpo\SmsBump\Model\Session</argument>
+        </arguments>
+    </type>
+    <type name="Yotpo\SmsBump\Block\KlaviyoSubscriptionIntegration">
+        <arguments>
+            <argument name="config" xsi:type="object">Yotpo\SmsBump\Model\Config</argument>
         </arguments>
     </type>
 </config>

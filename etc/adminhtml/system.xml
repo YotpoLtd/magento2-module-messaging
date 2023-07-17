@@ -78,6 +78,15 @@
                     </field>
                     <field id="sync_forms_data" translate="label comment" type="textarea" sortOrder="330" showInDefault="0" showInWebsite="0" showInStore="0">
                     </field>
+                    <field id="advanced_forms_heading" translate="label" sortOrder="332" showInStore="1" showInWebsite="1" showInDefault="1">
+                        <label>Advanced options</label>
+                        <frontend_model>Yotpo\SmsBump\Block\Adminhtml\System\Config\Form\Field\Heading</frontend_model>
+                    </field>
+                    <field id="capture_klaviyo_forms" translate="label comment" type="select" sortOrder="334" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Capture Klaviyo Forms:</label>
+                        <comment>If you use Klaviyo forms for collecting subscribers we will capture submits and subscribe them to Yotpo real-time.</comment>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    </field>
                 </group>
             </group>
             <group id="sync_settings" translate="label" type="text" sortOrder="340" showInDefault="1" showInWebsite="1" showInStore="1">

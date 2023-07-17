@@ -9,6 +9,7 @@
                 </arguments>
             </block>
             <block class="Yotpo\SmsBump\Block\BrowseAbandonment" name="browse_abandonment" template="Yotpo_SmsBump::browse_abandonment.phtml" ifconfig="yotpo_core/settings/active"/>
+            <block class="Yotpo\SmsBump\Block\KlaviyoSubscriptionIntegration" name="klaviyo_subscription_integration" template="Yotpo_SmsBump::klaviyo_subscription_integration.phtml" ifconfig="yotpo_core/settings/active"/>
         </referenceContainer>
     </body>
 </page>

@@ -22,6 +22,9 @@
                     <privacy_policy_text>View Privacy Policy</privacy_policy_text>
                     <privacy_policy_link>privacy-policy</privacy_policy_link>
                 </marketing_settings>
+                <sms_subscription>
+                    <capture_klaviyo_forms>0</capture_klaviyo_forms>
+                </sms_subscription>
             </widget_settings>
         </yotpo_core>
         <crontab>

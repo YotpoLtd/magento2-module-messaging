@@ -87,6 +87,8 @@ class Config extends CoreConfig
             ['path' => 'yotpo_core/widget_settings/marketing_settings/privacy_policy_text'],
         'sms_marketing_privacy_policy_link' =>
             ['path' => 'yotpo_core/widget_settings/marketing_settings/privacy_policy_link'],
+        'sms_marketing_capture_klaviyo_forms' =>
+            ['path' => 'yotpo_core/widget_settings/sms_subscription/capture_klaviyo_forms'],
         'sms_marketing_checkout_enable' =>
             ['path' => 'yotpo_core/widget_settings/marketing_settings/checkout_enable'],
         'sms_marketing_checkout_box_heading' =>
