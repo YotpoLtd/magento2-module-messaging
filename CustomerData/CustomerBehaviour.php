@@ -13,9 +13,13 @@ class CustomerBehaviour implements SectionSourceInterface
 {
     private CurrentCustomer $currentCustomer;
 
+    private Session $customerBehaviourSession;
+
     public function __construct(CurrentCustomer $currentCustomer, Session $session)
     {
         $this->currentCustomer = $currentCustomer;
+
+        $this->customerBehaviourSession = $session;
     }
 
     /**
@@ -25,6 +29,8 @@ class CustomerBehaviour implements SectionSourceInterface
     {
         $customer_id = $this->currentCustomer->getCustomerId();
 
-        return compact('customer_id');
+        $products_added_to_cart = $this->customerBehaviourSession->getData('products_added_to_cart', true);
+
+        return compact('customer_id', 'products_added_to_cart');
     }
 }

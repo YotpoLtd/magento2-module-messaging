@@ -1,4 +1,5 @@
 <?php
+
 namespace Yotpo\SmsBump\Block;
 
 use Magento\Framework\Registry;
@@ -116,8 +117,9 @@ class BrowseAbandonment extends Template
         Registry               $coreRegistry,
         HttpRequest            $httpRequest,
         CheckoutSessionFactory $checkoutSessionFactory,
-        array $templateData = []
-    ) {
+        array                  $templateData = []
+    )
+    {
         $this->yotpoConfig = $yotpoConfig;
         $this->coreRegistry = $coreRegistry;
         $this->httpRequest = $httpRequest;
@@ -167,7 +169,8 @@ class BrowseAbandonment extends Template
      *
      * @return array
      */
-    private function getBrowseAbandonmentEventInfoData($browseAbandonmentPageType) {
+    private function getBrowseAbandonmentEventInfoData($browseAbandonmentPageType)
+    {
         $browseAbandonmentInfoData = [];
         $browseAbandonmentInfoData['type'] = $browseAbandonmentPageType;
 
@@ -188,7 +191,8 @@ class BrowseAbandonment extends Template
      *
      * @return string
      */
-    private function getBrowseAbandonmentPageType() {
+    private function getBrowseAbandonmentPageType()
+    {
         $magentoPageTypeName = $this->getMagentoPageTypeName();
         return self::MAGENTO_PAGE_TYPE_NAME_TO_BROWSE_ABANDONMENT_PAGE_TYPE_NAME_MAP[$magentoPageTypeName];
     }
@@ -219,7 +223,8 @@ class BrowseAbandonment extends Template
      * @param string $browseAbandonmentPageType
      * @return int
      */
-    private function getIdByBrowseAbandonmentPageType($browseAbandonmentPageType) {
+    private function getIdByBrowseAbandonmentPageType($browseAbandonmentPageType)
+    {
         if (!in_array($browseAbandonmentPageType, self::BROWSE_ABANDONMENT_PAGE_TYPE_NAMES_ELIGIBLE_FOR_ID_ENRICHMENT)) {
             return null;
         }
@@ -250,7 +255,8 @@ class BrowseAbandonment extends Template
      *
      * @return int
      */
-    private function getCategoryId() {
+    private function getCategoryId()
+    {
         $category = $this->coreRegistry->registry('current_category');
         return $category->getId();
     }
