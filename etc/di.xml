@@ -107,4 +107,9 @@
             <argument name="session" xsi:type="object">Yotpo\SmsBump\Model\Session</argument>
         </arguments>
     </type>
+    <type name="Yotpo\SmsBump\Block\KlaviyoSubscriptionIntegration">
+        <arguments>
+            <argument name="config" xsi:type="object">Yotpo\SmsBump\Model\Config</argument>
+        </arguments>
+    </type>
 </config>
