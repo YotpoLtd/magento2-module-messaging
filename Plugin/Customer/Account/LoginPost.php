@@ -62,7 +62,7 @@ class LoginPost
      * @throws NoSuchEntityException
      * @throws SessionException
      */
-    public function afterExecute(\Magento\Customer\Controller\Account\LoginPost $subject, Redirect $result)
+    public function afterExecute(\Magento\Customer\Controller\Account\LoginPost $subject, $result)
     {
         if (!$this->session->getCustomerId()) {
             return $result;
