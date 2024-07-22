@@ -20,7 +20,7 @@ Magento 2.2+ (Module version 2.8.0 and above)
 Run the following command under your Magento 2 root dir:
 
 ```
-composer require yotpo/magento2-module-yotpo-core
+composer require yotpo/module-yotpo-messaging
 php bin/magento maintenance:enable
 php bin/magento setup:upgrade
 php bin/magento setup:di:compile
