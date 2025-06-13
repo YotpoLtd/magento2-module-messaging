@@ -9,7 +9,7 @@
     "require": {
         "php": "~5.6.0|^7.0|^8.0",
         "magento/framework": ">=102.0.0",
-        "yotpo/module-yotpo-core": "4.3.3"
+        "yotpo/module-yotpo-core": "4.3.4"
     },
     "type": "magento2-module",
     "autoload": {

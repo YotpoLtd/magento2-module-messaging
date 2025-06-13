@@ -167,7 +167,7 @@ class Config extends CoreConfig
      * @throws LocalizedException
      * @throws NoSuchEntityException
      */
-    public function isCustomerSyncActive(int $scopeId = null, $scope = ScopeInterface::SCOPE_STORE)
+    public function isCustomerSyncActive($scopeId = null, $scope = ScopeInterface::SCOPE_STORE)
     {
         return $this->isEnabled($scopeId, $scope) && $this->getConfig('customers_sync_active', $scopeId, $scope);
     }
