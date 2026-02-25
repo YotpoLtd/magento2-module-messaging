@@ -18,7 +18,7 @@ class Quote extends AbstractCheckoutTrigger
      * @param AddressInterface $address
      * @return QuoteModel
      */
-    public function afterSetBillingAddress(QuoteModel $quote, $result, AddressInterface $address = null)
+    public function afterSetBillingAddress(QuoteModel $quote, $result, ?AddressInterface $address = null)
     {
         $this->checkoutSync($quote);
         if (!$this->registry->registry('yotpo_smsbump_quote_set_billing_address_plugin')){
@@ -35,7 +35,7 @@ class Quote extends AbstractCheckoutTrigger
      * @param AddressInterface $address
      * @return QuoteModel
      */
-    public function afterSetShippingAddress(QuoteModel $quote, $result, AddressInterface $address = null)
+    public function afterSetShippingAddress(QuoteModel $quote, $result, ?AddressInterface $address = null)
     {
         $this->checkoutSync($quote);
         if (!$this->registry->registry('yotpo_smsbump_quote_set_shipping_address_plugin')){
