@@ -57,8 +57,8 @@ class CustomersScheduler extends ConfigValue
         ScopeConfigInterface $scopeConfig,
         TypeListInterface $cacheTypeList,
         ValueFactory $configValueFactory,
-        AbstractResource $resource = null,
-        AbstractDb $resourceCollection = null,
+        ?AbstractResource $resource = null,
+        ?AbstractDb $resourceCollection = null,
         array $data = []
     ) {
         $this->_runModelPath = '';
