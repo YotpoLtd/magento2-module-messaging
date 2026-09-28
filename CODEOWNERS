@@ -1,1 +1,26 @@
-* @YotpoLtd/Orbits-admins
+# Only high-risk paths need a code-owner review: the human-required tier in
+# .claude/protected-files.json, the service contract in Api/, plus the agent
+# instruction files. Everything else needs only the normal approval.
+# The team is orbits-admins: it is the only Orbits team with write access here.
+
+/etc/db_schema.xml @YotpoLtd/orbits-admins
+/etc/db_schema_whitelist.json @YotpoLtd/orbits-admins
+/Setup/ @YotpoLtd/orbits-admins
+/composer.json @YotpoLtd/orbits-admins
+/etc/module.xml @YotpoLtd/orbits-admins
+/registration.php @YotpoLtd/orbits-admins
+/Api/ @YotpoLtd/orbits-admins
+/etc/csp_whitelist.xml @YotpoLtd/orbits-admins
+/Controller/AbandonedCart/ @YotpoLtd/orbits-admins
+/Model/AbandonedCart/ @YotpoLtd/orbits-admins
+/Plugin/Customer/Account/LoginPost.php @YotpoLtd/orbits-admins
+/LICENSE.txt @YotpoLtd/orbits-admins
+/LICENSE_AFL.txt @YotpoLtd/orbits-admins
+/.github/workflows/ @YotpoLtd/orbits-admins
+
+# Agent files
+/CLAUDE.md @YotpoLtd/orbits-admins
+/AGENTS.md @YotpoLtd/orbits-admins
+/.agents/adlc/ @YotpoLtd/orbits-admins
+/.claude/ @YotpoLtd/orbits-admins
+/CODEOWNERS @YotpoLtd/orbits-admins
